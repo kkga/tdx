@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/emersion/go-ical"
@@ -17,6 +19,10 @@ func NewList() *List {
 
 func (l *List) Init(name string, todos []ical.Component) error {
 	for _, todo := range todos {
+		if todo.Name != ical.CompToDo {
+			return errors.New(fmt.Sprintf("Not VTODO component: %v", todo))
+		}
+
 		t := NewToDo()
 
 		err := t.Init(todo)
