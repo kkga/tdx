@@ -15,7 +15,7 @@ import (
 	"github.com/emersion/go-ical"
 )
 
-var calDir = "/home/kkga/.local/share/vdirsyncer/migadu-cal/tasks/"
+var calDir = "/home/kkga/.local/share/calendars/tasks/"
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "new" {
