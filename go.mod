@@ -1,4 +1,4 @@
-module caltodo
+module ctodo
 
 go 1.17
 
