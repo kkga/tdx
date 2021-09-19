@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/emersion/go-ical"
 )
@@ -13,12 +16,20 @@ import (
 var calDir = "/home/kkga/.local/share/vdirsyncer/migadu-cal/tasks/"
 
 func main() {
-	todos := []Todo{}
+	todos := []ToDo{}
 
-	files, _ := ioutil.ReadDir(calDir)
+	files, err := ioutil.ReadDir(calDir)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for _, f := range files {
-		file, err := os.Open(fmt.Sprintf("%s/%s", calDir, f.Name()))
+		if strings.TrimPrefix(filepath.Ext(f.Name()), ".") != ical.Extension {
+			continue
+		}
+
+		path := path.Join(calDir, f.Name())
+		file, err := os.Open(path)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -36,18 +47,20 @@ func main() {
 
 			for _, comp := range cal.Children {
 				if comp.Name == ical.CompToDo {
-					t := Todo{}
+					t := ToDo{}
 
-					fmt.Println("--")
+					// fmt.Println("-----------")
+
 					for p := range comp.Props {
-						fmt.Println(p)
+
+						// fmt.Println(p)
 						switch p {
 						case ical.PropStatus:
 							s, err := comp.Props.Get(ical.PropStatus).Text()
 							if err != nil {
 								log.Fatal(err)
 							}
-							t.Status = TodoStatus(s)
+							t.Status = ToDoStatus(s)
 						case ical.PropSummary:
 							s, err := comp.Props.Get(ical.PropSummary).Text()
 							if err != nil {
@@ -66,6 +79,12 @@ func main() {
 								log.Fatal(err)
 							}
 							t.Due = time
+						case ical.PropPriority:
+							prio, err := comp.Props.Get(ical.PropPriority).Int()
+							if err != nil {
+								log.Fatal(err)
+							}
+							t.Priority = prio
 						}
 					}
 
@@ -75,7 +94,13 @@ func main() {
 		}
 	}
 
+	printTodos(todos)
+}
+
+func printTodos(todos []ToDo) {
 	for _, t := range todos {
-		fmt.Println(t.String())
+		if t.Status != ToDoStatusCompleted {
+			fmt.Println(t.String())
+		}
 	}
 }

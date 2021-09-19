@@ -6,27 +6,45 @@ import (
 	"time"
 )
 
-type Todo struct {
-	Status      TodoStatus
+type ToDo struct {
+	Status      ToDoStatus
 	Summary     string
 	Description string
 	Due         time.Time
+	Priority    int
 }
 
-type TodoStatus string
+type ToDoStatus string
+type ToDoPriority int
 
 const (
-	TodoCompleted   TodoStatus = "COMPLETED"
-	TodoNeedsACtion TodoStatus = "NEEDS-ACTION"
+	ToDoStatusCompleted   ToDoStatus   = "COMPLETED"
+	ToDoStatusNeedsAction ToDoStatus   = "NEEDS-ACTION"
+	ToDoPriorityLow       ToDoPriority = 9
+	ToDoPriorityMedium    ToDoPriority = 14
+	ToDoPriorityHigh      ToDoPriority = 1
 )
 
-func (t Todo) String() string {
+func (t ToDo) String() string {
 	sb := strings.Builder{}
 
-	if t.Status == TodoCompleted {
+	if t.Status == ToDoStatusCompleted {
 		sb.WriteString("[x]")
-	} else if t.Status == TodoNeedsACtion {
+	} else if t.Status == ToDoStatusNeedsAction {
 		sb.WriteString("[ ]")
+	}
+
+	if t.Priority != 0 {
+		var prio string
+		switch t.Priority {
+		case int(ToDoPriorityLow):
+			prio = "!"
+		case int(ToDoPriorityMedium):
+			prio = "!!"
+		case int(ToDoPriorityHigh):
+			prio = "!!!"
+		}
+		sb.WriteString(fmt.Sprintf(" (%s)", prio))
 	}
 
 	if t.Summary != "" {
@@ -35,7 +53,8 @@ func (t Todo) String() string {
 	}
 
 	if !t.Due.IsZero() {
-		sb.WriteString(fmt.Sprintf(" (%s)", t.Due.String()))
+		date := t.Due.Local().Format(time.RFC822)
+		sb.WriteString(fmt.Sprintf(" (%s)", date))
 	}
 
 	if t.Description != "" {

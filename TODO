@@ -1,0 +1,8 @@
+
+- [ ] read about priority ical spec
+
+
+CONFIG OPTIONS
+- list of dirs to parse todos
+- default list
+- components displayed on list cmd (date, description etc)
