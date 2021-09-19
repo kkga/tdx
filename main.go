@@ -38,22 +38,25 @@ func main() {
 			}
 
 			for _, c := range cal.Children {
+				summary := c.Props.Get(ical.PropSummary)
+				desc := c.Props.Get(ical.PropDescription)
+				fmt.Println(summary, desc)
 				// fmt.Println(c.Name)
-				for _, p := range c.Props {
-					name := p[0].Name
-					val := p[0].Value
-					switch p[0].Name {
-					case ical.PropStatus:
-						s := p[0].Value
-						if s == "NEEDS-ACTION" {
-							val = "**not done**"
-						} else {
-							val = "**done**"
-						}
-					}
-					fmt.Println(name, val)
-					// fmt.Printf("%+v\n", p[0].Text())
-				}
+				// for _, p := range c.Props {
+				// 	name := p[0].Name
+				// 	val := p[0].Value
+				// 	switch p[0].Name {
+				// 	case ical.PropStatus:
+				// 		s := p[0].Value
+				// 		if s == "NEEDS-ACTION" {
+				// 			val = "**not done**"
+				// 		} else {
+				// 			val = "**done**"
+				// 		}
+				// 	}
+				// 	fmt.Println(name, val)
+				// fmt.Printf("%+v\n", p[0].Text())
+				// }
 			}
 			fmt.Println("-------------------------")
 
