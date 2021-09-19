@@ -13,6 +13,7 @@ type ToDo struct {
 	Priority    ToDoPriority
 	Summary     string
 	Description string
+	Tags        []string
 	Due         time.Time
 }
 

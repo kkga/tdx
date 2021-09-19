@@ -1,9 +1,17 @@
+VTODO spec: https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.2
+
+---
+
 - [ ] read about priority ical spec
 - [ ] add test for NewToDo
 
 ENCODING
 - use a NewToDo func similar to NewEvent in go-ical
 - generate UID of specific format?
+- parse #tags in description
+
+FILES
+- recurse into dirs in path
 
 DECODING
 - [ ] make a map of [UID]ToDo instead of slice
