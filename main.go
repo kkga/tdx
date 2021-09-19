@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -21,37 +22,17 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "new" {
 		encode()
 	} else {
-		list := list()
+		files, err := ioutil.ReadDir(calDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		list := decodeFiles(files)
 		fmt.Println(list.String())
 	}
 }
 
-func encode() {
-	event := ical.NewEvent()
-	event.Props.SetText(ical.PropUID, "uid@example.org")
-	event.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
-	event.Props.SetText(ical.PropSummary, "My awesome event")
-	event.Props.SetDateTime(ical.PropDateTimeStart, time.Now().Add(24*time.Hour))
-
-	cal := ical.NewCalendar()
-	cal.Props.SetText(ical.PropVersion, "2.0")
-	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
-	cal.Children = append(cal.Children, event.Component)
-
-	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print(buf.String())
-}
-
-func list() *List {
-	files, err := ioutil.ReadDir(calDir)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func decodeFiles(files []fs.FileInfo) *List {
 	list := *NewList()
 	list.ToDos = make(map[ToDoUID]ToDo)
 
@@ -79,21 +60,30 @@ func list() *List {
 
 			t := todos(cal)
 
-			for _, todo := range t {
-				t := NewToDo()
-				err := t.ParseComponent(todo)
-				if err != nil {
-					log.Fatal(err)
-				}
-				uid, err := todo.Props.Get(ical.PropUID).Text()
-				if err != nil {
-					log.Fatal(err)
-				}
-				list.ToDos[ToDoUID(uid)] = *t
-			}
+			list.Init("my_list", t)
 		}
 	}
 	return &list
+}
+
+func encode() {
+	event := ical.NewEvent()
+	event.Props.SetText(ical.PropUID, "uid@example.org")
+	event.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
+	event.Props.SetText(ical.PropSummary, "My awesome event")
+	event.Props.SetDateTime(ical.PropDateTimeStart, time.Now().Add(24*time.Hour))
+
+	cal := ical.NewCalendar()
+	cal.Props.SetText(ical.PropVersion, "2.0")
+	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
+	cal.Children = append(cal.Children, event.Component)
+
+	var buf bytes.Buffer
+	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Print(buf.String())
 }
 
 func todos(cal *ical.Calendar) []ical.Component {
