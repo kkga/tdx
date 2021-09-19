@@ -10,7 +10,7 @@ import (
 
 type List struct {
 	Name  string
-	ToDos map[ToDoUID]ToDo
+	ToDos []ToDo
 }
 
 func NewList() *List {
@@ -18,11 +18,12 @@ func NewList() *List {
 }
 
 func (l *List) Init(name string, todos []ical.Component) error {
+	l.ToDos = make([]ToDo, 0, len(todos))
+
 	for _, todo := range todos {
 		if todo.Name != ical.CompToDo {
 			return errors.New(fmt.Sprintf("Not VTODO component: %v", todo))
 		}
-
 		t := NewToDo()
 
 		err := t.Init(todo)
@@ -30,12 +31,7 @@ func (l *List) Init(name string, todos []ical.Component) error {
 			return err
 		}
 
-		uid, err := todo.Props.Get(ical.PropUID).Text()
-		if err != nil {
-			return err
-		}
-
-		l.ToDos[ToDoUID(uid)] = *t
+		l.ToDos = append(l.ToDos, *t)
 	}
 	return nil
 }

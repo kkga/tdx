@@ -27,14 +27,25 @@ func main() {
 			log.Fatal(err)
 		}
 
-		list := decodeFiles(files)
+		todos := decodeFiles(files)
+		list := NewList()
+		list.Init("new list", todos)
 		fmt.Println(list.String())
 	}
 }
 
-func decodeFiles(files []fs.FileInfo) *List {
-	list := *NewList()
-	list.ToDos = make(map[ToDoUID]ToDo)
+func decodeFiles(files []fs.FileInfo) []ical.Component {
+	components := []ical.Component{}
+
+	filterComponents := func(cal *ical.Calendar, filter string) []ical.Component {
+		l := make([]ical.Component, 0, len(cal.Children))
+		for _, child := range cal.Children {
+			if child.Name == filter {
+				l = append(l, *child)
+			}
+		}
+		return l
+	}
 
 	for _, f := range files {
 		if strings.TrimPrefix(filepath.Ext(f.Name()), ".") != ical.Extension {
@@ -58,14 +69,14 @@ func decodeFiles(files []fs.FileInfo) *List {
 				log.Fatal(err)
 			}
 
-			t := todos(cal)
-
-			list.Init("my_list", t)
+			components = append(components, filterComponents(cal, ical.CompToDo)...)
 		}
 	}
-	return &list
+
+	return components
 }
 
+// dummy encode function
 func encode() {
 	event := ical.NewEvent()
 	event.Props.SetText(ical.PropUID, "uid@example.org")
@@ -84,14 +95,4 @@ func encode() {
 	}
 
 	log.Print(buf.String())
-}
-
-func todos(cal *ical.Calendar) []ical.Component {
-	l := make([]ical.Component, 0, len(cal.Children))
-	for _, child := range cal.Children {
-		if child.Name == ical.CompToDo {
-			l = append(l, *child)
-		}
-	}
-	return l
 }

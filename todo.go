@@ -9,6 +9,7 @@ import (
 )
 
 type ToDo struct {
+	UID         string
 	Status      ToDoStatus
 	Priority    ToDoPriority
 	Summary     string
@@ -38,6 +39,12 @@ func NewToDo() *ToDo {
 func (t *ToDo) Init(todo ical.Component) error {
 	for p := range todo.Props {
 		switch p {
+		case ical.PropUID:
+			uid, err := todo.Props.Get(ical.PropUID).Text()
+			if err != nil {
+				return err
+			}
+			t.UID = uid
 		case ical.PropStatus:
 			s, err := todo.Props.Get(ical.PropStatus).Text()
 			if err != nil {
