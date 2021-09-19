@@ -22,7 +22,7 @@ func main() {
 		encode()
 	} else {
 		list := list()
-		printTodos(list)
+		fmt.Println(list.String())
 	}
 }
 
@@ -46,13 +46,14 @@ func encode() {
 	log.Print(buf.String())
 }
 
-func list() []ToDo {
+func list() *List {
 	files, err := ioutil.ReadDir(calDir)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	list := make([]ToDo, 0, len(files))
+	list := *NewList()
+	list.ToDos = make(map[ToDoUID]ToDo)
 
 	for _, f := range files {
 		if strings.TrimPrefix(filepath.Ext(f.Name()), ".") != ical.Extension {
@@ -84,12 +85,15 @@ func list() []ToDo {
 				if err != nil {
 					log.Fatal(err)
 				}
-				list = append(list, *t)
+				uid, err := todo.Props.Get(ical.PropUID).Text()
+				if err != nil {
+					log.Fatal(err)
+				}
+				list.ToDos[ToDoUID(uid)] = *t
 			}
 		}
 	}
-
-	return list
+	return &list
 }
 
 func todos(cal *ical.Calendar) []ical.Component {
@@ -100,12 +104,4 @@ func todos(cal *ical.Calendar) []ical.Component {
 		}
 	}
 	return l
-}
-
-func printTodos(todos []ToDo) {
-	for _, t := range todos {
-		if t.Status != ToDoStatusCompleted {
-			fmt.Println(t.String())
-		}
-	}
 }

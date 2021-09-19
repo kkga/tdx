@@ -20,6 +20,7 @@ type ToDo struct {
 type (
 	ToDoStatus   string
 	ToDoPriority int
+	ToDoUID      string
 )
 
 const (
