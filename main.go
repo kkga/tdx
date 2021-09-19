@@ -21,7 +21,8 @@ var calDir = "/home/kkga/.local/share/calendars/tasks/"
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "new" {
-		encode()
+		todo := &todo.ToDo{UID: "12341234"}
+		fmt.Println(todo.Encode())
 	} else {
 		files, err := ioutil.ReadDir(calDir)
 		if err != nil {

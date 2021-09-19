@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"time"
@@ -118,4 +119,26 @@ func (t ToDo) String() string {
 	}
 
 	return sb.String()
+}
+
+type icalToDo struct {
+	*ical.Component
+}
+
+func (t ToDo) Encode() (string, error) {
+	icalToDo := &icalToDo{ical.NewComponent(ical.CompToDo)}
+	icalToDo.Props.SetText(ical.PropUID, t.UID)
+	icalToDo.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
+
+	cal := ical.NewCalendar()
+	cal.Props.SetText(ical.PropVersion, "2.0")
+	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
+	cal.Children = append(cal.Children, icalToDo.Component)
+
+	var buf bytes.Buffer
+	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
