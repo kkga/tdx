@@ -35,7 +35,7 @@ func NewToDo() *ToDo {
 	return &ToDo{}
 }
 
-func (t *ToDo) ParseComponent(todo ical.Component) error {
+func (t *ToDo) Init(todo ical.Component) error {
 	for p := range todo.Props {
 		switch p {
 		case ical.PropStatus:

@@ -19,7 +19,7 @@ func (l *List) Init(name string, todos []ical.Component) error {
 	for _, todo := range todos {
 		t := NewToDo()
 
-		err := t.ParseComponent(todo)
+		err := t.Init(todo)
 		if err != nil {
 			return err
 		}
