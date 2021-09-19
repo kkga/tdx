@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
+	"github.com/kkga/ctdo/todo"
 )
 
 var calDir = "/home/kkga/.local/share/calendars/tasks/"
@@ -28,7 +29,7 @@ func main() {
 		}
 
 		todos := decodeFiles(files)
-		list := NewList()
+		list := todo.NewList()
 		list.Init("new list", todos)
 		fmt.Println(list.String())
 	}
