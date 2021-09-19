@@ -10,14 +10,16 @@ import (
 
 type ToDo struct {
 	Status      ToDoStatus
+	Priority    ToDoPriority
 	Summary     string
 	Description string
 	Due         time.Time
-	Priority    int
 }
 
-type ToDoStatus string
-type ToDoPriority int
+type (
+	ToDoStatus   string
+	ToDoPriority int
+)
 
 const (
 	ToDoStatusCompleted   ToDoStatus   = "COMPLETED"
@@ -61,7 +63,7 @@ func NewToDo(todo ical.Component) (*ToDo, error) {
 			if err != nil {
 				return nil, err
 			}
-			t.Priority = prio
+			t.Priority = ToDoPriority(prio)
 		}
 	}
 	return t, nil
@@ -79,11 +81,11 @@ func (t ToDo) String() string {
 	if t.Priority != 0 {
 		var prio string
 		switch t.Priority {
-		case int(ToDoPriorityLow):
+		case ToDoPriorityLow:
 			prio = "!"
-		case int(ToDoPriorityMedium):
+		case ToDoPriorityMedium:
 			prio = "!!"
-		case int(ToDoPriorityHigh):
+		case ToDoPriorityHigh:
 			prio = "!!!"
 		}
 		sb.WriteString(fmt.Sprintf(" (%s)", prio))
