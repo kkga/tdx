@@ -16,7 +16,7 @@ import (
 var calDir = "/home/kkga/.local/share/vdirsyncer/migadu-cal/tasks/"
 
 func main() {
-	todos := []ToDo{}
+	list := []ToDo{}
 
 	files, err := ioutil.ReadDir(calDir)
 	if err != nil {
@@ -45,56 +45,29 @@ func main() {
 				log.Fatal(err)
 			}
 
-			for _, comp := range cal.Children {
-				if comp.Name == ical.CompToDo {
-					t := ToDo{}
+			t := todos(cal)
 
-					// fmt.Println("-----------")
-
-					for p := range comp.Props {
-
-						// fmt.Println(p)
-						switch p {
-						case ical.PropStatus:
-							s, err := comp.Props.Get(ical.PropStatus).Text()
-							if err != nil {
-								log.Fatal(err)
-							}
-							t.Status = ToDoStatus(s)
-						case ical.PropSummary:
-							s, err := comp.Props.Get(ical.PropSummary).Text()
-							if err != nil {
-								log.Fatal(err)
-							}
-							t.Summary = s
-						case ical.PropDescription:
-							s, err := comp.Props.Get(ical.PropDescription).Text()
-							if err != nil {
-								log.Fatal(err)
-							}
-							t.Description = s
-						case ical.PropDue:
-							time, err := comp.Props.Get(ical.PropDue).DateTime(t.Due.Location())
-							if err != nil {
-								log.Fatal(err)
-							}
-							t.Due = time
-						case ical.PropPriority:
-							prio, err := comp.Props.Get(ical.PropPriority).Int()
-							if err != nil {
-								log.Fatal(err)
-							}
-							t.Priority = prio
-						}
-					}
-
-					todos = append(todos, t)
+			for _, todo := range t {
+				t, err := NewToDo(todo)
+				if err != nil {
+					log.Fatal(err)
 				}
+				list = append(list, *t)
 			}
 		}
 	}
 
-	printTodos(todos)
+	printTodos(list)
+}
+
+func todos(cal *ical.Calendar) []ical.Component {
+	l := make([]ical.Component, 0, len(cal.Children))
+	for _, child := range cal.Children {
+		if child.Name == ical.CompToDo {
+			l = append(l, *child)
+		}
+	}
+	return l
 }
 
 func printTodos(todos []ToDo) {

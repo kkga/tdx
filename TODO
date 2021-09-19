@@ -1,6 +1,8 @@
 
 - [ ] read about priority ical spec
 
+- [ ] add test for NewToDo
+
 
 CONFIG OPTIONS
 - list of dirs to parse todos

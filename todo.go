@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/emersion/go-ical"
 )
 
 type ToDo struct {
@@ -24,6 +26,46 @@ const (
 	ToDoPriorityMedium    ToDoPriority = 14
 	ToDoPriorityHigh      ToDoPriority = 1
 )
+
+func NewToDo(todo ical.Component) (*ToDo, error) {
+	t := &ToDo{}
+
+	for p := range todo.Props {
+		switch p {
+		case ical.PropStatus:
+			s, err := todo.Props.Get(ical.PropStatus).Text()
+			if err != nil {
+				return nil, err
+			}
+			t.Status = ToDoStatus(s)
+		case ical.PropSummary:
+			s, err := todo.Props.Get(ical.PropSummary).Text()
+			if err != nil {
+				return nil, err
+			}
+			t.Summary = s
+		case ical.PropDescription:
+			s, err := todo.Props.Get(ical.PropDescription).Text()
+			if err != nil {
+				return nil, err
+			}
+			t.Description = s
+		case ical.PropDue:
+			time, err := todo.Props.Get(ical.PropDue).DateTime(t.Due.Location())
+			if err != nil {
+				return nil, err
+			}
+			t.Due = time
+		case ical.PropPriority:
+			prio, err := todo.Props.Get(ical.PropPriority).Int()
+			if err != nil {
+				return nil, err
+			}
+			t.Priority = prio
+		}
+	}
+	return t, nil
+}
 
 func (t ToDo) String() string {
 	sb := strings.Builder{}
