@@ -27,8 +27,6 @@ func main() {
 		}
 		defer file.Close()
 
-		fmt.Println(file)
-
 		dec := ical.NewDecoder(file)
 
 		for {
@@ -57,6 +55,7 @@ func main() {
 					// fmt.Printf("%+v\n", p[0].Text())
 				}
 			}
+			fmt.Println("-------------------------")
 
 			for _, event := range cal.Events() {
 				summary, err := event.Props.Text(ical.PropSummary)
