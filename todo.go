@@ -29,44 +29,46 @@ const (
 	ToDoPriorityHigh      ToDoPriority = 1
 )
 
-func NewToDo(todo ical.Component) (*ToDo, error) {
-	t := &ToDo{}
+func NewToDo() *ToDo {
+	return &ToDo{}
+}
 
+func (t *ToDo) ParseComponent(todo ical.Component) error {
 	for p := range todo.Props {
 		switch p {
 		case ical.PropStatus:
 			s, err := todo.Props.Get(ical.PropStatus).Text()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			t.Status = ToDoStatus(s)
 		case ical.PropSummary:
 			s, err := todo.Props.Get(ical.PropSummary).Text()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			t.Summary = s
 		case ical.PropDescription:
 			s, err := todo.Props.Get(ical.PropDescription).Text()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			t.Description = s
 		case ical.PropDue:
 			time, err := todo.Props.Get(ical.PropDue).DateTime(t.Due.Location())
 			if err != nil {
-				return nil, err
+				return err
 			}
 			t.Due = time
 		case ical.PropPriority:
 			prio, err := todo.Props.Get(ical.PropPriority).Int()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			t.Priority = ToDoPriority(prio)
 		}
 	}
-	return t, nil
+	return nil
 }
 
 func (t ToDo) String() string {

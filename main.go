@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-ical"
 )
@@ -16,12 +18,41 @@ import (
 var calDir = "/home/kkga/.local/share/vdirsyncer/migadu-cal/tasks/"
 
 func main() {
-	list := []ToDo{}
+	if len(os.Args) > 1 && os.Args[1] == "new" {
+		encode()
+	} else {
+		list := list()
+		printTodos(list)
+	}
+}
 
+func encode() {
+	event := ical.NewEvent()
+	event.Props.SetText(ical.PropUID, "uid@example.org")
+	event.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
+	event.Props.SetText(ical.PropSummary, "My awesome event")
+	event.Props.SetDateTime(ical.PropDateTimeStart, time.Now().Add(24*time.Hour))
+
+	cal := ical.NewCalendar()
+	cal.Props.SetText(ical.PropVersion, "2.0")
+	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
+	cal.Children = append(cal.Children, event.Component)
+
+	var buf bytes.Buffer
+	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Print(buf.String())
+}
+
+func list() []ToDo {
 	files, err := ioutil.ReadDir(calDir)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	list := make([]ToDo, 0, len(files))
 
 	for _, f := range files {
 		if strings.TrimPrefix(filepath.Ext(f.Name()), ".") != ical.Extension {
@@ -48,7 +79,8 @@ func main() {
 			t := todos(cal)
 
 			for _, todo := range t {
-				t, err := NewToDo(todo)
+				t := NewToDo()
+				err := t.ParseComponent(todo)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -57,7 +89,7 @@ func main() {
 		}
 	}
 
-	printTodos(list)
+	return list
 }
 
 func todos(cal *ical.Calendar) []ical.Component {

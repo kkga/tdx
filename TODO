@@ -1,8 +1,12 @@
-
 - [ ] read about priority ical spec
-
 - [ ] add test for NewToDo
 
+ENCODING
+- use a NewToDo func similar to NewEvent in go-ical
+- generate UID of specific format?
+
+DECODING
+- [ ] make a map of [UID]ToDo instead of slice
 
 CONFIG OPTIONS
 - list of dirs to parse todos
