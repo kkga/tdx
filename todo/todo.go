@@ -20,7 +20,7 @@ type ToDo struct {
 	Description string
 	Tags        []string
 	Due         time.Time
-	OtherProps  []ical.Prop
+	OtherProps  ical.Props
 }
 
 type (
@@ -51,38 +51,45 @@ func (t *ToDo) Init(todo ical.Component) error {
 				return err
 			}
 			t.UID = uid
+			delete(props, p)
 		case ical.PropStatus:
 			s, err := todo.Props.Get(ical.PropStatus).Text()
 			if err != nil {
 				return err
 			}
 			t.Status = ToDoStatus(s)
+			delete(props, p)
 		case ical.PropSummary:
 			s, err := todo.Props.Get(ical.PropSummary).Text()
 			if err != nil {
 				return err
 			}
 			t.Summary = s
+			delete(props, p)
 		case ical.PropDescription:
 			s, err := todo.Props.Get(ical.PropDescription).Text()
 			if err != nil {
 				return err
 			}
 			t.Description = s
+			delete(props, p)
 		case ical.PropDue:
 			time, err := todo.Props.Get(ical.PropDue).DateTime(t.Due.Location())
 			if err != nil {
 				return err
 			}
 			t.Due = time
+			delete(props, p)
 		case ical.PropPriority:
 			prio, err := todo.Props.Get(ical.PropPriority).Int()
 			if err != nil {
 				return err
 			}
 			t.Priority = ToDoPriority(prio)
+			delete(props, p)
 		}
 	}
+	t.OtherProps = props
 	return nil
 }
 
