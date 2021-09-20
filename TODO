@@ -2,8 +2,13 @@ VTODO spec: https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.2
 
 ---
 
-- [ ] read about priority ical spec
-- [ ] add test for NewToDo
+Looks like i'm overthinking this...
+Instead of trying to convert ical component into ToDo and then back without loosing data,
+i should use the decoded ical data as a single source and provide printing functions
+that format the given component.
+
+- [x] read about priority ical spec
+- add test for NewToDo
 
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
