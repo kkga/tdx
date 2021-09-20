@@ -1,45 +1,53 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/emersion/go-ical"
-	"github.com/kkga/ctdo/todo"
+	"github.com/kkga/ctdo/cmd"
 )
 
 var calDir = "/home/kkga/.local/share/calendars/tasks/"
+var version = "dev"
 
 func main() {
-	if len(os.Args) > 1 && os.Args[1] == "new" {
-		todo := &todo.ToDo{}
-		todoBuf, _ := todo.Encode()
+	// log.SetFlags(0)
 
-		f, _ := os.Create(fmt.Sprintf("%s/ctdo-testing-%d.ics", calDir, time.Now().UnixNano()))
-		defer f.Close()
-		w := bufio.NewWriter(f)
-		_, _ = w.Write(todoBuf.Bytes())
-		w.Flush()
-	} else {
-		files, err := ioutil.ReadDir(calDir)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		todos := decodeFiles(files)
-		list := todo.NewList()
-		list.Init("new list", todos)
-		fmt.Println(list.String())
+	if len(os.Args) > 1 && os.Args[1] == "-v" {
+		fmt.Printf("kks %s\n", version)
+		os.Exit(0)
 	}
+
+	if err := cmd.Root(os.Args[1:]); err != nil {
+		log.Fatal(err)
+	}
+	// if len(os.Args) > 1 && os.Args[1] == "new" {
+	// 	todo := &todo.ToDo{}
+	// 	todoBuf, _ := todo.Encode()
+
+	// 	f, _ := os.Create(fmt.Sprintf("%s/ctdo-testing-%d.ics", calDir, time.Now().UnixNano()))
+	// 	defer f.Close()
+	// 	w := bufio.NewWriter(f)
+	// 	_, _ = w.Write(todoBuf.Bytes())
+	// 	w.Flush()
+	// } else {
+	// 	files, err := ioutil.ReadDir(calDir)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	todos := decodeFiles(files)
+	// 	list := todo.NewList()
+	// 	list.Init("new list", todos)
+	// 	fmt.Println(list.String())
+	// }
 }
 
 func decodeFiles(files []fs.FileInfo) []ical.Component {

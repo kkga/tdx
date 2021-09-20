@@ -1,6 +1,9 @@
 package cmd
 
-import "flag"
+import (
+	"flag"
+	"fmt"
+)
 
 func NewListCmd() *ListCmd {
 	c := &ListCmd{Cmd: Cmd{
@@ -9,6 +12,7 @@ func NewListCmd() *ListCmd {
 		shortDesc: "List todos",
 		usageLine: "[options]",
 	}}
+	c.fs.BoolVar(&c.json, "json", false, "json output")
 	return c
 }
 
@@ -21,9 +25,9 @@ func (c *ListCmd) Run() error {
 	// decode todos into map
 
 	if c.json {
-		// print json
+		fmt.Println("list -json called")
 	} else {
-		// print raw
+		fmt.Println("list called")
 	}
 
 	return nil
