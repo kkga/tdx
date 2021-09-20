@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
+	"github.com/fatih/color"
 )
 
 type ToDo struct {
@@ -19,6 +20,7 @@ type ToDo struct {
 	Description string
 	Tags        []string
 	Due         time.Time
+	OtherProps  []ical.Prop
 }
 
 type (
@@ -30,9 +32,9 @@ type (
 const (
 	ToDoStatusCompleted   ToDoStatus   = "COMPLETED"
 	ToDoStatusNeedsAction ToDoStatus   = "NEEDS-ACTION"
-	ToDoPriorityLow       ToDoPriority = 9
-	ToDoPriorityMedium    ToDoPriority = 14
 	ToDoPriorityHigh      ToDoPriority = 1
+	ToDoPriorityMedium    ToDoPriority = 5
+	ToDoPriorityLow       ToDoPriority = 6
 )
 
 func NewToDo() *ToDo {
@@ -40,7 +42,8 @@ func NewToDo() *ToDo {
 }
 
 func (t *ToDo) Init(todo ical.Component) error {
-	for p := range todo.Props {
+	props := todo.Props
+	for p := range props {
 		switch p {
 		case ical.PropUID:
 			uid, err := todo.Props.Get(ical.PropUID).Text()
@@ -85,6 +88,9 @@ func (t *ToDo) Init(todo ical.Component) error {
 
 func (t ToDo) String() string {
 	sb := strings.Builder{}
+	colorPrio := color.New(color.FgRed, color.Bold).SprintFunc()
+	colorDate := color.New(color.FgYellow).SprintFunc()
+	colorDesc := color.New(color.Faint).SprintFunc()
 
 	if t.Status == ToDoStatusCompleted {
 		sb.WriteString("[x]")
@@ -94,15 +100,20 @@ func (t ToDo) String() string {
 
 	if t.Priority != 0 {
 		var prio string
-		switch t.Priority {
-		case ToDoPriorityLow:
-			prio = "!"
-		case ToDoPriorityMedium:
-			prio = "!!"
-		case ToDoPriorityHigh:
+		switch {
+		case t.Priority == ToDoPriorityHigh:
 			prio = "!!!"
+		case t.Priority > ToDoPriorityHigh && t.Priority <= ToDoPriorityMedium:
+			prio = "!!"
+		case t.Priority > ToDoPriorityMedium:
+			prio = "!"
 		}
-		sb.WriteString(fmt.Sprintf(" (%s)", prio))
+		sb.WriteString(fmt.Sprintf(" %s", colorPrio(prio)))
+	}
+
+	if !t.Due.IsZero() {
+		date := t.Due.Local().Format("Jan-06")
+		sb.WriteString(fmt.Sprintf(" %s", colorDate(date)))
 	}
 
 	if t.Summary != "" {
@@ -110,14 +121,9 @@ func (t ToDo) String() string {
 		sb.WriteString(t.Summary)
 	}
 
-	if !t.Due.IsZero() {
-		date := t.Due.Local().Format(time.RFC822)
-		sb.WriteString(fmt.Sprintf(" (%s)", date))
-	}
-
 	if t.Description != "" {
-		sb.WriteString("\n    ↳ ")
-		sb.WriteString(t.Description)
+		sb.WriteString(colorDesc("\n    ↳ "))
+		sb.WriteString(colorDesc(t.Description))
 	}
 
 	return sb.String()

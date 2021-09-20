@@ -6,15 +6,16 @@ VTODO spec: https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.2
 - [ ] add test for NewToDo
 
 ENCODING
-- use a NewToDo func similar to NewEvent in go-ical
-- generate UID of specific format?
-- parse #tags in description
+- [x] use a NewToDo func similar to NewEvent in go-ical
+- [x] generate UID of specific format?
+- [ ] store non-relevant components in a separate field to keep them during encode
 
 FILES
 - recurse into dirs in path
 
 DECODING
-- [ ] make a map of [UID]ToDo instead of slice
+- [ ] parse #tags in description
+- [x] (not needed for nor) make a map of [UID]ToDo instead of slice
 
 CONFIG OPTIONS
 - list of dirs to parse todos
