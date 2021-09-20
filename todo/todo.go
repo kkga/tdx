@@ -41,6 +41,7 @@ func NewToDo() *ToDo {
 	return &ToDo{}
 }
 
+// TODO: probably don't need this, use the ical.Component directly
 func (t *ToDo) Init(todo ical.Component) error {
 	props := todo.Props
 	for p := range props {
@@ -93,6 +94,7 @@ func (t *ToDo) Init(todo ical.Component) error {
 	return nil
 }
 
+// TODO: refactor this for using the ical.Component directly
 func (t ToDo) String() string {
 	sb := strings.Builder{}
 	colorPrio := color.New(color.FgRed, color.Bold).SprintFunc()
@@ -140,6 +142,7 @@ type icalToDo struct {
 	*ical.Component
 }
 
+// TODO: get rid of this
 func GenerateUID() string {
 	sb := strings.Builder{}
 
@@ -162,6 +165,7 @@ func GenerateUID() string {
 	return sb.String()
 }
 
+// TODO: get rid of this
 func (t ToDo) Encode() (bytes.Buffer, error) {
 	icalToDo := &icalToDo{ical.NewComponent(ical.CompToDo)}
 	icalToDo.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
