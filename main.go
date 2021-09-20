@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -21,8 +22,14 @@ var calDir = "/home/kkga/.local/share/calendars/tasks/"
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "new" {
-		todo := &todo.ToDo{UID: "12341234"}
-		fmt.Println(todo.Encode())
+		todo := &todo.ToDo{}
+		todoBuf, _ := todo.Encode()
+
+		f, _ := os.Create(fmt.Sprintf("%s/ctdo-testing-%d.ics", calDir, time.Now().UnixNano()))
+		defer f.Close()
+		w := bufio.NewWriter(f)
+		_, _ = w.Write(todoBuf.Bytes())
+		w.Flush()
 	} else {
 		files, err := ioutil.ReadDir(calDir)
 		if err != nil {

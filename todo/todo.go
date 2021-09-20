@@ -3,6 +3,8 @@ package todo
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -125,10 +127,38 @@ type icalToDo struct {
 	*ical.Component
 }
 
-func (t ToDo) Encode() (string, error) {
+func GenerateUID() string {
+	sb := strings.Builder{}
+
+	randStr := func(n int) string {
+		var letters = []rune("1234567890abcdefghijklmnopqrstuvwxyz")
+
+		s := make([]rune, n)
+		for i := range s {
+			s[i] = letters[rand.Intn(len(letters))]
+		}
+		return string(s)
+	}
+
+	sb.WriteString(fmt.Sprint(time.Now().UnixNano()))
+	sb.WriteString(fmt.Sprintf("-%s", randStr(8)))
+	if hostname, err := os.Hostname(); err == nil {
+		sb.WriteString(fmt.Sprintf("@%s", hostname))
+	}
+
+	return sb.String()
+}
+
+func (t ToDo) Encode() (bytes.Buffer, error) {
 	icalToDo := &icalToDo{ical.NewComponent(ical.CompToDo)}
-	icalToDo.Props.SetText(ical.PropUID, t.UID)
 	icalToDo.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
+
+	if t.UID == "" {
+		icalToDo.Props.SetText(ical.PropUID, GenerateUID())
+	} else {
+		icalToDo.Props.SetText(ical.PropUID, t.UID)
+	}
+	icalToDo.Props.SetText(ical.PropSummary, "testing encode")
 
 	cal := ical.NewCalendar()
 	cal.Props.SetText(ical.PropVersion, "2.0")
@@ -137,8 +167,7 @@ func (t ToDo) Encode() (string, error) {
 
 	var buf bytes.Buffer
 	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
-		return "", err
+		return buf, err
 	}
-
-	return buf.String(), nil
+	return buf, nil
 }
