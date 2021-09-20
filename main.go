@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"io/fs"
@@ -83,25 +82,4 @@ func decodeFiles(files []fs.FileInfo) []ical.Component {
 	}
 
 	return components
-}
-
-// dummy encode function
-func encode() {
-	event := ical.NewEvent()
-	event.Props.SetText(ical.PropUID, "uid@example.org")
-	event.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
-	event.Props.SetText(ical.PropSummary, "My awesome event")
-	event.Props.SetDateTime(ical.PropDateTimeStart, time.Now().Add(24*time.Hour))
-
-	cal := ical.NewCalendar()
-	cal.Props.SetText(ical.PropVersion, "2.0")
-	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
-	cal.Children = append(cal.Children, event.Component)
-
-	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print(buf.String())
 }

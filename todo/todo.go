@@ -142,7 +142,7 @@ func GenerateUID() string {
 
 	sb.WriteString(fmt.Sprint(time.Now().UnixNano()))
 	sb.WriteString(fmt.Sprintf("-%s", randStr(8)))
-	if hostname, err := os.Hostname(); err == nil {
+	if hostname, _ := os.Hostname(); hostname != "" {
 		sb.WriteString(fmt.Sprintf("@%s", hostname))
 	}
 
