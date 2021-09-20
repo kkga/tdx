@@ -2,10 +2,6 @@ package cmd
 
 import (
 	"flag"
-	"fmt"
-	"strings"
-
-	"github.com/kkga/ctdo/todo"
 )
 
 func NewListCmd() *ListCmd {
@@ -27,15 +23,15 @@ type ListCmd struct {
 func (c *ListCmd) Run() error {
 	// decode todos into map
 
-	sb := strings.Builder{}
+	// sb := strings.Builder{}
 
-	for _, t := range c.ToDos {
-		if t.Status != todo.ToDoStatusCompleted {
-			sb.WriteString(t.String())
-			sb.WriteString("\n")
-		}
-	}
-	fmt.Println(strings.TrimSpace(sb.String()))
+	// for _, t := range c.ToDos {
+	// 	if t.Status != todo.ToDoStatusCompleted {
+	// 		sb.WriteString(t.String())
+	// 		sb.WriteString("\n")
+	// 	}
+	// }
+	// fmt.Println(strings.TrimSpace(sb.String()))
 
 	// if c.json {
 	// 	fmt.Println("list -json called")

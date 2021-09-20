@@ -16,6 +16,7 @@ func Root(args []string) error {
 	}
 
 	cmds := []Runner{
+		NewAddCmd(),
 		NewListCmd(),
 	}
 
