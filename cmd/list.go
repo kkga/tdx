@@ -25,7 +25,6 @@ type ListCmd struct {
 }
 
 func (c *ListCmd) Run() error {
-
 	sb := strings.Builder{}
 
 	collections, err := c.root.Collections()
@@ -39,11 +38,12 @@ func (c *ListCmd) Run() error {
 		if err != nil {
 			return err
 		}
-		for i, item := range items {
+		for _, item := range items {
 			for _, comp := range item.Children {
 				if comp.Name == ical.CompToDo {
-					summary := comp.Props.Get(ical.PropSummary)
-					sb.WriteString(fmt.Sprintf("%d: %s\n", i, summary.Value))
+					sb.WriteString(FormatToDo(*comp))
+					// summary := comp.Props.Get(ical.PropSummary)
+					// sb.WriteString(fmt.Sprintf("%d: %s\n", i, summary.Value))
 				}
 			}
 		}

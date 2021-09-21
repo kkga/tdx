@@ -27,11 +27,19 @@ type Collection struct {
 }
 
 const (
-	MetaDisplayName = "displayname"
-	MetaColor       = "color"
+	StatusCompleted   = "COMPLETED"
+	StatusNeedsAction = "NEEDS-ACTION"
+	PriorityHigh      = 1
+	PriorityMedium    = 5
+	PriorityLow       = 6
 )
 
-// Collections returns a list of all vdir collections in specified root path recursively
+const (
+	MetaDisplayName = "displayname" // MetaDisplayName is a filename vdir uses for collection name
+	MetaColor       = "color"       // MetaColor is a filename vdir uses for collection color
+)
+
+// Collections returns a slice of all vdir collections in root path recursively
 func (v VdirRoot) Collections() (collections []Collection, err error) {
 	err = filepath.WalkDir(v.Path, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -75,7 +83,7 @@ func (v VdirRoot) Collections() (collections []Collection, err error) {
 	return collections, nil
 }
 
-// Items returns a slice of all iCalendar items in collection
+// Items returns a slice of decoded iCalendar items in collection
 func (c Collection) Items() (items []ical.Calendar, err error) {
 
 	isIcal := func(path string, de fs.DirEntry) bool {
