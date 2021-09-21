@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emersion/go-ical"
+	"github.com/kkga/ctodo/vdir"
 )
 
 type Runner interface {
@@ -21,9 +22,10 @@ type Cmd struct {
 	shortDesc string
 	usageLine string
 	cals      []ical.Calendar
+	root      *vdir.VdirRoot
 }
 
-var calDir = "/home/kkga/.local/share/calendars/tasks/"
+var dir = "/home/kkga/.local/share/calendars/"
 
 func (c *Cmd) Run() error      { return nil }
 func (c *Cmd) Name() string    { return c.fs.Name() }
@@ -35,6 +37,8 @@ func (c *Cmd) Init(args []string) error {
 	if err := c.fs.Parse(args); err != nil {
 		return err
 	}
+
+	c.root = vdir.NewVdirRoot(dir)
 
 	return nil
 }

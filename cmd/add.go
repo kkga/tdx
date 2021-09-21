@@ -77,7 +77,7 @@ func (c *AddCmd) Run() error {
 		return err
 	}
 
-	f, err := os.Create(fmt.Sprintf("%s/%s.ics", calDir, uid))
+	f, err := os.Create(fmt.Sprintf("%s/%s.ics", c.root.Path, uid))
 	if err != nil {
 		return err
 	}

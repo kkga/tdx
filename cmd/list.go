@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"flag"
+	"fmt"
+	"strings"
+
+	"github.com/emersion/go-ical"
 )
 
 func NewListCmd() *ListCmd {
@@ -21,23 +25,31 @@ type ListCmd struct {
 }
 
 func (c *ListCmd) Run() error {
-	// decode todos into map
 
-	// sb := strings.Builder{}
+	sb := strings.Builder{}
 
-	// for _, t := range c.ToDos {
-	// 	if t.Status != todo.ToDoStatusCompleted {
-	// 		sb.WriteString(t.String())
-	// 		sb.WriteString("\n")
-	// 	}
-	// }
-	// fmt.Println(strings.TrimSpace(sb.String()))
+	collections, err := c.root.Collections()
+	if err != nil {
+		return err
+	}
 
-	// if c.json {
-	// 	fmt.Println("list -json called")
-	// } else {
-	// 	fmt.Println("list called")
-	// }
+	for _, c := range collections {
+		sb.WriteString(fmt.Sprintf("\n== %s ==\n", c.Name))
+		items, err := c.Items()
+		if err != nil {
+			return err
+		}
+		for i, item := range items {
+			for _, comp := range item.Children {
+				if comp.Name == ical.CompToDo {
+					summary := comp.Props.Get(ical.PropSummary)
+					sb.WriteString(fmt.Sprintf("%d: %s\n", i, summary.Value))
+				}
+			}
+		}
+	}
+
+	fmt.Print(sb.String())
 
 	return nil
 }
