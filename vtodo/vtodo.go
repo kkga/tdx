@@ -12,9 +12,11 @@ import (
 )
 
 const (
-	ToDoPriorityHigh   = 1
-	ToDoPriorityMedium = 5
-	ToDoPriorityLow    = 6
+	StatusCompleted   = "COMPLETED"
+	StatusNeedsAction = "NEEDS-ACTION"
+	PriorityHigh      = 1
+	PriorityMedium    = 5
+	PriorityLow       = 6
 )
 
 // generateUID returns a random string containing timestamp and hostname
@@ -57,4 +59,49 @@ func Encode(vtodo *ical.Component) (*bytes.Buffer, error) {
 		return &buf, err
 	}
 	return &buf, nil
+}
+
+// TODO: refactor this for using the ical.Component directly
+func ToString(vtodo ical.Component) string {
+	// sb := strings.Builder{}
+	// colorPrio := color.New(color.FgRed, color.Bold).SprintFunc()
+	// colorDate := color.New(color.FgYellow).SprintFunc()
+	// colorDesc := color.New(color.Faint).SprintFunc()
+
+	// if t.Status == ToDoStatusCompleted {
+	// 	sb.WriteString("[x]")
+	// } else if t.Status == ToDoStatusNeedsAction {
+	// 	sb.WriteString("[ ]")
+	// }
+
+	// if t.Priority != 0 {
+	// 	var prio string
+	// 	switch {
+	// 	case t.Priority == ToDoPriorityHigh:
+	// 		prio = "!!!"
+	// 	case t.Priority > ToDoPriorityHigh && t.Priority <= ToDoPriorityMedium:
+	// 		prio = "!!"
+	// 	case t.Priority > ToDoPriorityMedium:
+	// 		prio = "!"
+	// 	}
+	// 	sb.WriteString(fmt.Sprintf(" %s", colorPrio(prio)))
+	// }
+
+	// if !t.Due.IsZero() {
+	// 	date := t.Due.Local().Format("Jan-06")
+	// 	sb.WriteString(fmt.Sprintf(" %s", colorDate(date)))
+	// }
+
+	// if t.Summary != "" {
+	// 	sb.WriteString(" ")
+	// 	sb.WriteString(t.Summary)
+	// }
+
+	// if t.Description != "" {
+	// 	sb.WriteString(colorDesc("\n    ↳ "))
+	// 	sb.WriteString(colorDesc(t.Description))
+	// }
+
+	// return sb.String()
+	return ""
 }

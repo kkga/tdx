@@ -50,7 +50,7 @@ func (c *Cmd) usage() {
 	fmt.Println()
 
 	fmt.Println("USAGE")
-	fmt.Printf("  kks %s %s\n\n", c.fs.Name(), c.usageLine)
+	fmt.Printf("  ctodo %s %s\n\n", c.fs.Name(), c.usageLine)
 
 	if strings.Contains(c.usageLine, "[options]") {
 		fmt.Println("OPTIONS")

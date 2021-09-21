@@ -59,13 +59,13 @@ func (c *AddCmd) Run() error {
 		prioProp.SetValueType(ical.ValueInt)
 		switch c.priority {
 		case "high":
-			prioProp.Value = fmt.Sprint(vtodo.ToDoPriorityHigh)
+			prioProp.Value = fmt.Sprint(vtodo.PriorityHigh)
 			t.Props.Add(prioProp)
 		case "medium":
-			prioProp.Value = fmt.Sprint(vtodo.ToDoPriorityMedium)
+			prioProp.Value = fmt.Sprint(vtodo.PriorityMedium)
 			t.Props.Add(prioProp)
 		case "low":
-			prioProp.Value = fmt.Sprint(vtodo.ToDoPriorityLow)
+			prioProp.Value = fmt.Sprint(vtodo.PriorityLow)
 			t.Props.Add(prioProp)
 		default:
 			return fmt.Errorf("Unknown priority flag: %s, expected one of: high, medium, low", c.priority)
