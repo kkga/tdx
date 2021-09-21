@@ -41,7 +41,11 @@ func (c *Cmd) Init(args []string) error {
 		return err
 	}
 
-	c.root = vdir.NewVdirRoot(dir)
+	root, err := vdir.NewVdirRoot(dir)
+	if err != nil {
+		return err
+	}
+	c.root = root
 
 	return nil
 }

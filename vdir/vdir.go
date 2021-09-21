@@ -1,6 +1,7 @@
 package vdir
 
 import (
+	"errors"
 	"io"
 	"io/fs"
 	"os"
@@ -10,8 +11,15 @@ import (
 	"github.com/emersion/go-ical"
 )
 
-func NewVdirRoot(path string) *VdirRoot {
-	return &VdirRoot{path}
+func NewVdirRoot(path string) (*VdirRoot, error) {
+	f, err := os.Stat(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, errors.New("Specified vdir path does not exist.")
+	}
+	if !f.IsDir() {
+		return nil, errors.New("Specified vdir path is not a directory.")
+	}
+	return &VdirRoot{path}, nil
 }
 
 // VdirRoot represents the topmost vdir root folder
