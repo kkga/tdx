@@ -41,7 +41,12 @@ func (c *ListCmd) Run() error {
 		for _, item := range items {
 			for _, comp := range item.Children {
 				if comp.Name == ical.CompToDo {
-					sb.WriteString(FormatToDo(*comp))
+					t, err := FormatToDo(*comp)
+					if err != nil {
+						return err
+					}
+					sb.WriteString(t)
+					sb.WriteString("\n")
 					// summary := comp.Props.Get(ical.PropSummary)
 					// sb.WriteString(fmt.Sprintf("%d: %s\n", i, summary.Value))
 				}

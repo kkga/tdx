@@ -3,9 +3,11 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/emersion/go-ical"
+	"github.com/fatih/color"
 	"github.com/kkga/ctodo/vdir"
 )
 
@@ -57,51 +59,59 @@ func (c *Cmd) usage() {
 }
 
 // TODO: refactor this for using the ical.Component directly
-func FormatToDo(vtodo ical.Component) string {
+func FormatToDo(vtodo ical.Component) (string, error) {
 	sb := strings.Builder{}
+	colorStatusDone := color.New(color.FgGreen).SprintFunc()
+	colorStatusUndone := color.New(color.FgRed, color.Bold).SprintFunc()
 	// colorPrio := color.New(color.FgRed, color.Bold).SprintFunc()
 	// colorDate := color.New(color.FgYellow).SprintFunc()
 	// colorDesc := color.New(color.Faint).SprintFunc()
 
-	for p, v := range vtodo.Props {
-		switch p {
+	if vtodo.Name != ical.CompToDo {
+		return "", fmt.Errorf("Not VTODO component: %v", vtodo)
+	}
+
+	var (
+		status      string
+		summary     string
+		description string
+		prio        string
+		// due         string
+	)
+
+	for name, prop := range vtodo.Props {
+		p := prop[0]
+
+		switch name {
 		case ical.PropStatus:
-			if s := v[0].Value; s != "" {
-				if s == vdir.StatusCompleted {
-					sb.WriteString("[x] ")
-				} else {
-					sb.WriteString("[ ] ")
-				}
+			if p.Value == vdir.StatusCompleted {
+				status = colorStatusDone("[x]")
+			} else {
+				status = colorStatusUndone("[ ]")
 			}
 		case ical.PropSummary:
-			if s := v[0].Value; s != "" {
-				sb.WriteString(s)
-				sb.WriteString("\n")
+			summary = p.Value
+		case ical.PropDescription:
+			description = p.Value
+		case ical.PropPriority:
+			v, err := strconv.Atoi(p.Value)
+			if err != nil {
+				return "", err
+			}
+			switch {
+			case v == vdir.PriorityHigh:
+				prio = "!!!"
+			case v > vdir.PriorityHigh && v <= vdir.PriorityMedium:
+				prio = "!!"
+			case v > vdir.PriorityMedium:
+				prio = "!"
 			}
 		}
 	}
-
-	// summary := vtodo.Props.Get(ical.PropSummary)
-	// description := vtodo.Props.Get(ical.PropDescription)
-	// status := vtodo.Props.Get(ical.PropStatus)
-	// prio := vtodo.Props.Get(ical.PropPriority)
-	// due := vtodo.Props.Get(ical.PropDue)
-
-	// fmt.Println(prio.Value)
-
-	// if prio.Value != "" {
-	// 	p, _ := strconv.Atoi(prio.Value)
-	// 	var ps string
-	// 	switch {
-	// 	case p == vdir.PriorityHigh:
-	// 		ps = "!!!"
-	// 	case p > vdir.PriorityHigh && p <= vdir.PriorityMedium:
-	// 		ps = "!!"
-	// 	case p > vdir.PriorityMedium:
-	// 		ps = "!"
-	// 	}
-	// 	sb.WriteString(fmt.Sprintf(" %s", colorPrio(ps)))
-	// }
+	sb.WriteString(status)
+	sb.WriteString(prio)
+	sb.WriteString(summary)
+	sb.WriteString(description)
 
 	// if d, err := due.DateTime(time.Local); err != nil {
 	// 	date := d.Local().Format("Jan-06")
@@ -118,5 +128,5 @@ func FormatToDo(vtodo ical.Component) string {
 	// 	sb.WriteString(colorDesc(d))
 	// }
 
-	return sb.String()
+	return sb.String(), nil
 }
