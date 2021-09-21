@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emersion/go-ical"
+	"github.com/kkga/tdx/vtodo"
 )
 
 func NewListCmd() *ListCmd {
@@ -41,14 +42,12 @@ func (c *ListCmd) Run() error {
 		for _, item := range items {
 			for _, comp := range item.Children {
 				if comp.Name == ical.CompToDo {
-					t, err := FormatToDo(*comp)
+					t, err := vtodo.Format(comp)
 					if err != nil {
 						return err
 					}
 					sb.WriteString(t)
 					sb.WriteString("\n")
-					// summary := comp.Props.Get(ical.PropSummary)
-					// sb.WriteString(fmt.Sprintf("%d: %s\n", i, summary.Value))
 				}
 			}
 		}
