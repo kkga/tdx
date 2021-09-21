@@ -34,11 +34,16 @@ func (c *ListCmd) Run() error {
 	}
 
 	for _, c := range collections {
-		sb.WriteString(fmt.Sprintf("\n== %s ==\n", c.Name))
 		items, err := c.Items()
 		if err != nil {
 			return err
 		}
+
+		if len(items) == 0 {
+			continue
+		}
+
+		sb.WriteString(fmt.Sprintf("\n== %s ==\n", c.Name))
 		for _, item := range items {
 			for _, comp := range item.Children {
 				if comp.Name == ical.CompToDo {
