@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/kkga/ctodo/cmd"
+	"github.com/kkga/tdx/cmd"
 )
 
 var version = "dev"

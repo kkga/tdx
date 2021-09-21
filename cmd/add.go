@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
-	"github.com/kkga/ctodo/vtodo"
+	"github.com/kkga/tdx/vtodo"
 )
 
 func NewAddCmd() *AddCmd {

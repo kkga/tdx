@@ -27,14 +27,6 @@ type Collection struct {
 }
 
 const (
-	StatusCompleted   = "COMPLETED"
-	StatusNeedsAction = "NEEDS-ACTION"
-	PriorityHigh      = 1
-	PriorityMedium    = 5
-	PriorityLow       = 6
-)
-
-const (
 	MetaDisplayName = "displayname" // MetaDisplayName is a filename vdir uses for collection name
 	MetaColor       = "color"       // MetaColor is a filename vdir uses for collection color
 )
