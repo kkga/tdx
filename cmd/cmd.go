@@ -9,6 +9,7 @@ import (
 	"github.com/emersion/go-ical"
 	"github.com/fatih/color"
 	"github.com/kkga/tdx/vdir"
+	"github.com/kkga/tdx/vtodo"
 )
 
 type Runner interface {
@@ -59,7 +60,7 @@ func (c *Cmd) usage() {
 }
 
 // TODO: refactor this for using the ical.Component directly
-func FormatToDo(vtodo ical.Component) (string, error) {
+func FormatToDo(comp ical.Component) (string, error) {
 	sb := strings.Builder{}
 	colorStatusDone := color.New(color.FgGreen).SprintFunc()
 	colorStatusUndone := color.New(color.FgRed, color.Bold).SprintFunc()
@@ -67,8 +68,8 @@ func FormatToDo(vtodo ical.Component) (string, error) {
 	// colorDate := color.New(color.FgYellow).SprintFunc()
 	// colorDesc := color.New(color.Faint).SprintFunc()
 
-	if vtodo.Name != ical.CompToDo {
-		return "", fmt.Errorf("Not VTODO component: %v", vtodo)
+	if comp.Name != ical.CompToDo {
+		return "", fmt.Errorf("Not VTODO component: %v", comp)
 	}
 
 	var (
@@ -79,35 +80,41 @@ func FormatToDo(vtodo ical.Component) (string, error) {
 		// due         string
 	)
 
-	for name, prop := range vtodo.Props {
+	for name, prop := range comp.Props {
 		p := prop[0]
 
 		switch name {
+
 		case ical.PropStatus:
-			if p.Value == vdir.StatusCompleted {
+			if p.Value == vtodo.StatusCompleted {
 				status = colorStatusDone("[x]")
 			} else {
 				status = colorStatusUndone("[ ]")
 			}
+
 		case ical.PropSummary:
 			summary = p.Value
+
 		case ical.PropDescription:
 			description = p.Value
+
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
 			if err != nil {
 				return "", err
 			}
 			switch {
-			case v == vdir.PriorityHigh:
+			case v == vtodo.PriorityHigh:
 				prio = "!!!"
-			case v > vdir.PriorityHigh && v <= vdir.PriorityMedium:
+			case v > vtodo.PriorityHigh && v <= vtodo.PriorityMedium:
 				prio = "!!"
-			case v > vdir.PriorityMedium:
+			case v > vtodo.PriorityMedium:
 				prio = "!"
 			}
+
 		}
 	}
+
 	sb.WriteString(status)
 	sb.WriteString(prio)
 	sb.WriteString(summary)
