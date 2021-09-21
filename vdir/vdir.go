@@ -10,6 +10,15 @@ import (
 	"github.com/emersion/go-ical"
 )
 
+func NewVdirRoot(path string) *VdirRoot {
+	return &VdirRoot{path}
+}
+
+// VdirRoot represents the topmost vdir root folder
+type VdirRoot struct {
+	Path string
+}
+
 // Collection represents a Vdir collection
 type Collection struct {
 	Name  string
@@ -23,13 +32,13 @@ const (
 )
 
 // Collections returns a list of all vdir collections in specified root path recursively
-func Collections(root string) (collections []Collection, err error) {
-	err = filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
+func (v VdirRoot) Collections() (collections []Collection, err error) {
+	err = filepath.WalkDir(v.Path, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if d.IsDir() && p != root {
+		if d.IsDir() && p != v.Path {
 			var c = &Collection{}
 			c.Path = p
 
