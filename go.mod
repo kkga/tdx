@@ -1,4 +1,4 @@
-module github.com/kkga/ctdo
+module github.com/kkga/ctodo
 
 go 1.17
 
