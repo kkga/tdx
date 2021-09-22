@@ -11,7 +11,6 @@ import (
 	"github.com/emersion/go-ical"
 	// "github.com/kkga/tdx/vdir"
 	"github.com/kkga/tdx/vdir"
-	"github.com/kkga/tdx/vtodo"
 )
 
 func NewAddCmd() *AddCmd {
@@ -48,13 +47,13 @@ func (c *AddCmd) Run() error {
 	}
 
 	summary := strings.Join(args, " ")
-	uid := vtodo.GenerateUID()
+	uid := vdir.GenerateUID()
 
 	t := ical.NewComponent("VTODO")
 	t.Props.SetText(ical.PropSummary, summary)
 	t.Props.SetText(ical.PropUID, uid)
 	t.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
-	t.Props.SetText(ical.PropStatus, vtodo.StatusNeedsAction)
+	t.Props.SetText(ical.PropStatus, vdir.StatusNeedsAction)
 
 	// TODO parse due date flag
 
@@ -67,13 +66,13 @@ func (c *AddCmd) Run() error {
 		prioProp.SetValueType(ical.ValueInt)
 		switch c.priority {
 		case "high":
-			prioProp.Value = fmt.Sprint(vtodo.PriorityHigh)
+			prioProp.Value = fmt.Sprint(vdir.PriorityHigh)
 			t.Props.Add(prioProp)
 		case "medium":
-			prioProp.Value = fmt.Sprint(vtodo.PriorityMedium)
+			prioProp.Value = fmt.Sprint(vdir.PriorityMedium)
 			t.Props.Add(prioProp)
 		case "low":
-			prioProp.Value = fmt.Sprint(vtodo.PriorityLow)
+			prioProp.Value = fmt.Sprint(vdir.PriorityLow)
 			t.Props.Add(prioProp)
 		default:
 			return fmt.Errorf("Unknown priority flag: %s, expected one of: high, medium, low", c.priority)
@@ -92,7 +91,7 @@ func (c *AddCmd) Run() error {
 		Path: p,
 		Ical: cal,
 	}
-	c.root.WriteItem(*c.collection, item)
+	item.WriteFile()
 
 	return nil
 }

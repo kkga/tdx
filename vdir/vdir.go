@@ -4,13 +4,18 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-ical"
+	"github.com/fatih/color"
 )
 
 // VdirRoot represents the topmost vdir root folder
@@ -35,6 +40,14 @@ type Item struct {
 const (
 	MetaDisplayName = "displayname" // MetaDisplayName is a filename vdir uses for collection name
 	MetaColor       = "color"       // MetaColor is a filename vdir uses for collection color
+)
+
+const (
+	StatusCompleted   = "COMPLETED"
+	StatusNeedsAction = "NEEDS-ACTION"
+	PriorityHigh      = 1
+	PriorityMedium    = 5
+	PriorityLow       = 6
 )
 
 // NewVdirRoot initializes a VdirRoot checking that the directory exists
@@ -165,17 +178,95 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 	return items, nil
 }
 
-// WriteItem encodes given ical.Calendar data and writes to file in collection dir
-func (v VdirRoot) WriteItem(collection Collection, item *Item) error {
+// Format returns a string representation of an item
+func (i Item) Format() (string, error) {
+	sb := strings.Builder{}
+
+	colorStatusDone := color.New(color.FgGreen).SprintFunc()
+	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
+	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
+	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
+	colorDesc := color.New(color.Faint).SprintFunc()
+	// colorDate := color.New(color.FgYellow).SprintFunc()
+
+	var vtodo *ical.Component
+
+	for _, comp := range i.Ical.Children {
+		if comp.Name == ical.CompToDo {
+			vtodo = comp
+		}
+	}
+
+	if vtodo.Name != ical.CompToDo {
+		return "", fmt.Errorf("Not VTODO component: %v", vtodo)
+	}
+
+	var (
+		status      string
+		summary     string
+		description string
+		prio        string
+		// due         string
+	)
+
+	for name, prop := range vtodo.Props {
+		p := prop[0]
+
+		switch name {
+
+		case ical.PropStatus:
+			if p.Value == StatusCompleted {
+				status = colorStatusDone("[x]")
+			} else {
+				status = colorStatusUndone("[ ]")
+			}
+
+		case ical.PropSummary:
+			summary = p.Value
+
+		case ical.PropDescription:
+			description = colorDesc(fmt.Sprintf("(%s)", p.Value))
+
+		case ical.PropPriority:
+			v, err := strconv.Atoi(p.Value)
+			if err != nil {
+				return "", err
+			}
+			switch {
+			case v == PriorityHigh:
+				prio = colorPrioHigh("!!!")
+			case v > PriorityHigh && v <= PriorityMedium:
+				prio = colorPrioMedium("!!")
+			case v > PriorityMedium:
+				prio = colorPrioMedium("!")
+			}
+
+		}
+	}
+
+	sb.WriteString(fmt.Sprintf("%s", status))
+	if prio != "" {
+		sb.WriteString(fmt.Sprintf(" %s", prio))
+	}
+	sb.WriteString(fmt.Sprintf(" %s", summary))
+	if description != "" {
+		sb.WriteString(fmt.Sprintf(" %s", description))
+	}
+
+	return sb.String(), nil
+}
+
+// WriteFile encodes ical data and writes to file
+func (i *Item) WriteFile() error {
 	var buf bytes.Buffer
-	err := ical.NewEncoder(&buf).Encode(item.Ical)
+	err := ical.NewEncoder(&buf).Encode(i.Ical)
 	if err != nil {
 		return err
 	}
 
 	// TODO: update modified date prop
 
-	f, err := os.Create(item.Path)
+	f, err := os.Create(i.Path)
 	if err != nil {
 		return err
 	}
@@ -193,4 +284,31 @@ func (v VdirRoot) WriteItem(collection Collection, item *Item) error {
 	}
 
 	return nil
+}
+
+// GenerateUID returns a random string containing timestamp and hostname
+func GenerateUID() string {
+	sb := strings.Builder{}
+
+	time := time.Now().UnixNano()
+
+	randStr := func(n int) string {
+		rs := rand.NewSource(time)
+		r := rand.New(rs)
+		var letters = []rune("1234567890abcdefghijklmnopqrstuvwxyz")
+
+		s := make([]rune, n)
+		for i := range s {
+			s[i] = letters[r.Intn(len(letters))]
+		}
+		return string(s)
+	}
+
+	sb.WriteString(fmt.Sprint(time))
+	sb.WriteString(fmt.Sprintf("-%s", randStr(8)))
+	if hostname, _ := os.Hostname(); hostname != "" {
+		sb.WriteString(fmt.Sprintf("@%s", hostname))
+	}
+
+	return sb.String()
 }

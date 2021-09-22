@@ -7,7 +7,6 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
-	"github.com/kkga/tdx/vtodo"
 )
 
 func NewListCmd() *ListCmd {
@@ -75,7 +74,7 @@ func (c *ListCmd) Run() error {
 func writeItem(sb *strings.Builder, id int, item vdir.Item) error {
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
-			t, err := vtodo.Format(comp)
+			t, err := item.Format()
 			if err != nil {
 				return err
 			}

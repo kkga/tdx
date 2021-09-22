@@ -8,7 +8,6 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
-	"github.com/kkga/tdx/vtodo"
 )
 
 func NewDoneCmd() *DoneCmd {
@@ -39,13 +38,13 @@ func (c *DoneCmd) Run() error {
 		return err
 	}
 
-	var collection vdir.Collection
+	// var collection vdir.Collection
 	var item *vdir.Item
 
-	for col, items := range collections {
+	for _, items := range collections {
 		for _, i := range items {
 			if i.Id == argID {
-				collection = *col
+				// collection = *col
 				item = i
 			}
 		}
@@ -57,17 +56,17 @@ func (c *DoneCmd) Run() error {
 
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
-			comp.Props.SetText(ical.PropStatus, vtodo.StatusCompleted)
+			comp.Props.SetText(ical.PropStatus, vdir.StatusCompleted)
 		}
 	}
 
-	if err := c.root.WriteItem(collection, item); err != nil {
+	if err := item.WriteFile(); err != nil {
 		return err
 	}
 
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
-			t, err := vtodo.Format(comp)
+			t, err := item.Format()
 			if err != nil {
 				return err
 			}
