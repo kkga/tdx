@@ -65,5 +65,15 @@ func (c *DoneCmd) Run() error {
 		return err
 	}
 
+	for _, comp := range item.Ical.Children {
+		if comp.Name == ical.CompToDo {
+			t, err := vtodo.Format(comp)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%2d %s\n", argID, t)
+		}
+	}
+
 	return nil
 }

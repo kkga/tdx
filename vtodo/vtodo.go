@@ -68,7 +68,8 @@ func Format(comp *ical.Component) (string, error) {
 
 	colorStatusDone := color.New(color.FgGreen).SprintFunc()
 	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
-	colorPrio := color.New(color.FgRed, color.Bold).SprintFunc()
+	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
+	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	colorDesc := color.New(color.Faint).SprintFunc()
 	// colorDate := color.New(color.FgYellow).SprintFunc()
 
@@ -109,11 +110,11 @@ func Format(comp *ical.Component) (string, error) {
 			}
 			switch {
 			case v == PriorityHigh:
-				prio = colorPrio("!!!")
+				prio = colorPrioHigh("!!!")
 			case v > PriorityHigh && v <= PriorityMedium:
-				prio = colorPrio("!!")
+				prio = colorPrioMedium("!!")
 			case v > PriorityMedium:
-				prio = colorPrio("!")
+				prio = colorPrioMedium("!")
 			}
 
 		}
