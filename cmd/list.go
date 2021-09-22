@@ -39,37 +39,34 @@ func (c *ListCmd) Run() error {
 		return err
 	}
 
-	// if c.listFlag != "" {
-	// 	// TODO this is now handled in Init
-	// 	for _, col := range collections {
-	// 		if col.Name == c.listFlag {
-	// 			items, err := col.Items()
-	// 			if err != nil {
-	// 				return err
-	// 			}
-	// 			if len(items) == 0 {
-	// 				continue
-	// 			}
-	// 			if err = writeItems(&sb, items); err != nil {
-	// 				return err
-	// 			}
-	// 			break
-	// 		}
-	// 	}
-	// } else {
-	for c, items := range collections {
-		if len(items) == 0 {
-			continue
+	if c.listFlag != "" {
+		for col, items := range collections {
+			if col.Name == c.listFlag {
+				if len(items) == 0 {
+					continue
+				}
+				sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
+				for _, i := range collections[col] {
+					if err = writeItem(&sb, i.Id, *i); err != nil {
+						return err
+					}
+				}
+				break
+			}
 		}
-		fmt.Println(items)
-		sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", c.Name, len(items)))
-		for _, i := range collections[c] {
-			if err = writeItem(&sb, i.Id, *i); err != nil {
-				return err
+	} else {
+		for col, items := range collections {
+			if len(items) == 0 {
+				continue
+			}
+			sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
+			for _, i := range collections[col] {
+				if err = writeItem(&sb, i.Id, *i); err != nil {
+					return err
+				}
 			}
 		}
 	}
-	// }
 
 	fmt.Print(sb.String())
 	return nil
