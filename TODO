@@ -8,8 +8,8 @@ Instead of trying to convert ical component into ToDo and then back without loos
 i should use the decoded ical data as a single source and provide printing functions
 that format the given component.
 
+- [ ] add tests for vdir package
 - [x] read about priority ical spec
-- add test for NewToDo
 
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
