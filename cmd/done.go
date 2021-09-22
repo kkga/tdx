@@ -39,13 +39,13 @@ func (c *DoneCmd) Run() error {
 		return err
 	}
 
-	var collection *vdir.Collection
+	var collection vdir.Collection
 	var item *vdir.Item
 
 	for col, items := range collections {
 		for _, i := range items {
 			if i.Id == argID {
-				collection = col
+				collection = *col
 				item = i
 			}
 		}
@@ -55,9 +55,13 @@ func (c *DoneCmd) Run() error {
 		return fmt.Errorf("Non-existing todo ID: %d", argID)
 	}
 
-	item.Ical.Children[0].Props.SetText(ical.PropStatus, vtodo.StatusCompleted)
+	for _, comp := range item.Ical.Children {
+		if comp.Name == ical.CompToDo {
+			comp.Props.SetText(ical.PropStatus, vtodo.StatusCompleted)
+		}
+	}
 
-	if err := c.root.WriteItem(*collection, item); err != nil {
+	if err := c.root.WriteItem(collection, item); err != nil {
 		return err
 	}
 

@@ -80,12 +80,12 @@ func (c *AddCmd) Run() error {
 		}
 	}
 
+	// TODO move this to vdir WriteIcal method
+
 	calBuf, err := vtodo.Encode(t)
 	if err != nil {
 		return err
 	}
-
-	// TODO move this to vdir WriteIcal method
 
 	p := path.Join(c.collection.Path, fmt.Sprintf("%s.ics", uid))
 
