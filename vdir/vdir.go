@@ -40,7 +40,7 @@ const (
 )
 
 // Collections returns a slice of all vdir collections in root path recursively
-func (v VdirRoot) Collections() (collections []Collection, err error) {
+func (v VdirRoot) Collections() (collections []*Collection, err error) {
 	err = filepath.WalkDir(v.Path, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -49,6 +49,7 @@ func (v VdirRoot) Collections() (collections []Collection, err error) {
 		if d.IsDir() && p != v.Path {
 			var c = &Collection{}
 			c.Path = p
+			c.Name = d.Name()
 
 			err = filepath.WalkDir(p, func(pp string, dd fs.DirEntry, err error) error {
 				if err != nil {
@@ -73,7 +74,7 @@ func (v VdirRoot) Collections() (collections []Collection, err error) {
 			if err != nil {
 				return err
 			}
-			collections = append(collections, *c)
+			collections = append(collections, c)
 		}
 		return nil
 	})
@@ -84,7 +85,7 @@ func (v VdirRoot) Collections() (collections []Collection, err error) {
 }
 
 // Items returns a slice of decoded iCalendar items in collection
-func (c Collection) Items() (items []ical.Calendar, err error) {
+func (c Collection) Items() (items []*ical.Calendar, err error) {
 
 	isIcal := func(path string, de fs.DirEntry) bool {
 		return !de.IsDir() && strings.TrimPrefix(filepath.Ext(path), ".") == ical.Extension
@@ -110,7 +111,13 @@ func (c Collection) Items() (items []ical.Calendar, err error) {
 				} else if err != nil {
 					return err
 				}
-				items = append(items, *item)
+
+				// filter only items that contain vtodo
+				for _, comp := range item.Children {
+					if comp.Name == ical.CompToDo {
+						items = append(items, item)
+					}
+				}
 			}
 		}
 		return nil

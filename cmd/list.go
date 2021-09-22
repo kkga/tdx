@@ -17,7 +17,7 @@ func NewListCmd() *ListCmd {
 		usageLine: "[options]",
 	}}
 	c.fs.BoolVar(&c.json, "json", false, "json output")
-	c.fs.StringVar(&c.list, "l", "", "show only todos from specified list")
+	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified list")
 	c.fs.StringVar(&c.sort, "s", "", "sort todos by field: priority, due, created, status")
 	c.fs.StringVar(&c.status, "S", "", "show only todos with specified status: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
@@ -38,9 +38,10 @@ func (c *ListCmd) Run() error {
 		return err
 	}
 
-	if c.list != "" {
-		for i, col := range collections {
-			if col.Name == c.list {
+	if c.listFlag != "" {
+		// TODO this is now handled in Init
+		for _, col := range collections {
+			if col.Name == c.listFlag {
 				items, err := col.Items()
 				if err != nil {
 					return err
@@ -52,11 +53,8 @@ func (c *ListCmd) Run() error {
 					return err
 				}
 				break
-			} else if i == len(collections)-1 {
-				return fmt.Errorf("List not found: %s", c.list)
 			}
 		}
-
 	} else {
 		for _, col := range collections {
 			items, err := col.Items()
@@ -68,7 +66,7 @@ func (c *ListCmd) Run() error {
 				continue
 			}
 
-			sb.WriteString(fmt.Sprintf("\n== %s ==\n", col.Name))
+			sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
 			if err = writeItems(&sb, items); err != nil {
 				return err
 			}
@@ -79,7 +77,7 @@ func (c *ListCmd) Run() error {
 	return nil
 }
 
-func writeItems(sb *strings.Builder, items []ical.Calendar) error {
+func writeItems(sb *strings.Builder, items []*ical.Calendar) error {
 	for _, item := range items {
 		for _, comp := range item.Children {
 			if comp.Name == ical.CompToDo {

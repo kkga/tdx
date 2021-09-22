@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -19,7 +20,9 @@ func NewAddCmd() *AddCmd {
 		alias:     []string{"a"},
 		shortDesc: "Add todo",
 		usageLine: "[options]",
+		listReq:   true,
 	}}
+	c.fs.StringVar(&c.listFlag, "l", "", "list")
 	c.fs.StringVar(&c.priority, "p", "", "priority")
 	c.fs.StringVar(&c.due, "D", "", "due date")
 	c.fs.StringVar(&c.description, "d", "", "description")
@@ -36,6 +39,10 @@ type AddCmd struct {
 func (c *AddCmd) Run() error {
 	args := c.fs.Args()
 
+	if c.listFlag == "" {
+		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
+	}
+
 	if len(args) == 0 {
 		return errors.New("Provide a todo summary")
 	}
@@ -47,6 +54,7 @@ func (c *AddCmd) Run() error {
 	t.Props.SetText(ical.PropSummary, summary)
 	t.Props.SetText(ical.PropUID, uid)
 	t.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
+	t.Props.SetText(ical.PropStatus, vtodo.StatusNeedsAction)
 
 	// TODO parse due date flag
 
@@ -77,7 +85,9 @@ func (c *AddCmd) Run() error {
 		return err
 	}
 
-	f, err := os.Create(fmt.Sprintf("%s/%s.ics", c.root.Path, uid))
+	p := path.Join(c.collection.Path, fmt.Sprintf("%s.ics", uid))
+
+	f, err := os.Create(p)
 	if err != nil {
 		return err
 	}
