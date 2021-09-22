@@ -1,7 +1,6 @@
 package vtodo
 
 import (
-	"bytes"
 	"fmt"
 	"math/rand"
 	"os"
@@ -46,21 +45,6 @@ func GenerateUID() string {
 	}
 
 	return sb.String()
-}
-
-// encode adds vtodo into a new Calendar and returns a buffer ready for writing
-func Encode(comp *ical.Component) (*bytes.Buffer, error) {
-	cal := ical.NewCalendar()
-	// TODO move this data somewhere
-	cal.Props.SetText(ical.PropVersion, "2.0")
-	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
-	cal.Children = append(cal.Children, comp)
-
-	var buf bytes.Buffer
-	if err := ical.NewEncoder(&buf).Encode(cal); err != nil {
-		return &buf, err
-	}
-	return &buf, nil
 }
 
 func Format(comp *ical.Component) (string, error) {

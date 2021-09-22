@@ -1,16 +1,16 @@
 package cmd
 
 import (
-	"bufio"
 	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"path"
 	"strings"
 	"time"
 
 	"github.com/emersion/go-ical"
+	// "github.com/kkga/tdx/vdir"
+	"github.com/kkga/tdx/vdir"
 	"github.com/kkga/tdx/vtodo"
 )
 
@@ -80,31 +80,19 @@ func (c *AddCmd) Run() error {
 		}
 	}
 
-	// TODO move this to vdir WriteIcal method
-
-	calBuf, err := vtodo.Encode(t)
-	if err != nil {
-		return err
-	}
+	cal := ical.NewCalendar()
+	// TODO move this data somewhere
+	cal.Props.SetText(ical.PropVersion, "2.0")
+	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
+	cal.Children = append(cal.Children, t)
 
 	p := path.Join(c.collection.Path, fmt.Sprintf("%s.ics", uid))
 
-	f, err := os.Create(p)
-	if err != nil {
-		return err
+	item := &vdir.Item{
+		Path: p,
+		Ical: cal,
 	}
-	defer f.Close()
-
-	w := bufio.NewWriter(f)
-	_, err = w.Write(calBuf.Bytes())
-	if err != nil {
-		return err
-	}
-
-	w.Flush()
-	if err != nil {
-		return err
-	}
+	c.root.WriteItem(*c.collection, item)
 
 	return nil
 }
