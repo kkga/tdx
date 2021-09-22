@@ -120,3 +120,7 @@ func (c Collection) Items() (items []ical.Calendar, err error) {
 	}
 	return items, nil
 }
+
+func (c Collection) String() string {
+	return c.Name
+}

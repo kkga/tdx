@@ -23,6 +23,8 @@ type Cmd struct {
 	usageLine string
 	cals      []ical.Calendar
 	root      *vdir.VdirRoot
+
+	list string
 }
 
 var dir = "/home/kkga/.local/share/calendars/"
