@@ -25,8 +25,8 @@ type Collection struct {
 
 // Item represents an iCalendar item with a unique id
 type Item struct {
-	id   int
-	ical *ical.Calendar
+	Id   int
+	Ical *ical.Calendar
 }
 
 const (
@@ -69,12 +69,12 @@ func NewItem(path string) (*Item, error) {
 		// filter only items that contain vtodo
 		for _, comp := range item.Children {
 			if comp.Name == ical.CompToDo {
-				i.ical = item
-				break
+				i.Ical = item
+				return i, nil
 			}
 		}
 	}
-	return i, nil
+	return nil, err
 }
 
 // NewCollection initializes a Collection with a path, name and color parsed from path
@@ -136,9 +136,11 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 						if err != nil {
 							return err
 						}
-						id++
-						item.id = id
-						items[c] = append(items[c], item)
+						if item != nil {
+							id++
+							item.Id = id
+							items[c] = append(items[c], item)
+						}
 					}
 					return nil
 				})

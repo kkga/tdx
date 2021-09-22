@@ -60,11 +60,13 @@ func (c *Cmd) Init(args []string) error {
 		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
 	} else {
 		collections, err := root.Collections()
-		names := []string{}
 		if err != nil {
 			return err
 		}
-		for _, col := range collections {
+
+		names := []string{}
+
+		for col := range collections {
 			names = append(names, col.Name)
 			if col.Name == c.listFlag {
 				c.collection = col

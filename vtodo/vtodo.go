@@ -67,7 +67,7 @@ func Format(comp *ical.Component) (string, error) {
 	sb := strings.Builder{}
 
 	colorStatusDone := color.New(color.FgGreen).SprintFunc()
-	colorStatusUndone := color.New(color.FgBlue, color.Bold).SprintFunc()
+	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
 	colorPrio := color.New(color.FgRed, color.Bold).SprintFunc()
 	colorDesc := color.New(color.Faint).SprintFunc()
 	// colorDate := color.New(color.FgYellow).SprintFunc()
@@ -100,7 +100,7 @@ func Format(comp *ical.Component) (string, error) {
 			summary = p.Value
 
 		case ical.PropDescription:
-			description = colorDesc(p.Value)
+			description = colorDesc(fmt.Sprintf("(%s)", p.Value))
 
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
@@ -125,8 +125,7 @@ func Format(comp *ical.Component) (string, error) {
 	}
 	sb.WriteString(fmt.Sprintf(" %s", summary))
 	if description != "" {
-		sb.WriteString("\n    ")
-		sb.WriteString(fmt.Sprintf("%s", description))
+		sb.WriteString(fmt.Sprintf(" %s", description))
 	}
 
 	return sb.String(), nil

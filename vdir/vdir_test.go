@@ -32,7 +32,7 @@ func TestCollections(t *testing.T) {
 			}
 			for col := range collections {
 				for _, item := range collections[col] {
-					fmt.Printf("%s: %d,  %+v\n", col, item.id, item.ical.Children[0].Props.Get(ical.PropSummary))
+					fmt.Printf("%s: %d,  %+v\n", col, item.id, item.Ical.Children[0].Props.Get(ical.PropSummary))
 				}
 			}
 		})

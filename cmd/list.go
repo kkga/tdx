@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emersion/go-ical"
+	"github.com/kkga/tdx/vdir"
 	"github.com/kkga/tdx/vtodo"
 )
 
@@ -38,56 +39,52 @@ func (c *ListCmd) Run() error {
 		return err
 	}
 
-	if c.listFlag != "" {
-		// TODO this is now handled in Init
-		for _, col := range collections {
-			if col.Name == c.listFlag {
-				items, err := col.Items()
-				if err != nil {
-					return err
-				}
-				if len(items) == 0 {
-					continue
-				}
-				if err = writeItems(&sb, items); err != nil {
-					return err
-				}
-				break
-			}
+	// if c.listFlag != "" {
+	// 	// TODO this is now handled in Init
+	// 	for _, col := range collections {
+	// 		if col.Name == c.listFlag {
+	// 			items, err := col.Items()
+	// 			if err != nil {
+	// 				return err
+	// 			}
+	// 			if len(items) == 0 {
+	// 				continue
+	// 			}
+	// 			if err = writeItems(&sb, items); err != nil {
+	// 				return err
+	// 			}
+	// 			break
+	// 		}
+	// 	}
+	// } else {
+	for c, items := range collections {
+		if len(items) == 0 {
+			continue
 		}
-	} else {
-		for _, col := range collections {
-			items, err := col.Items()
-			if err != nil {
-				return err
-			}
-
-			if len(items) == 0 {
-				continue
-			}
-
-			sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
-			if err = writeItems(&sb, items); err != nil {
+		fmt.Println(items)
+		sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", c.Name, len(items)))
+		for _, i := range collections[c] {
+			if err = writeItem(&sb, i.Id, *i); err != nil {
 				return err
 			}
 		}
 	}
+	// }
 
 	fmt.Print(sb.String())
 	return nil
 }
 
-func writeItems(sb *strings.Builder, items []*ical.Calendar) error {
-	for _, item := range items {
-		for _, comp := range item.Children {
-			if comp.Name == ical.CompToDo {
-				t, err := vtodo.Format(comp)
-				if err != nil {
-					return err
-				}
-				sb.WriteString(t)
-				sb.WriteString("\n")
+func writeItem(sb *strings.Builder, id int, item vdir.Item) error {
+	for _, comp := range item.Ical.Children {
+		if comp.Name == ical.CompToDo {
+			t, err := vtodo.Format(comp)
+			if err != nil {
+				return err
 			}
+			sb.WriteString(fmt.Sprintf("%2d ", id))
+			sb.WriteString(t)
+			sb.WriteString("\n")
 		}
 	}
 	return nil
