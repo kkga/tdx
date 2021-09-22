@@ -2,14 +2,23 @@ package vdir
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"testing"
+
+	"github.com/emersion/go-ical"
+)
+
+var (
+	cwd, _       = os.Getwd()
+	testVdirPath = path.Join(cwd, "test_data/vdir")
 )
 
 func TestCollections(t *testing.T) {
 	var tests = []struct {
 		path string
 	}{
-		{"/home/kkga/.local/share/calendars/migadu/"},
+		{testVdirPath},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
@@ -18,10 +27,7 @@ func TestCollections(t *testing.T) {
 				t.Fatal(err)
 			}
 			collections, _ := vd.Collections()
-			fmt.Printf("%v", collections)
-			// for _, d := range collections {
-			// 	fmt.Println(d.Name())
-			// }
+			fmt.Printf("%v\n", collections)
 		})
 	}
 }
@@ -30,7 +36,7 @@ func TestItems(t *testing.T) {
 	var tests = []struct {
 		path string
 	}{
-		{"/home/kkga/.local/share/calendars/migadu/"},
+		{testVdirPath},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
@@ -44,9 +50,9 @@ func TestItems(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				fmt.Println(c.Name)
-				fmt.Printf("%+v\n", items)
-				fmt.Println("-------")
+				for id, item := range items {
+					fmt.Printf("%d: %+v\n", id, item.Children[0].Props.Get(ical.PropSummary))
+				}
 			}
 		})
 	}

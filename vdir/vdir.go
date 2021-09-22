@@ -85,17 +85,21 @@ func (v VdirRoot) Collections() (collections []*Collection, err error) {
 }
 
 // Items returns a slice of decoded iCalendar items in collection
-func (c Collection) Items() (items []*ical.Calendar, err error) {
+func (c Collection) Items() (items map[int]*ical.Calendar, err error) {
+	items = make(map[int]*ical.Calendar)
 
 	isIcal := func(path string, de fs.DirEntry) bool {
 		return !de.IsDir() && strings.TrimPrefix(filepath.Ext(path), ".") == ical.Extension
 	}
+
+	id := 1
 
 	err = filepath.WalkDir(c.Path, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if isIcal(p, d) {
+			id++
 			file, err := os.Open(p)
 			if err != nil {
 				return err
@@ -115,7 +119,8 @@ func (c Collection) Items() (items []*ical.Calendar, err error) {
 				// filter only items that contain vtodo
 				for _, comp := range item.Children {
 					if comp.Name == ical.CompToDo {
-						items = append(items, item)
+						items[id] = item
+						// items = append(items, item)
 					}
 				}
 			}
