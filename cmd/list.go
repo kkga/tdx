@@ -46,7 +46,7 @@ func (c *ListCmd) Run() error {
 				}
 				sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
 				for _, i := range collections[col] {
-					if err = writeItem(&sb, i.Id, *i); err != nil {
+					if err = writeItem(&sb, *i); err != nil {
 						return err
 					}
 				}
@@ -60,7 +60,7 @@ func (c *ListCmd) Run() error {
 			}
 			sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
 			for _, i := range collections[col] {
-				if err = writeItem(&sb, i.Id, *i); err != nil {
+				if err = writeItem(&sb, *i); err != nil {
 					return err
 				}
 			}
@@ -71,14 +71,13 @@ func (c *ListCmd) Run() error {
 	return nil
 }
 
-func writeItem(sb *strings.Builder, id int, item vdir.Item) error {
+func writeItem(sb *strings.Builder, item vdir.Item) error {
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
 			t, err := item.Format()
 			if err != nil {
 				return err
 			}
-			sb.WriteString(fmt.Sprintf("%2d ", id))
 			sb.WriteString(t)
 			sb.WriteString("\n")
 		}

@@ -19,6 +19,7 @@ func Root(args []string) error {
 		NewAddCmd(),
 		NewListCmd(),
 		NewDoneCmd(),
+		NewUndoCmd(),
 	}
 
 	subcommand := os.Args[1]

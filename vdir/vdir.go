@@ -244,7 +244,8 @@ func (i Item) Format() (string, error) {
 		}
 	}
 
-	sb.WriteString(fmt.Sprintf("%s", status))
+	sb.WriteString(fmt.Sprintf("%2d", i.Id))
+	sb.WriteString(fmt.Sprintf(" %s", status))
 	if prio != "" {
 		sb.WriteString(fmt.Sprintf(" %s", prio))
 	}
