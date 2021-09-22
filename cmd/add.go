@@ -85,6 +85,8 @@ func (c *AddCmd) Run() error {
 		return err
 	}
 
+	// TODO move this to vdir WriteIcal method
+
 	p := path.Join(c.collection.Path, fmt.Sprintf("%s.ics", uid))
 
 	f, err := os.Create(p)

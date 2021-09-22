@@ -58,7 +58,7 @@ func (c *Cmd) Init(args []string) error {
 
 	if c.listReq && c.listFlag == "" {
 		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
-	} else {
+	} else if c.listFlag != "" {
 		collections, err := root.Collections()
 		if err != nil {
 			return err

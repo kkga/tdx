@@ -18,6 +18,7 @@ func Root(args []string) error {
 	cmds := []Runner{
 		NewAddCmd(),
 		NewListCmd(),
+		NewDoneCmd(),
 	}
 
 	subcommand := os.Args[1]

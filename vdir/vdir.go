@@ -1,6 +1,8 @@
 package vdir
 
 import (
+	"bufio"
+	"bytes"
 	"errors"
 	"io"
 	"io/fs"
@@ -26,6 +28,7 @@ type Collection struct {
 // Item represents an iCalendar item with a unique id
 type Item struct {
 	Id   int
+	Path string
 	Ical *ical.Calendar
 }
 
@@ -55,6 +58,7 @@ func NewItem(path string) (*Item, error) {
 		return nil, err
 	}
 	defer file.Close()
+	i.Path = path
 
 	dec := ical.NewDecoder(file)
 
@@ -111,6 +115,10 @@ func NewCollection(path string, name string) (*Collection, error) {
 	return c, nil
 }
 
+func (c Collection) String() string {
+	return c.Name
+}
+
 // Collections returns a map of all collections and items in vdir, items have unique id values
 func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 	items = make(map[*Collection][]*Item)
@@ -157,6 +165,32 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 	return items, nil
 }
 
-func (c Collection) String() string {
-	return c.Name
+// WriteItem encodes given ical.Calendar data and writes to file in collection dir
+func (v VdirRoot) WriteItem(collection Collection, item *Item) error {
+	var buf bytes.Buffer
+	err := ical.NewEncoder(&buf).Encode(item.Ical)
+	if err != nil {
+		return err
+	}
+
+	// TODO: update modified date prop
+
+	f, err := os.Create(item.Path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+	_, err = w.Write(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
+	w.Flush()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
