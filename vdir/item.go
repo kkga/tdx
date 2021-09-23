@@ -73,7 +73,7 @@ func (i *Item) Format() (string, error) {
 	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
 	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	colorDesc := color.New(color.Faint, color.Italic).SprintFunc()
-	colorDate := color.New(color.Faint, color.Bold).SprintFunc()
+	colorDate := color.New(color.Faint).SprintFunc()
 
 	var vtodo *ical.Component
 
