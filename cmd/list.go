@@ -50,8 +50,8 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	collections := c.allCollections
 	// if cmd has collection specified via flag, delete other collections from map
+	var collections = c.allCollections
 	if c.collection != nil && c.allLists == false {
 		for col := range collections {
 			if col != c.collection {
@@ -60,6 +60,7 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
+	// filter items
 	var filtered = make(map[vdir.Collection][]vdir.Item)
 	for k, v := range collections {
 		items, err := filterByStatus(v, vdir.ToDoStatus(c.status))
@@ -76,7 +77,8 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	sb := strings.Builder{}
+	// prepare output
+	var sb = strings.Builder{}
 	for col, items := range filtered {
 		// if len(filtered) > 1 {
 		colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
