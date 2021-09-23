@@ -33,10 +33,11 @@ type Cmd struct {
 }
 
 type Config struct {
-	CalDir        string `required:"true"`
+	Path          string `required:"true"`
 	DefaultList   string `split_words:"true"`
-	DefaultStatus string `default:"NEEDS-ACTION" split_words:"true"`
-	DefaultSort   string `default:"PRIORITY" split_words:"true"`
+	DefaultStatus string `split_words:"true" default:"NEEDS-ACTION"`
+	DefaultSort   string `split_words:"true" default:"PRIORITY"`
+	DefaultDue    int    `split_words:"true" default:"48"`
 	Color         bool   `default:"true"`
 }
 
@@ -58,7 +59,7 @@ func (c *Cmd) Init(args []string) error {
 		return err
 	}
 
-	root, err := vdir.NewVdirRoot(conf.CalDir)
+	root, err := vdir.NewVdirRoot(conf.Path)
 	if err != nil {
 		return err
 	}
