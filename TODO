@@ -5,19 +5,20 @@ vdir spec: https://vdirsyncer.readthedocs.io/en/stable/vdir.html
 
 BUGS
 - [ ] Collections() messes up the map with non-existing items in various collections
+	- [ ] this is the result of incorrect path (higher up tree), should prob check if
+				the path actually contains calendars
 
 Looks like i'm overthinking this...
 Instead of trying to convert ical component into ToDo and then back without loosing data,
 i should use the decoded ical data as a single source and provide printing functions
 that format the given component.
 
-- [ ] add tests for vdir package
+- add tests for vdir package
 - [x] read about priority ical spec
 
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
 - [x] generate UID of specific format?
-- [ ] store non-relevant components in a separate field to keep them during encode
 
 FILES
 - recurse into dirs in path
@@ -27,6 +28,6 @@ DECODING
 - [x] (not needed for nor) make a map of [UID]ToDo instead of slice
 
 CONFIG OPTIONS
-- list of dirs to parse todos
-- default list
-- components displayed on list cmd (date, description etc)
+- [x] list of dirs to parse todos
+- [x] default list
+- [ ] components displayed on list cmd (date, description etc)
