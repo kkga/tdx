@@ -2,6 +2,7 @@ package vdir
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -40,40 +41,6 @@ func NewVdirRoot(path string) (*VdirRoot, error) {
 		return nil, errors.New("Specified vdir path is not a directory")
 	}
 	return &VdirRoot{path}, nil
-}
-
-// NewCollection initializes a Collection with a path, name and color parsed from path
-func NewCollection(path string, name string) (*Collection, error) {
-	c := &Collection{
-		Path: path,
-		Name: name,
-	}
-
-	// parse dir for metadata
-	err := filepath.WalkDir(
-		path,
-		func(pp string, dd fs.DirEntry, err error) error {
-			if dd.Name() == MetaDisplayName {
-				name, err := os.ReadFile(pp)
-				if err != nil {
-					return err
-				}
-				c.Name = string(name)
-			}
-			if dd.Name() == MetaColor {
-				color, err := os.ReadFile(pp)
-				if err != nil {
-					return err
-				}
-				c.Color = string(color)
-			}
-			return nil
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-	return c, nil
 }
 
 // Init initializes a Collection with a path, name and color parsed from path
@@ -138,6 +105,7 @@ func (v VdirRoot) Collections() (collections map[*Collection][]*Item, err error)
 				if err := c.Init(p); err != nil {
 					return err
 				}
+				fmt.Println(c)
 				// parse collection folder for ical files
 				err = filepath.WalkDir(c.Path, func(pp string, dd fs.DirEntry, err error) error {
 					if isIcal(pp, dd) {

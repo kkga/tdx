@@ -3,6 +3,9 @@ vdir spec: https://vdirsyncer.readthedocs.io/en/stable/vdir.html
 
 ---
 
+BUGS
+- [ ] Collections() messes up the map with non-existing items in various collections
+
 Looks like i'm overthinking this...
 Instead of trying to convert ical component into ToDo and then back without loosing data,
 i should use the decoded ical data as a single source and provide printing functions

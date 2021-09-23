@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	cwd, _       = os.Getwd()
-	testVdirPath = path.Join(cwd, "test_data/vdir")
+	cwd, _ = os.Getwd()
+	// testVdirPath = path.Join(cwd, "test_data/vdir")
+	testVdirPath = path.Join("/home/kkga/.local/share/calendars")
 )
 
 func TestCollections(t *testing.T) {
@@ -30,9 +31,10 @@ func TestCollections(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			for col := range collections {
-				for _, item := range collections[col] {
-					fmt.Printf("%s: %d,  %+v\n", col, item.id, item.Ical.Children[0].Props.Get(ical.PropSummary))
+			for col, items := range collections {
+				for _, item := range items {
+					summary := item.Ical.Children[0].Props.Get(ical.PropSummary)
+					fmt.Printf("%s: %+s\n", col, summary)
 				}
 			}
 		})
