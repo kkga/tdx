@@ -4,9 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"strings"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/kkga/tdx/vdir"
 )
 
@@ -32,26 +32,33 @@ type Cmd struct {
 	listReq bool
 }
 
-var dir = "/home/kkga/.local/share/calendars/migadu/"
+type Config struct {
+	CalDir        string `required:"true"`
+	DefaultList   string `split_words:"true"`
+	DefaultStatus string `default:"NEEDS-ACTION" split_words:"true"`
+	DefaultSort   string `default:"PRIORITY" split_words:"true"`
+	Color         bool   `default:"true"`
+}
 
 func (c *Cmd) Run() error      { return nil }
 func (c *Cmd) Name() string    { return c.fs.Name() }
 func (c *Cmd) Alias() []string { return c.alias }
 
 func (c *Cmd) Init(args []string) error {
-	env := struct{ list string }{list: os.Getenv("TDX_DEFAULT_LIST")}
-
-	if env.list != "" {
-		c.list = env.list
+	var conf Config
+	err := envconfig.Process("TDX", &conf)
+	if err != nil {
+		return err
 	}
 
+	c.list = conf.DefaultList
 	c.fs.Usage = c.usage
 
 	if err := c.fs.Parse(args); err != nil {
 		return err
 	}
 
-	root, err := vdir.NewVdirRoot(dir)
+	root, err := vdir.NewVdirRoot(conf.CalDir)
 	if err != nil {
 		return err
 	}

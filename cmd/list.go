@@ -15,7 +15,7 @@ func NewListCmd() *ListCmd {
 		fs:        flag.NewFlagSet("list", flag.ExitOnError),
 		alias:     []string{"ls", "l"},
 		shortDesc: "List todos",
-		usageLine: "[options]",
+		usageLine: "[options] [query]",
 	}}
 	c.fs.BoolVar(&c.json, "json", false, "json output")
 	c.fs.StringVar(&c.list, "l", "", "show only todos from specified list")
@@ -34,9 +34,10 @@ type ListCmd struct {
 }
 
 func (c *ListCmd) Run() error {
-	// query := c.fs.Args()
-
-	collections := c.allCollections
+	var query string
+	if len(c.fs.Args()) > 0 {
+		query = strings.Join(c.fs.Args(), "")
+	}
 
 	// check status flag
 	if c.status != "" {
@@ -49,6 +50,7 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
+	collections := c.allCollections
 	// if cmd has collection specified via flag, delete other collections from map
 	if c.collection != nil && c.allLists == false {
 		for col := range collections {
@@ -59,13 +61,18 @@ func (c *ListCmd) Run() error {
 	}
 
 	var filtered = make(map[vdir.Collection][]vdir.Item)
-	for col, items := range collections {
-		items, err := filterByStatus(items, vdir.ToDoStatus(c.status))
+	for k, v := range collections {
+		items, err := filterByStatus(v, vdir.ToDoStatus(c.status))
 		if err != nil {
 			return err
 		}
-		for _, i := range items {
-			filtered[*col] = append(filtered[*col], *i)
+		items, err = filterByQuery(items, query)
+		if err != nil {
+			return err
+		}
+
+		for _, item := range items {
+			filtered[*k] = append(filtered[*k], *item)
 		}
 	}
 
@@ -99,6 +106,27 @@ func filterByStatus(items []*vdir.Item, status vdir.ToDoStatus) (filtered []*vdi
 					return nil, propErr
 				}
 				if s == string(status) {
+					filtered = append(filtered, i)
+				}
+			}
+		}
+	}
+	return
+}
+
+func filterByQuery(items []*vdir.Item, query string) (filtered []*vdir.Item, err error) {
+	if query == "" {
+		return items, nil
+	}
+
+	for _, i := range items {
+		for _, comp := range i.Ical.Children {
+			if comp.Name == ical.CompToDo {
+				summary, propErr := comp.Props.Text(ical.PropSummary)
+				if propErr != nil {
+					return nil, propErr
+				}
+				if strings.Contains(strings.ToLower(summary), strings.ToLower(query)) {
 					filtered = append(filtered, i)
 				}
 			}
