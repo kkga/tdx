@@ -21,7 +21,7 @@ func NewAddCmd() *AddCmd {
 		usageLine: "[options]",
 		listReq:   true,
 	}}
-	c.fs.StringVar(&c.listFlag, "l", "", "list")
+	c.fs.StringVar(&c.list, "l", "", "list")
 	c.fs.StringVar(&c.priority, "p", "", "priority")
 	c.fs.StringVar(&c.due, "D", "", "due date")
 	c.fs.StringVar(&c.description, "d", "", "description")
@@ -38,7 +38,7 @@ type AddCmd struct {
 func (c *AddCmd) Run() error {
 	args := c.fs.Args()
 
-	if c.listFlag == "" {
+	if c.list == "" {
 		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
 	}
 
@@ -53,7 +53,7 @@ func (c *AddCmd) Run() error {
 	t.Props.SetText(ical.PropSummary, summary)
 	t.Props.SetText(ical.PropUID, uid)
 	t.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
-	t.Props.SetText(ical.PropStatus, vdir.StatusNeedsAction)
+	t.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
 
 	// TODO parse due date flag
 

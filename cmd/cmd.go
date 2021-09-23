@@ -27,8 +27,8 @@ type Cmd struct {
 	root       *vdir.VdirRoot
 	collection *vdir.Collection
 
-	listFlag string
-	listReq  bool
+	list    string
+	listReq bool
 }
 
 var dir = "/home/kkga/.local/share/calendars/migadu/"
@@ -41,7 +41,7 @@ func (c *Cmd) Init(args []string) error {
 	env := struct{ list string }{list: os.Getenv("TDX_DEFAULT_LIST")}
 
 	if env.list != "" {
-		c.listFlag = env.list
+		c.list = env.list
 	}
 
 	c.fs.Usage = c.usage
@@ -56,9 +56,9 @@ func (c *Cmd) Init(args []string) error {
 	}
 	c.root = root
 
-	if c.listReq && c.listFlag == "" {
+	if c.listReq && c.list == "" {
 		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
-	} else if c.listFlag != "" {
+	} else if c.list != "" {
 		collections, err := root.Collections()
 		if err != nil {
 			return err
@@ -68,12 +68,12 @@ func (c *Cmd) Init(args []string) error {
 
 		for col := range collections {
 			names = append(names, col.Name)
-			if col.Name == c.listFlag {
+			if col.Name == c.list {
 				c.collection = col
 			}
 		}
 		if c.collection == nil {
-			return fmt.Errorf("List does not exist: %s\nAvailable lists: %s", c.listFlag, strings.Join(names, ", "))
+			return fmt.Errorf("List does not exist: %s\nAvailable lists: %s", c.list, strings.Join(names, ", "))
 		}
 	}
 

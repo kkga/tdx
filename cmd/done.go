@@ -56,7 +56,7 @@ func (c *DoneCmd) Run() error {
 
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
-			comp.Props.SetText(ical.PropStatus, vdir.StatusCompleted)
+			comp.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
 		}
 	}
 

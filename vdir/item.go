@@ -16,12 +16,16 @@ import (
 	"github.com/fatih/color"
 )
 
+type ToDoStatus string
+
 const (
-	StatusCompleted   = "COMPLETED"
-	StatusNeedsAction = "NEEDS-ACTION"
-	PriorityHigh      = 1
-	PriorityMedium    = 5
-	PriorityLow       = 6
+	StatusCompleted   ToDoStatus = "COMPLETED"
+	StatusNeedsAction ToDoStatus = "NEEDS-ACTION"
+	StatusCancelled   ToDoStatus = "CANCELLED"
+	StatusAny         ToDoStatus = "ANY"
+	PriorityHigh                 = 1
+	PriorityMedium               = 5
+	PriorityLow                  = 6
 )
 
 // Item represents an iCalendar item with a unique id
@@ -97,7 +101,7 @@ func (i *Item) Format() (string, error) {
 		switch name {
 
 		case ical.PropStatus:
-			if p.Value == StatusCompleted {
+			if ToDoStatus(p.Value) == StatusCompleted {
 				status = colorStatusDone("[x]")
 			} else {
 				status = colorStatusUndone("[ ]")
@@ -107,7 +111,7 @@ func (i *Item) Format() (string, error) {
 			summary = p.Value
 
 		case ical.PropDescription:
-			description = colorDesc(fmt.Sprintf("(%s)", p.Value))
+			description = colorDesc(fmt.Sprintf("| %s", p.Value))
 
 		case ical.PropDue:
 			d, _ := p.DateTime(time.Local)

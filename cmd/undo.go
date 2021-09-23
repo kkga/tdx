@@ -58,7 +58,7 @@ func (c *UndoCmd) Run() error {
 		}
 	}
 
-	vtodo.Props.SetText(ical.PropStatus, vdir.StatusNeedsAction)
+	vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
 
 	if err := item.WriteFile(); err != nil {
 		return err
