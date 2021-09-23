@@ -14,7 +14,7 @@ func NewListCmd() *ListCmd {
 	c := &ListCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("list", flag.ExitOnError),
 		alias:     []string{"ls", "l"},
-		shortDesc: "List todos",
+		shortDesc: "List todos, optionally filtered by query",
 		usageLine: "[options] [query]",
 	}}
 	c.fs.BoolVar(&c.json, "json", false, "json output")
