@@ -58,24 +58,19 @@ func (c *Cmd) Init(args []string) error {
 		return err
 	}
 
-	root, err := vdir.NewVdirRoot(conf.Path)
-	if err != nil {
+	if c.root, err = vdir.NewVdirRoot(conf.Path); err != nil {
 		return err
 	}
-	c.root = root
 
-	collections, err := root.Collections()
-	if err != nil {
+	if c.allCollections, err = c.root.Collections(); err != nil {
 		return err
 	}
-	c.allCollections = collections
 
 	if c.listRequired && c.listFlag == "" {
-		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
+		return errors.New("List flag required. See 'tdx -h'.")
 	} else if c.listFlag != "" {
-
 		names := []string{}
-		for col := range collections {
+		for col := range c.allCollections {
 			names = append(names, col.Name)
 			if col.Name == c.listFlag {
 				c.collection = col
