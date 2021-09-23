@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -17,15 +16,16 @@ import (
 )
 
 type ToDoStatus string
+type ToDoPriority int
 
 const (
-	StatusCompleted   ToDoStatus = "COMPLETED"
-	StatusNeedsAction ToDoStatus = "NEEDS-ACTION"
-	StatusCancelled   ToDoStatus = "CANCELLED"
-	StatusAny         ToDoStatus = "ANY"
-	PriorityHigh                 = 1
-	PriorityMedium               = 5
-	PriorityLow                  = 6
+	StatusCompleted   ToDoStatus   = "COMPLETED"
+	StatusNeedsAction ToDoStatus   = "NEEDS-ACTION"
+	StatusCancelled   ToDoStatus   = "CANCELLED"
+	StatusAny         ToDoStatus   = "ANY"
+	PriorityHigh      ToDoPriority = 1
+	PriorityMedium    ToDoPriority = 5
+	PriorityLow       ToDoPriority = 6
 )
 
 // Item represents an iCalendar item with a unique id
@@ -111,11 +111,10 @@ func (i *Item) Format() (string, error) {
 			summary = p.Value
 
 		case ical.PropDescription:
-			description = colorDesc(fmt.Sprintf("| %s", p.Value))
+			description = colorDesc(fmt.Sprintf("%s", p.Value))
 
 		case ical.PropDue:
 			d, _ := p.DateTime(time.Local)
-			fmt.Println(d)
 			due = colorDate(d.Format("02-Jan-2006"))
 
 		case ical.PropPriority:
@@ -124,49 +123,47 @@ func (i *Item) Format() (string, error) {
 				return "", err
 			}
 			switch {
-			case v == PriorityHigh:
+			case ToDoPriority(v) == PriorityHigh:
 				prio = colorPrioHigh("!!!")
-			case v > PriorityHigh && v <= PriorityMedium:
+			case ToDoPriority(v) > PriorityHigh && ToDoPriority(v) <= PriorityMedium:
 				prio = colorPrioMedium("!!")
-			case v > PriorityMedium:
+			case ToDoPriority(v) > PriorityMedium:
 				prio = colorPrioMedium("!")
 			}
 
 		}
 	}
 
-	b := new(bytes.Buffer)
+	todoSb := strings.Builder{}
+	metaSb := strings.Builder{}
 
-	w := new(tabwriter.Writer)
-	w.Init(b, 0, 8, 1, ' ', 0)
-
-	fmt.Fprintf(w, "%2d %s", i.Id, status)
+	todoSb.WriteString(fmt.Sprintf("%2d %s", i.Id, status))
 
 	if prio != "" {
-		fmt.Fprintf(w, " %s\t", prio)
-	} else {
-		fmt.Fprint(w, " ")
+		todoSb.WriteString(fmt.Sprintf(" %s", prio))
 	}
 
-	fmt.Fprintf(w, "%s", summary)
+	todoSb.WriteString(fmt.Sprintf(" %s", summary))
 
-	if due != "" {
-		fmt.Fprintf(w, " %s", due)
-	} else {
-		fmt.Fprint(w, "\t")
+	if due != "" || description != "" {
+		if due != "" {
+			metaSb.WriteString(fmt.Sprintf("%s", due))
+		} else if due != "" && description != "" {
+			metaSb.WriteString(fmt.Sprintf("%s / %s", due, description))
+		} else if description != "" {
+			metaSb.WriteString(fmt.Sprintf("%s", description))
+		}
 	}
 
-	if description != "" {
-		fmt.Fprintf(w, "%s", description)
+	if metaSb.String() != "" {
+		meta := fmt.Sprintf("\n       %s %s", colorDesc("↳"), metaSb.String())
+		todoSb.WriteString(meta)
 	}
 
-	if err := w.Flush(); err != nil {
-		return "", nil
-	}
-	return b.String(), nil
+	return todoSb.String(), nil
 }
 
-// WriteFile encodes ical data and writes to file
+// WriteFile enodes ical data and writes to file
 func (i *Item) WriteFile() error {
 	var buf bytes.Buffer
 	err := ical.NewEncoder(&buf).Encode(i.Ical)

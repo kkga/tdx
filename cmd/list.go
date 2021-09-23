@@ -74,7 +74,9 @@ func (c *ListCmd) Run() error {
 	}
 
 	for col, items := range filtered {
-		sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
+		if c.list == "" {
+			sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
+		}
 		for _, i := range items {
 			if err = writeItem(&sb, i); err != nil {
 				return err
