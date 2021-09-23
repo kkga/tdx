@@ -2,7 +2,6 @@ package vdir
 
 import (
 	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -88,8 +87,8 @@ func (c Collection) String() string {
 }
 
 // Collections returns a map of all collections and items in vdir, items have unique id values
-func (v VdirRoot) Collections() (collections map[*Collection][]*Item, err error) {
-	collections = make(map[*Collection][]*Item)
+func (v VdirRoot) Collections() (collections Collections, err error) {
+	collections = make(Collections)
 	id := 0
 
 	isIcal := func(path string, de fs.DirEntry) bool {
@@ -105,7 +104,6 @@ func (v VdirRoot) Collections() (collections map[*Collection][]*Item, err error)
 				if err := c.Init(p); err != nil {
 					return err
 				}
-				fmt.Println(c)
 				// parse collection folder for ical files
 				err = filepath.WalkDir(c.Path, func(pp string, dd fs.DirEntry, err error) error {
 					if isIcal(pp, dd) {
