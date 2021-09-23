@@ -98,11 +98,12 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 				// parse collection folder for ical files
 				err = filepath.WalkDir(c.Path, func(pp string, dd fs.DirEntry, err error) error {
 					if isIcal(pp, dd) {
-						item, err := NewItem(pp)
-						if err != nil {
+						item := &Item{}
+						item.Init(p)
+						if err := item.Init(pp); err != nil {
 							return err
 						}
-						if item != nil {
+						if item.Ical != nil {
 							id++
 							item.Id = id
 							items[c] = append(items[c], item)

@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/emersion/go-ical"
@@ -30,13 +31,11 @@ type Item struct {
 	Ical *ical.Calendar
 }
 
-// NewItem initializes an Item with a decoded ical from path
-func NewItem(path string) (*Item, error) {
-	i := &Item{}
-
+// Init initializes an Item with a decoded ical from path
+func (i *Item) Init(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer file.Close()
 	i.Path = path
@@ -44,34 +43,33 @@ func NewItem(path string) (*Item, error) {
 	dec := ical.NewDecoder(file)
 
 	for {
-		item, err := dec.Decode()
+		cal, err := dec.Decode()
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return nil, err
+			return err
 		}
 
 		// filter only items that contain vtodo
-		for _, comp := range item.Children {
+		for _, comp := range cal.Children {
 			if comp.Name == ical.CompToDo {
-				i.Ical = item
-				return i, nil
+				i.Ical = cal
+				return nil
 			}
 		}
 	}
-	return nil, err
+
+	return nil
 }
 
 // Format returns a string representation of an item
 func (i *Item) Format() (string, error) {
-	sb := strings.Builder{}
-
-	colorStatusDone := color.New(color.FgGreen).SprintFunc()
+	colorStatusDone := color.New(color.Faint).SprintFunc()
 	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
 	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
 	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
-	colorDesc := color.New(color.Faint).SprintFunc()
-	// colorDate := color.New(color.FgYellow).SprintFunc()
+	colorDesc := color.New(color.Faint, color.Italic).SprintFunc()
+	colorDate := color.New(color.FgYellow).SprintFunc()
 
 	var vtodo *ical.Component
 
@@ -90,7 +88,7 @@ func (i *Item) Format() (string, error) {
 		summary     string
 		description string
 		prio        string
-		// due         string
+		due         string
 	)
 
 	for name, prop := range vtodo.Props {
@@ -111,6 +109,11 @@ func (i *Item) Format() (string, error) {
 		case ical.PropDescription:
 			description = colorDesc(fmt.Sprintf("(%s)", p.Value))
 
+		case ical.PropDue:
+			d, _ := p.DateTime(time.Local)
+			fmt.Println(d)
+			due = colorDate(d.Format("02-Jan-2006"))
+
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
 			if err != nil {
@@ -128,17 +131,35 @@ func (i *Item) Format() (string, error) {
 		}
 	}
 
-	sb.WriteString(fmt.Sprintf("%2d", i.Id))
-	sb.WriteString(fmt.Sprintf(" %s", status))
+	b := new(bytes.Buffer)
+
+	w := new(tabwriter.Writer)
+	w.Init(b, 0, 8, 1, ' ', 0)
+
+	fmt.Fprintf(w, "%2d %s", i.Id, status)
+
 	if prio != "" {
-		sb.WriteString(fmt.Sprintf(" %s", prio))
-	}
-	sb.WriteString(fmt.Sprintf(" %s", summary))
-	if description != "" {
-		sb.WriteString(fmt.Sprintf(" %s", description))
+		fmt.Fprintf(w, " %s\t", prio)
+	} else {
+		fmt.Fprint(w, " ")
 	}
 
-	return sb.String(), nil
+	fmt.Fprintf(w, "%s", summary)
+
+	if due != "" {
+		fmt.Fprintf(w, " %s", due)
+	} else {
+		fmt.Fprint(w, "\t")
+	}
+
+	if description != "" {
+		fmt.Fprintf(w, "%s", description)
+	}
+
+	if err := w.Flush(); err != nil {
+		return "", nil
+	}
+	return b.String(), nil
 }
 
 // WriteFile encodes ical data and writes to file
