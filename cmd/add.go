@@ -93,5 +93,7 @@ func (c *AddCmd) Run() error {
 	}
 	item.WriteFile()
 
+	fmt.Printf("Added: %s\n", summary)
+
 	return nil
 }

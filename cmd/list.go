@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emersion/go-ical"
+	"github.com/fatih/color"
 	"github.com/kkga/tdx/vdir"
 )
 
@@ -75,7 +76,8 @@ func (c *ListCmd) Run() error {
 
 	for col, items := range filtered {
 		if c.list == "" {
-			sb.WriteString(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items)))
+			colorList := color.New(color.Bold, color.BgBlack).SprintFunc()
+			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
 		}
 		for _, i := range items {
 			if err = writeItem(&sb, i); err != nil {

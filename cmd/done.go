@@ -70,7 +70,7 @@ func (c *DoneCmd) Run() error {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%2d %s\n", argID, t)
+			fmt.Println(t)
 		}
 	}
 
