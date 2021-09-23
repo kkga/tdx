@@ -15,13 +15,13 @@ import (
 
 func NewAddCmd() *AddCmd {
 	c := &AddCmd{Cmd: Cmd{
-		fs:        flag.NewFlagSet("add", flag.ExitOnError),
-		alias:     []string{"a"},
-		shortDesc: "Add todo",
-		usageLine: "[options]",
-		listReq:   true,
+		fs:           flag.NewFlagSet("add", flag.ExitOnError),
+		alias:        []string{"a"},
+		shortDesc:    "Add todo",
+		usageLine:    "[options]",
+		listRequired: true,
 	}}
-	c.fs.StringVar(&c.list, "l", "", "list")
+	c.fs.StringVar(&c.listFlag, "l", "", "list")
 	c.fs.StringVar(&c.priority, "p", "", "priority")
 	c.fs.StringVar(&c.due, "D", "", "due date")
 	c.fs.StringVar(&c.description, "d", "", "description")
@@ -37,10 +37,6 @@ type AddCmd struct {
 
 func (c *AddCmd) Run() error {
 	args := c.fs.Args()
-
-	if c.list == "" {
-		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
-	}
 
 	if len(args) == 0 {
 		return errors.New("Provide a todo summary")

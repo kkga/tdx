@@ -22,14 +22,13 @@ type Cmd struct {
 	alias     []string
 	shortDesc string
 	usageLine string
-	// cals       []ical.Calendar
 
 	root           *vdir.VdirRoot
-	allCollections map[*vdir.Collection][]*vdir.Item
+	allCollections vdir.Collections
 	collection     *vdir.Collection
 
-	list    string
-	listReq bool
+	listFlag     string
+	listRequired bool
 }
 
 type Config struct {
@@ -52,7 +51,7 @@ func (c *Cmd) Init(args []string) error {
 		return err
 	}
 
-	c.list = conf.DefaultList
+	c.listFlag = conf.DefaultList
 	c.fs.Usage = c.usage
 
 	if err := c.fs.Parse(args); err != nil {
@@ -71,19 +70,19 @@ func (c *Cmd) Init(args []string) error {
 	}
 	c.allCollections = collections
 
-	if c.listReq && c.list == "" {
+	if c.listRequired && c.listFlag == "" {
 		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
-	} else if c.list != "" {
+	} else if c.listFlag != "" {
 
 		names := []string{}
 		for col := range collections {
 			names = append(names, col.Name)
-			if col.Name == c.list {
+			if col.Name == c.listFlag {
 				c.collection = col
 			}
 		}
 		if c.collection == nil {
-			return fmt.Errorf("List does not exist: %s\nAvailable lists: %s", c.list, strings.Join(names, ", "))
+			return fmt.Errorf("List does not exist: %s\nAvailable lists: %s", c.listFlag, strings.Join(names, ", "))
 		}
 	}
 
@@ -95,7 +94,7 @@ func (c *Cmd) usage() {
 	fmt.Println()
 
 	fmt.Println("USAGE")
-	fmt.Printf("  ctodo %s %s\n\n", c.fs.Name(), c.usageLine)
+	fmt.Printf("  tdx %s %s\n\n", c.fs.Name(), c.usageLine)
 
 	if strings.Contains(c.usageLine, "[options]") {
 		fmt.Println("OPTIONS")

@@ -2,6 +2,7 @@ package vdir
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -95,11 +96,21 @@ func (v VdirRoot) Collections() (collections Collections, err error) {
 		return !de.IsDir() && strings.TrimPrefix(filepath.Ext(path), ".") == ical.Extension
 	}
 
+	hasIcalFiles := func(path string) bool {
+		files, _ := os.ReadDir(path)
+		for _, f := range files {
+			if filepath.Ext(f.Name()) == fmt.Sprintf(".%s", ical.Extension) {
+				return true
+			}
+		}
+		return false
+	}
+
 	// parse dir for vdir collections (folders)
 	err = filepath.WalkDir(
 		v.Path,
 		func(p string, d fs.DirEntry, err error) error {
-			if d.IsDir() && p != v.Path {
+			if d.IsDir() && hasIcalFiles(p) {
 				c := &Collection{}
 				if err := c.Init(p); err != nil {
 					return err

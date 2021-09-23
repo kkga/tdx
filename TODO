@@ -1,17 +1,16 @@
 VTODO spec: https://datatracker.ietf.org/doc/html/rfc5545#section-3.6.2
 vdir spec: https://vdirsyncer.readthedocs.io/en/stable/vdir.html
 
----
-
-BUGS
-- [ ] Collections() messes up the map with non-existing items in various collections
-	- [ ] this is the result of incorrect path (higher up tree), should prob check if
-				the path actually contains calendars
-
 Looks like i'm overthinking this...
 Instead of trying to convert ical component into ToDo and then back without loosing data,
 i should use the decoded ical data as a single source and provide printing functions
 that format the given component.
+---
+
+BUGS
+- [x] Collections() messes up the map with non-existing items in various collections
+	- [x] this is the result of incorrect path (higher up tree), should prob check if
+				the path actually contains calendars
 
 - add tests for vdir package
 - [x] read about priority ical spec

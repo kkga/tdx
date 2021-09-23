@@ -3,9 +3,9 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"github.com/emersion/go-ical"
 	"strings"
 
-	"github.com/emersion/go-ical"
 	"github.com/fatih/color"
 	"github.com/kkga/tdx/vdir"
 )
@@ -18,7 +18,7 @@ func NewListCmd() *ListCmd {
 		usageLine: "[options] [query]",
 	}}
 	c.fs.BoolVar(&c.json, "json", false, "json output")
-	c.fs.StringVar(&c.list, "l", "", "show only todos from specified list")
+	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified list")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sort, "s", "", "sort todos by field: priority, due, created, status")
 	c.fs.StringVar(&c.status, "S", "NEEDS-ACTION", "show only todos with specified status: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
@@ -14,7 +15,8 @@ func NewDoneCmd() *DoneCmd {
 	c := &DoneCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("done", flag.ExitOnError),
 		alias:     []string{"do"},
-		shortDesc: "Complete todo",
+		shortDesc: "Complete todos",
+		usageLine: "<id>...",
 	}}
 	return c
 }
@@ -25,54 +27,55 @@ type DoneCmd struct {
 
 func (c *DoneCmd) Run() error {
 	if len(c.fs.Args()) == 0 {
-		return errors.New("Specify a todo ID.")
+		return errors.New("Specify one or multiple IDs")
 	}
 
-	argID, err := strconv.Atoi(c.fs.Arg(0))
-	if err != nil {
-		return err
+	IDs := make([]int, len(c.fs.Args()))
+
+	for i, s := range c.fs.Args() {
+		IDs[i], _ = strconv.Atoi(s)
 	}
 
-	collections, err := c.root.Collections()
-	if err != nil {
-		return err
+	var toComplete []*vdir.Item
+
+	containsInt := func(ii []int, i int) bool {
+		for _, v := range ii {
+			if v == i {
+				return true
+			}
+		}
+		return false
 	}
 
-	// var collection vdir.Collection
-	var item *vdir.Item
-
-	for _, items := range collections {
-		for _, i := range items {
-			if i.Id == argID {
-				// collection = *col
-				item = i
+	for _, items := range c.allCollections {
+		for _, item := range items {
+			if containsInt(IDs, item.Id) {
+				toComplete = append(toComplete, item)
 			}
 		}
 	}
 
-	if item == nil {
-		return fmt.Errorf("Non-existing todo ID: %d", argID)
-	}
+	sb := strings.Builder{}
 
-	for _, comp := range item.Ical.Children {
-		if comp.Name == ical.CompToDo {
-			comp.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
+	for _, item := range toComplete {
+		vtodo, err := item.Vtodo()
+		if err != nil {
+			return err
 		}
-	}
+		vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
 
-	if err := item.WriteFile(); err != nil {
-		return err
-	}
-
-	for _, comp := range item.Ical.Children {
-		if comp.Name == ical.CompToDo {
-			t, err := item.Format()
-			if err != nil {
-				return err
-			}
-			fmt.Println(t)
+		if err := item.WriteFile(); err != nil {
+			return err
 		}
+
+		t, err := item.Format()
+		if err != nil {
+			return err
+		}
+		sb.WriteString(fmt.Sprintf("%s\n", t))
 	}
+
+	fmt.Println(sb.String())
 
 	return nil
 }

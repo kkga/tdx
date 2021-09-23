@@ -66,6 +66,15 @@ func (i *Item) Init(path string) error {
 	return nil
 }
 
+func (i *Item) Vtodo() (*ical.Component, error) {
+	for _, comp := range i.Ical.Children {
+		if comp.Name == ical.CompToDo {
+			return comp, nil
+		}
+	}
+	return nil, fmt.Errorf("Vtodo not found: %s", i.Ical.Name)
+}
+
 // Format returns a string representation of an item
 func (i *Item) Format() (string, error) {
 	colorStatusDone := color.New(color.Faint).SprintFunc()

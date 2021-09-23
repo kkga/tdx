@@ -11,8 +11,8 @@ import (
 
 var (
 	cwd, _ = os.Getwd()
-	// testVdirPath = path.Join(cwd, "test_data/vdir")
-	testVdirPath = path.Join("/home/kkga/.local/share/calendars/migadu/")
+	// testVdirPath = path.Join(cwd, "test_data")
+	testVdirPath = path.Join("/home/kkga/.local/share/calendars/")
 )
 
 func TestCollections(t *testing.T) {
