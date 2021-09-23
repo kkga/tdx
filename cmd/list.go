@@ -19,6 +19,7 @@ func NewListCmd() *ListCmd {
 	}}
 	c.fs.BoolVar(&c.json, "json", false, "json output")
 	c.fs.StringVar(&c.list, "l", "", "show only todos from specified list")
+	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sort, "s", "", "sort todos by field: priority, due, created, status")
 	c.fs.StringVar(&c.status, "S", "NEEDS-ACTION", "show only todos with specified status: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
@@ -26,18 +27,16 @@ func NewListCmd() *ListCmd {
 
 type ListCmd struct {
 	Cmd
-	json   bool
-	sort   string
-	status string
+	json     bool
+	allLists bool
+	sort     string
+	status   string
 }
 
 func (c *ListCmd) Run() error {
-	sb := strings.Builder{}
+	// query := c.fs.Args()
 
-	collections, err := c.root.Collections()
-	if err != nil {
-		return err
-	}
+	collections := c.allCollections
 
 	// check status flag
 	if c.status != "" {
@@ -50,37 +49,34 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	filtered := make(map[vdir.Collection][]vdir.Item)
-
-	for col, items := range collections {
-		if c.list != "" {
-			if col.Name == c.list {
-				items, err = filterByStatus(items, vdir.ToDoStatus(c.status))
-				if err != nil {
-					return err
-				}
-				for _, i := range items {
-					filtered[*col] = append(filtered[*col], *i)
-				}
-			}
-		} else {
-			items, err = filterByStatus(items, vdir.ToDoStatus(c.status))
-			if err != nil {
-				return err
-			}
-			for _, i := range items {
-				filtered[*col] = append(filtered[*col], *i)
+	// if cmd has collection specified via flag, delete other collections from map
+	if c.collection != nil && c.allLists == false {
+		for col := range collections {
+			if col != c.collection {
+				delete(collections, col)
 			}
 		}
 	}
 
-	for col, items := range filtered {
-		if c.list == "" {
-			colorList := color.New(color.Bold, color.BgBlack).SprintFunc()
-			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
+	var filtered = make(map[vdir.Collection][]vdir.Item)
+	for col, items := range collections {
+		items, err := filterByStatus(items, vdir.ToDoStatus(c.status))
+		if err != nil {
+			return err
 		}
 		for _, i := range items {
-			if err = writeItem(&sb, i); err != nil {
+			filtered[*col] = append(filtered[*col], *i)
+		}
+	}
+
+	sb := strings.Builder{}
+	for col, items := range filtered {
+		// if len(filtered) > 1 {
+		colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
+		sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
+		// }
+		for _, i := range items {
+			if err := writeItem(&sb, i); err != nil {
 				return err
 			}
 		}

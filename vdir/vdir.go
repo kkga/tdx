@@ -15,6 +15,9 @@ type VdirRoot struct {
 	Path string
 }
 
+// Collections represents a map all collections and their items
+type Collections map[*Collection][]*Item
+
 // Collection represents a Vdir collection
 type Collection struct {
 	Name  string
@@ -31,10 +34,10 @@ const (
 func NewVdirRoot(path string) (*VdirRoot, error) {
 	f, err := os.Stat(path)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, errors.New("Specified vdir path does not exist.")
+		return nil, errors.New("Specified vdir path does not exist")
 	}
 	if !f.IsDir() {
-		return nil, errors.New("Specified vdir path is not a directory.")
+		return nil, errors.New("Specified vdir path is not a directory")
 	}
 	return &VdirRoot{path}, nil
 }
@@ -73,13 +76,53 @@ func NewCollection(path string, name string) (*Collection, error) {
 	return c, nil
 }
 
+// Init initializes a Collection with a path, name and color parsed from path
+func (c *Collection) Init(path string) error {
+	f, err := os.Stat(path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return errors.New("Specified path does not exist")
+	}
+	if !f.IsDir() {
+		return errors.New("Specified path is not a directory")
+	}
+
+	c.Path = path
+	c.Name = filepath.Base(path)
+
+	// parse dir for metadata
+	err = filepath.WalkDir(
+		path,
+		func(pp string, dd fs.DirEntry, err error) error {
+			if dd.Name() == MetaDisplayName {
+				name, err := os.ReadFile(pp)
+				if err != nil {
+					return err
+				}
+				c.Name = string(name)
+			}
+			if dd.Name() == MetaColor {
+				color, err := os.ReadFile(pp)
+				if err != nil {
+					return err
+				}
+				c.Color = string(color)
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c Collection) String() string {
 	return c.Name
 }
 
 // Collections returns a map of all collections and items in vdir, items have unique id values
-func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
-	items = make(map[*Collection][]*Item)
+func (v VdirRoot) Collections() (collections map[*Collection][]*Item, err error) {
+	collections = make(map[*Collection][]*Item)
 	id := 0
 
 	isIcal := func(path string, de fs.DirEntry) bool {
@@ -91,8 +134,8 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 		v.Path,
 		func(p string, d fs.DirEntry, err error) error {
 			if d.IsDir() && p != v.Path {
-				var c, err = NewCollection(p, d.Name())
-				if err != nil {
+				c := &Collection{}
+				if err := c.Init(p); err != nil {
 					return err
 				}
 				// parse collection folder for ical files
@@ -106,7 +149,7 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 						if item.Ical != nil {
 							id++
 							item.Id = id
-							items[c] = append(items[c], item)
+							collections[c] = append(collections[c], item)
 						}
 					}
 					return nil
@@ -121,5 +164,5 @@ func (v VdirRoot) Collections() (items map[*Collection][]*Item, err error) {
 	if err != nil {
 		return
 	}
-	return items, nil
+	return collections, nil
 }

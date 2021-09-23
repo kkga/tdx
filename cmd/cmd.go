@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
 )
 
@@ -19,13 +18,15 @@ type Runner interface {
 }
 
 type Cmd struct {
-	fs         *flag.FlagSet
-	alias      []string
-	shortDesc  string
-	usageLine  string
-	cals       []ical.Calendar
-	root       *vdir.VdirRoot
-	collection *vdir.Collection
+	fs        *flag.FlagSet
+	alias     []string
+	shortDesc string
+	usageLine string
+	// cals       []ical.Calendar
+
+	root           *vdir.VdirRoot
+	allCollections map[*vdir.Collection][]*vdir.Item
+	collection     *vdir.Collection
 
 	list    string
 	listReq bool
@@ -56,16 +57,17 @@ func (c *Cmd) Init(args []string) error {
 	}
 	c.root = root
 
+	collections, err := root.Collections()
+	if err != nil {
+		return err
+	}
+	c.allCollections = collections
+
 	if c.listReq && c.list == "" {
 		return errors.New("Specify a list with '-l' or set default list with 'TDX_DEFAULT_LIST'")
 	} else if c.list != "" {
-		collections, err := root.Collections()
-		if err != nil {
-			return err
-		}
 
 		names := []string{}
-
 		for col := range collections {
 			names = append(names, col.Name)
 			if col.Name == c.list {
