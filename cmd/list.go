@@ -17,11 +17,11 @@ func NewListCmd() *ListCmd {
 		shortDesc: "List todos, optionally filtered by query",
 		usageLine: "[options] [query]",
 	}}
-	c.fs.BoolVar(&c.json, "json", false, "json output")
-	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified list")
+	c.fs.BoolVar(&c.json, "j", false, "json output")
+	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sort, "s", "", "sort todos by field: priority, due, created, status")
-	c.fs.StringVar(&c.status, "S", "NEEDS-ACTION", "show only todos with specified status: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.StringVar(&c.sort, "s", "", "sort todos by `field`: priority, due, created, status")
+	c.fs.StringVar(&c.status, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
 }
 

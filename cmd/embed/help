@@ -1,7 +1,7 @@
 ToDo manager for vdir (iCalendar) files.
 
 USAGE
-  tdx <command> [<args>...]
+  tdx <command> [options] [<args>...]
 
 COMMANDS
   list, ls       list todos

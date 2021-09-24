@@ -10,7 +10,7 @@ import (
 var helpTxt string
 
 func Root(args []string) error {
-	if len(args) < 1 || args[0] == "-h" || args[0] == "--help" {
+	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
 		printHelp()
 		os.Exit(0)
 	}
@@ -20,6 +20,14 @@ func Root(args []string) error {
 		NewListCmd(),
 		NewDoneCmd(),
 		NewPurgeCmd(),
+	}
+
+	if len(args) == 0 {
+		ls := NewListCmd()
+		if err := ls.Init([]string{}); err != nil {
+			return err
+		}
+		return ls.Run()
 	}
 
 	subcommand := os.Args[1]

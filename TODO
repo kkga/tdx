@@ -7,6 +7,11 @@ i should use the decoded ical data as a single source and provide printing funct
 that format the given component.
 ---
 
+FEAT
+- [ ] json output
+- [ ] date fields (created, completed, due, start)
+	- [ ] find solution to do human dates (https://github.com/hako/durafmt)
+
 BUGS
 - [x] Collections() messes up the map with non-existing items in various collections
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
