@@ -76,8 +76,8 @@ func (i *Item) Vtodo() (*ical.Component, error) {
 	return nil, fmt.Errorf("Vtodo not found: %s", i.Ical.Name)
 }
 
-// Format returns a string representation of an item
-func (i *Item) Format() (string, error) {
+// Strings returns a string representation of an item
+func (i *Item) String() (string, error) {
 	colorStatusDone := color.New(color.Faint).SprintFunc()
 	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
 	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
@@ -153,7 +153,7 @@ func (i *Item) Format() (string, error) {
 		todoSb.WriteString(fmt.Sprintf(" %s", prio))
 	}
 
-	todoSb.WriteString(fmt.Sprintf(" %s", summary))
+	todoSb.WriteString(fmt.Sprintf(" %s\n", summary))
 
 	if due != "" || description != "" {
 		if due != "" {
@@ -166,7 +166,7 @@ func (i *Item) Format() (string, error) {
 	}
 
 	if metaSb.String() != "" {
-		meta := fmt.Sprintf("\n       %s %s", colorDesc("↳"), metaSb.String())
+		meta := fmt.Sprintf("       %s %s\n", colorDesc("↳"), metaSb.String())
 		todoSb.WriteString(meta)
 	}
 

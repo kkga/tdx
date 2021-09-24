@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/emersion/go-ical"
 )
@@ -90,10 +89,9 @@ func (c Collection) String() string {
 // Collections returns a map of all collections and items in vdir, items have unique id values
 func (v VdirRoot) Collections() (collections Collections, err error) {
 	collections = make(Collections)
-	id := 0
 
 	isIcal := func(path string, de fs.DirEntry) bool {
-		return !de.IsDir() && strings.TrimPrefix(filepath.Ext(path), ".") == ical.Extension
+		return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)
 	}
 
 	hasIcalFiles := func(path string) bool {
@@ -106,40 +104,43 @@ func (v VdirRoot) Collections() (collections Collections, err error) {
 		return false
 	}
 
-	// parse dir for vdir collections (folders)
-	err = filepath.WalkDir(
-		v.Path,
-		func(p string, d fs.DirEntry, err error) error {
-			if d.IsDir() && hasIcalFiles(p) {
-				c := &Collection{}
-				if err := c.Init(p); err != nil {
-					return err
-				}
-				// parse collection folder for ical files
-				err = filepath.WalkDir(c.Path, func(pp string, dd fs.DirEntry, err error) error {
+	var itemId int
+	walkFunc := func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() && hasIcalFiles(path) {
+			c := &Collection{}
+			if err := c.Init(path); err != nil {
+				return err
+			}
+			// parse collection folder for ical files
+			err = filepath.WalkDir(
+				c.Path,
+				func(pp string, dd fs.DirEntry, err error) error {
 					if isIcal(pp, dd) {
-						item := &Item{}
-						item.Init(p)
+						item := new(Item)
 						if err := item.Init(pp); err != nil {
 							return err
 						}
 						if item.Ical != nil {
-							id++
-							item.Id = id
+							itemId++
+							item.Id = itemId
 							collections[c] = append(collections[c], item)
 						}
 					}
 					return nil
-				})
-				if err != nil {
-					return err
-				}
+				},
+			)
+			if err != nil {
+				return err
 			}
-			return nil
-		},
-	)
+		}
+		return nil
+	}
+
+	// parse dir for vdir collections (folders)
+	err = filepath.WalkDir(v.Path, walkFunc)
 	if err != nil {
 		return
 	}
+
 	return collections, nil
 }

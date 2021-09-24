@@ -140,12 +140,12 @@ func filterByQuery(items []*vdir.Item, query string) (filtered []*vdir.Item, err
 func writeItem(sb *strings.Builder, item vdir.Item) error {
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
-			t, err := item.Format()
+			s, err := item.String()
 			if err != nil {
 				return err
 			}
-			sb.WriteString(t)
-			sb.WriteString("\n")
+			sb.WriteString(s)
+			// sb.WriteString("\n")
 		}
 	}
 	return nil

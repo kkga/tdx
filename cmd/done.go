@@ -16,13 +16,15 @@ func NewDoneCmd() *DoneCmd {
 		fs:        flag.NewFlagSet("done", flag.ExitOnError),
 		alias:     []string{"do"},
 		shortDesc: "Complete todos",
-		usageLine: "<id>...",
+		usageLine: "[options] <id>...",
 	}}
+	c.fs.BoolVar(&c.toggle, "t", false, "toggle complete state")
 	return c
 }
 
 type DoneCmd struct {
 	Cmd
+	toggle bool
 }
 
 func (c *DoneCmd) Run() error {
@@ -62,20 +64,36 @@ func (c *DoneCmd) Run() error {
 		if err != nil {
 			return err
 		}
-		vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
+
+		if c.toggle {
+			s, err := vtodo.Props.Text(ical.PropStatus)
+			if err != nil {
+				return err
+			}
+			switch vdir.ToDoStatus(s) {
+			case vdir.StatusCompleted:
+				vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
+			case vdir.StatusNeedsAction, vdir.StatusCancelled:
+				vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
+			default:
+				vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
+			}
+		} else {
+			vtodo.Props.SetText(ical.PropStatus, string(vdir.StatusCompleted))
+		}
 
 		if err := item.WriteFile(); err != nil {
 			return err
 		}
 
-		t, err := item.Format()
+		s, err := item.String()
 		if err != nil {
 			return err
 		}
-		sb.WriteString(fmt.Sprintf("%s\n", t))
+		sb.WriteString(fmt.Sprintf("%s", s))
 	}
 
-	fmt.Println(sb.String())
+	fmt.Printf(sb.String())
 
 	return nil
 }

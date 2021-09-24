@@ -19,7 +19,6 @@ func Root(args []string) error {
 		NewAddCmd(),
 		NewListCmd(),
 		NewDoneCmd(),
-		NewUndoCmd(),
 		NewPurgeCmd(),
 	}
 
