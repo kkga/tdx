@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math"
 	"math/rand"
 	"os"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/fatih/color"
+	"github.com/hako/durafmt"
 )
 
 type ToDoStatus string
@@ -83,8 +85,6 @@ func (i *Item) String() (string, error) {
 	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
 	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	colorDesc := color.New(color.Faint, color.Italic).SprintFunc()
-	colorDate := color.New(color.Faint).SprintFunc()
-
 	var vtodo *ical.Component
 
 	for _, comp := range i.Ical.Children {
@@ -103,6 +103,7 @@ func (i *Item) String() (string, error) {
 		description string
 		prio        string
 		due         string
+		repeat      string
 	)
 
 	for name, prop := range vtodo.Props {
@@ -123,9 +124,49 @@ func (i *Item) String() (string, error) {
 		case ical.PropDescription:
 			description = colorDesc(fmt.Sprintf("%s", p.Value))
 
+		case ical.PropRecurrenceRule:
+			c := color.New(color.FgGreen).SprintFunc()
+			repeat = c("⟳")
+
 		case ical.PropDue:
-			d, _ := p.DateTime(time.Local)
-			due = colorDate(d.Format("02-Jan-2006"))
+			d, err := p.DateTime(time.Local)
+			if err != nil {
+				return "", err
+			}
+			now := time.Now()
+			diff := d.Sub(now)
+
+			var prefix string
+			var humanDate string
+			var colorizer = color.New(color.Reset).SprintFunc()
+
+			if diff.Hours() < 24 {
+				if math.Signbit(diff.Hours()) {
+					colorizer = color.New(color.FgRed).SprintFunc()
+					prefix = "overdue"
+					humanDate = "yesterday"
+				} else if !math.Signbit(diff.Hours()) && now.Day() == d.Day() {
+					colorizer = color.New(color.FgGreen).SprintFunc()
+					prefix = "due"
+					humanDate = "today"
+				} else {
+					colorizer = color.New(color.FgGreen).SprintFunc()
+					prefix = "due"
+					humanDate = "tomorrow"
+				}
+			} else {
+				if math.Signbit(diff.Hours()) {
+					prefix = "overdue"
+					colorizer = color.New(color.FgRed).SprintFunc()
+				} else {
+					prefix = "due"
+					colorizer = color.New(color.Faint).SprintFunc()
+				}
+
+				humanDate = durafmt.ParseShort(diff).String()
+			}
+
+			due = fmt.Sprintf("%s%s %s", colorizer(prefix), colorizer(":"), colorizer(humanDate))
 
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
@@ -152,14 +193,17 @@ func (i *Item) String() (string, error) {
 	if prio != "" {
 		todoSb.WriteString(fmt.Sprintf(" %s", prio))
 	}
+	if repeat != "" {
+		todoSb.WriteString(fmt.Sprintf(" %s", repeat))
+	}
 
 	todoSb.WriteString(fmt.Sprintf(" %s\n", summary))
 
 	if due != "" || description != "" {
-		if due != "" {
+		if due != "" && description == "" {
 			metaSb.WriteString(fmt.Sprintf("%s", due))
 		} else if due != "" && description != "" {
-			metaSb.WriteString(fmt.Sprintf("%s / %s", due, description))
+			metaSb.WriteString(fmt.Sprintf("%s %s %s", due, colorDesc("|"), description))
 		} else if description != "" {
 			metaSb.WriteString(fmt.Sprintf("%s", description))
 		}

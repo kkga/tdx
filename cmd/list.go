@@ -3,10 +3,13 @@ package cmd
 import (
 	"flag"
 	"fmt"
-	"github.com/emersion/go-ical"
 	"strings"
+	"time"
+
+	"github.com/emersion/go-ical"
 
 	"github.com/fatih/color"
+	"github.com/hako/durafmt"
 	"github.com/kkga/tdx/vdir"
 )
 
@@ -93,6 +96,11 @@ func (c *ListCmd) Run() error {
 
 	fmt.Print(sb.String())
 	return nil
+}
+
+func parseDueDate(dur time.Duration) (duration string, err error) {
+	duration = durafmt.Parse(dur).String()
+	return
 }
 
 func filterByStatus(items []*vdir.Item, status vdir.ToDoStatus) (filtered []*vdir.Item, err error) {
