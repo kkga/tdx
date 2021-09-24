@@ -35,7 +35,7 @@ type Item struct {
 	Ical *ical.Calendar
 }
 
-// Init initializes an Item with a decoded ical from path
+// Init initializes an Item with a decoded ical data from path
 func (i *Item) Init(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -66,6 +66,7 @@ func (i *Item) Init(path string) error {
 	return nil
 }
 
+// Vtodo returns a pointer inner todo ical component
 func (i *Item) Vtodo() (*ical.Component, error) {
 	for _, comp := range i.Ical.Children {
 		if comp.Name == ical.CompToDo {
@@ -172,7 +173,7 @@ func (i *Item) Format() (string, error) {
 	return todoSb.String(), nil
 }
 
-// WriteFile enodes ical data and writes to file
+// WriteFile encodes ical data and writes to file at Item.Path
 func (i *Item) WriteFile() error {
 	var buf bytes.Buffer
 	err := ical.NewEncoder(&buf).Encode(i.Ical)
