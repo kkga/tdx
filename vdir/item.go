@@ -64,11 +64,10 @@ func (i *Item) Init(path string) error {
 			}
 		}
 	}
-
 	return nil
 }
 
-// Vtodo returns a pointer inner todo ical component
+// Vtodo returns a pointer to inner todo ical component
 func (i *Item) Vtodo() (*ical.Component, error) {
 	for _, comp := range i.Ical.Children {
 		if comp.Name == ical.CompToDo {
@@ -86,7 +85,6 @@ func (i *Item) String() (string, error) {
 	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	colorDesc := color.New(color.Faint, color.Italic).SprintFunc()
 	var vtodo *ical.Component
-
 	for _, comp := range i.Ical.Children {
 		if comp.Name == ical.CompToDo {
 			vtodo = comp
