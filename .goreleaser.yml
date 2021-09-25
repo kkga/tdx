@@ -19,4 +19,5 @@ changelog:
       - "^docs:"
       - "^test:"
       - "^todo:"
+      - "^wip:"
       - "typo"
