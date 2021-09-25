@@ -49,7 +49,8 @@ func (c *DoneCmd) Run() error {
 		return false
 	}
 
-	for _, items := range c.allCollections {
+	// TODO: rewrite with ItemById
+	for _, items := range c.vdirMap {
 		for _, item := range items {
 			if containsInt(IDs, item.Id) {
 				toComplete = append(toComplete, item)

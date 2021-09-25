@@ -58,7 +58,8 @@ func (c *ListCmd) Run() error {
 	}
 
 	// if cmd has collection specified via flag, delete other collections from map
-	var collections = c.allCollections
+	// TODO: rewrite with ItemById
+	var collections = c.vdirMap
 	if c.collection != nil && c.allLists == false {
 		for col := range collections {
 			if col != c.collection {

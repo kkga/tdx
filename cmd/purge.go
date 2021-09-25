@@ -24,7 +24,7 @@ type PurgeCmd struct {
 func (c *PurgeCmd) Run() error {
 	var removed int
 
-	for _, items := range c.allCollections {
+	for _, items := range c.vdirMap {
 		for _, item := range items {
 			vtodo, err := item.Vtodo()
 			if err != nil {

@@ -38,21 +38,12 @@ func (c *ShowCmd) Run() error {
 
 	var toShow []*vdir.Item
 
-	containsInt := func(ii []int, i int) bool {
-		for _, v := range ii {
-			if v == i {
-				return true
-			}
+	for _, id := range IDs {
+		item, err := c.vdirMap.ItemById(id)
+		if err != nil {
+			return err
 		}
-		return false
-	}
-
-	for _, items := range c.allCollections {
-		for _, item := range items {
-			if containsInt(IDs, item.Id) {
-				toShow = append(toShow, item)
-			}
-		}
+		toShow = append(toShow, item)
 	}
 
 	sb := strings.Builder{}
