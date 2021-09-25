@@ -9,7 +9,7 @@ that format the given component.
 
 FEAT
 - [ ] edit command
-	- open $EDITOR with predefined template
+	- [x] open $EDITOR with predefined template
 - [ ] json output for list
 - [x] json output for show
 - [x] date fields (created, completed, due, start)
@@ -23,16 +23,14 @@ BUGS
 - [x] Collections() messes up the map with non-existing items in various collections
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
 				the path actually contains calendars
-
-- add tests for vdir package
-- [x] read about priority ical spec
+- [ ] add tests for vdir package
 
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
 - [x] generate UID of specific format?
-
-FILES
-- recurse into dirs in path
+- [x] read about priority ical spec
+- [ ] update modified date on write
+- [ ] what is sequence?
 
 DECODING
 - [ ] parse #tags in description
