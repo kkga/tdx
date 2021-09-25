@@ -313,7 +313,7 @@ func (i *Item) WriteFile() error {
 		return err
 	}
 
-	w.Flush()
+	err = w.Flush()
 	if err != nil {
 		return err
 	}
