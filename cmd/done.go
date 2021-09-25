@@ -50,7 +50,7 @@ func (c *DoneCmd) Run() error {
 	}
 
 	// TODO: rewrite with ItemById
-	for _, items := range c.vdirMap {
+	for _, items := range c.vdir {
 		for _, item := range items {
 			if containsInt(IDs, item.Id) {
 				toComplete = append(toComplete, item)
