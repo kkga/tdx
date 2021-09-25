@@ -22,9 +22,9 @@ func NewAddCmd() *AddCmd {
 		usageLine:    "[options]",
 		listRequired: true,
 	}}
-	c.fs.StringVar(&c.listFlag, "l", "", "list")
-	c.fs.StringVar(&c.priority, "p", "", "priority")
-	c.fs.StringVar(&c.description, "d", "", "description")
+	c.fs.StringVar(&c.listFlag, "l", "", "`list` for new todo")
+	c.fs.StringVar(&c.priority, "p", "", "`priority`: high, medium, low")
+	c.fs.StringVar(&c.description, "d", "", "`description text`")
 	return c
 }
 
