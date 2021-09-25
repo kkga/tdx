@@ -3,6 +3,7 @@ package vdir
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -33,8 +34,14 @@ const (
 type FormatOption int
 
 const (
-	FormatInline FormatOption = iota
-	FormatNoDescription
+	FormatMultiline FormatOption = iota
+	FormatDescription
+)
+
+type FormatFullOption int
+
+const (
+	FormatFullRaw FormatFullOption = iota
 )
 
 // Item represents an iCalendar item with a unique id
@@ -84,18 +91,55 @@ func (i *Item) Vtodo() (*ical.Component, error) {
 	return nil, fmt.Errorf("Vtodo not found: %s", i.Ical.Name)
 }
 
-// Format returns a string representation of an item ready for output
+// FormatFull returns a full detailed info about an item
+func (i *Item) FormatFull(options ...FormatFullOption) (string, error) {
+	sb := strings.Builder{}
+
+	checkOpt := func(o FormatFullOption) bool {
+		for _, opt := range options {
+			if opt == o {
+				return true
+			}
+		}
+		return false
+	}
+
+	if checkOpt(FormatFullRaw) {
+		j, err := json.MarshalIndent(i, "", " ")
+		if err != nil {
+			return "", err
+		}
+		sb.WriteString(string(j))
+	} else {
+		vtodo, err := i.Vtodo()
+		if err != nil {
+			return "", nil
+		}
+		sb.WriteString(fmt.Sprintf("ID: %d\n", i.Id))
+		for name, prop := range vtodo.Props {
+			p := prop[0]
+			if date, _ := p.DateTime(time.Local); !date.IsZero() {
+				sb.WriteString(fmt.Sprintf("%s: %s\n", name, date.Format("2 Jan 2006 15:04")))
+			} else {
+				sb.WriteString(fmt.Sprintf("%s: %s\n", name, p.Value))
+			}
+		}
+	}
+
+	return sb.String(), nil
+}
+
+// Format returns a readable representation of an item ready for output
 func (i *Item) Format(options ...FormatOption) (string, error) {
 	colorStatusDone := color.New(color.Faint).SprintFunc()
 	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
 	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
 	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 	colorDesc := color.New(color.Faint, color.Italic).SprintFunc()
-	var vtodo *ical.Component
-	for _, comp := range i.Ical.Children {
-		if comp.Name == ical.CompToDo {
-			vtodo = comp
-		}
+
+	vtodo, err := i.Vtodo()
+	if err != nil {
+		return "", err
 	}
 
 	if vtodo.Name != ical.CompToDo {
@@ -224,7 +268,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 		metaSb.WriteString(due)
 	}
 
-	if description != "" {
+	if checkOpt(FormatDescription) && description != "" {
 		if due != "" {
 			metaSb.WriteString(fmt.Sprintf("%s %s", colorDesc("|"), description))
 		} else {
@@ -234,10 +278,10 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 	if metaSb.String() != "" {
 		var meta string
-		if checkOpt(FormatInline) {
-			meta = fmt.Sprintf(" %s\n", metaSb.String())
-		} else {
+		if checkOpt(FormatMultiline) {
 			meta = fmt.Sprintf("\n       %s %s\n", colorDesc("↳"), metaSb.String())
+		} else {
+			meta = fmt.Sprintf(" %s\n", metaSb.String())
 		}
 		todoSb.WriteString(meta)
 	} else {
