@@ -30,6 +30,13 @@ const (
 	PriorityLow       ToDoPriority = 6
 )
 
+type FormatOption int
+
+const (
+	FormatInline FormatOption = iota
+	FormatNoDescription
+)
+
 // Item represents an iCalendar item with a unique id
 type Item struct {
 	Id   int
@@ -77,8 +84,8 @@ func (i *Item) Vtodo() (*ical.Component, error) {
 	return nil, fmt.Errorf("Vtodo not found: %s", i.Ical.Name)
 }
 
-// Strings returns a string representation of an item
-func (i *Item) String() (string, error) {
+// Format returns a string representation of an item ready for output
+func (i *Item) Format(options ...FormatOption) (string, error) {
 	colorStatusDone := color.New(color.Faint).SprintFunc()
 	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
 	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
@@ -133,39 +140,39 @@ func (i *Item) String() (string, error) {
 			}
 			now := time.Now()
 			diff := d.Sub(now)
-			diff = diff.Round(1 * time.Hour)
+			diff = diff.Round(1 * time.Minute)
 
 			var prefix string
 			var humanDate string
 			var colorizer = color.New(color.Reset).SprintFunc()
 
 			if diff.Hours() < 24 {
-				if math.Signbit(diff.Hours()) {
-					colorizer = color.New(color.FgRed).SprintFunc()
-					prefix = "overdue"
-					humanDate = "yesterday"
-				} else if !math.Signbit(diff.Hours()) && now.Day() == d.Day() {
+				if now.Day() == d.Day() {
 					colorizer = color.New(color.FgGreen).SprintFunc()
-					prefix = "due"
+					prefix = ""
 					humanDate = "today"
+				} else if math.Signbit(diff.Hours()) {
+					colorizer = color.New(color.FgRed).SprintFunc()
+					prefix = "overdue "
+					humanDate = "yesterday"
 				} else {
 					colorizer = color.New(color.FgGreen).SprintFunc()
-					prefix = "due"
+					prefix = ""
 					humanDate = "tomorrow"
 				}
 			} else {
 				if math.Signbit(diff.Hours()) {
-					prefix = "overdue"
+					prefix = "overdue "
 					colorizer = color.New(color.FgRed).SprintFunc()
 				} else {
-					prefix = "due"
+					prefix = "in "
 					colorizer = color.New(color.Faint).SprintFunc()
 				}
 
 				humanDate = durafmt.ParseShort(diff).String()
 			}
 
-			due = fmt.Sprintf("%s%s %s", colorizer(prefix), colorizer(":"), colorizer(humanDate))
+			due = colorizer(fmt.Sprintf("(%s%s)", prefix, humanDate))
 
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
@@ -182,6 +189,15 @@ func (i *Item) String() (string, error) {
 			}
 
 		}
+	}
+
+	checkOpt := func(o FormatOption) bool {
+		for _, opt := range options {
+			if opt == o {
+				return true
+			}
+		}
+		return false
 	}
 
 	todoSb := strings.Builder{}
@@ -202,21 +218,30 @@ func (i *Item) String() (string, error) {
 		todoSb.WriteString(fmt.Sprintf(" %s", repeat))
 	}
 
-	todoSb.WriteString(fmt.Sprintf(" %s\n", summary))
+	todoSb.WriteString(fmt.Sprintf(" %s", summary))
 
-	if due != "" || description != "" {
-		if due != "" && description == "" {
-			metaSb.WriteString(fmt.Sprintf("%s", due))
-		} else if due != "" && description != "" {
-			metaSb.WriteString(fmt.Sprintf("%s %s %s", due, colorDesc("|"), description))
-		} else if description != "" {
+	if due != "" {
+		metaSb.WriteString(due)
+	}
+
+	if description != "" {
+		if due != "" {
+			metaSb.WriteString(fmt.Sprintf("%s %s", colorDesc("|"), description))
+		} else {
 			metaSb.WriteString(fmt.Sprintf("%s", description))
 		}
 	}
 
 	if metaSb.String() != "" {
-		meta := fmt.Sprintf("       %s %s\n", colorDesc("↳"), metaSb.String())
+		var meta string
+		if checkOpt(FormatInline) {
+			meta = fmt.Sprintf(" %s\n", metaSb.String())
+		} else {
+			meta = fmt.Sprintf("\n       %s %s\n", colorDesc("↳"), metaSb.String())
+		}
 		todoSb.WriteString(meta)
+	} else {
+		todoSb.WriteString("\n")
 	}
 
 	return todoSb.String(), nil

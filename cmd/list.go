@@ -21,6 +21,7 @@ func NewListCmd() *ListCmd {
 		usageLine: "[options] [query]",
 	}}
 	c.fs.BoolVar(&c.json, "j", false, "json output")
+	c.fs.BoolVar(&c.inline, "inline", false, "use inline output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sort, "s", "", "sort todos by `field`: priority, due, created, status")
@@ -31,6 +32,7 @@ func NewListCmd() *ListCmd {
 type ListCmd struct {
 	Cmd
 	json     bool
+	inline   bool
 	allLists bool
 	sort     string
 	status   string
@@ -83,12 +85,12 @@ func (c *ListCmd) Run() error {
 	// prepare output
 	var sb = strings.Builder{}
 	for col, items := range filtered {
-		// if len(filtered) > 1 {
-		colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
-		sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
-		// }
+		if len(filtered) > 1 {
+			colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
+			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
+		}
 		for _, i := range items {
-			if err := writeItem(&sb, i); err != nil {
+			if err := writeItem(&sb, *c, i); err != nil {
 				return err
 			}
 		}
@@ -145,15 +147,22 @@ func filterByQuery(items []*vdir.Item, query string) (filtered []*vdir.Item, err
 	return
 }
 
-func writeItem(sb *strings.Builder, item vdir.Item) error {
+func writeItem(sb *strings.Builder, c ListCmd, item vdir.Item) error {
 	for _, comp := range item.Ical.Children {
 		if comp.Name == ical.CompToDo {
-			s, err := item.String()
-			if err != nil {
-				return err
+			if c.inline {
+				s, err := item.Format(vdir.FormatInline)
+				if err != nil {
+					return err
+				}
+				sb.WriteString(s)
+			} else {
+				s, err := item.Format()
+				if err != nil {
+					return err
+				}
+				sb.WriteString(s)
 			}
-			sb.WriteString(s)
-			// sb.WriteString("\n")
 		}
 	}
 	return nil

@@ -92,7 +92,7 @@ func (c *AddCmd) Run() error {
 	}
 	item.WriteFile()
 
-	s, err := item.String()
+	s, err := item.Format()
 	if err != nil {
 		return err
 	}

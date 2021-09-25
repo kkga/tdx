@@ -86,7 +86,7 @@ func (c *DoneCmd) Run() error {
 			return err
 		}
 
-		s, err := item.String()
+		s, err := item.Format()
 		if err != nil {
 			return err
 		}
