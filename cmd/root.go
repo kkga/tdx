@@ -20,6 +20,7 @@ func Root(args []string) error {
 		NewListCmd(),
 		NewDoneCmd(),
 		NewShowCmd(),
+		NewEditCmd(),
 		NewPurgeCmd(),
 	}
 
