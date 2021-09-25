@@ -8,9 +8,12 @@ that format the given component.
 ---
 
 FEAT
-- [ ] json output
-- [ ] date fields (created, completed, due, start)
-	- [ ] find solution to do human dates
+- [ ] edit command
+	- open $EDITOR with predefined template
+- [ ] json output for list
+- [x] json output for show
+- [x] date fields (created, completed, due, start)
+	- [x] find solution to do human dates
 		- https://github.com/hako/durafmt
 		- https://github.com/karrick/tparse/v2
 		- https://github.com/tj/go-naturaldate
