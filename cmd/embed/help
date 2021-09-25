@@ -8,6 +8,7 @@ COMMANDS
   add, a         add todo
   done, do       complete todos
   purge          remove completed todos
+  show           show detailed todo info
 
 ENVIRONMENT VARIABLES
   TDX_PATH
