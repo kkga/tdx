@@ -178,9 +178,9 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			repeat = c("⟳")
 
 		case ical.PropDue:
-			d, err := p.DateTime(time.Local)
-			if err != nil {
-				return "", err
+			d, _ := p.DateTime(time.Local)
+			if d.IsZero() {
+				continue
 			}
 			now := time.Now()
 			diff := d.Sub(now)
@@ -270,7 +270,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 	if checkOpt(FormatDescription) && description != "" {
 		if due != "" {
-			metaSb.WriteString(fmt.Sprintf("%s %s", colorDesc("|"), description))
+			metaSb.WriteString(fmt.Sprintf(" %s %s", colorDesc("|"), description))
 		} else {
 			metaSb.WriteString(fmt.Sprintf("%s", description))
 		}
