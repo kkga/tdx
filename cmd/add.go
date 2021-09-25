@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
+	"github.com/hako/durafmt"
 	// "github.com/kkga/tdx/vdir"
 	"github.com/kkga/tdx/vdir"
 )
@@ -52,6 +53,20 @@ func (c *AddCmd) Run() error {
 	t.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
 
 	// TODO parse due date flag
+
+	if c.due != "" {
+		units, err := durafmt.DefaultUnitsCoder.Decode("ano,semana:SEMANAS,dia,hora,minuto,segundo,milissegundo,microssegundo")
+		if err != nil {
+			return err
+		}
+		d, err := durafmt.ParseStringShort(c.due)
+		if err != nil {
+			return err
+		}
+		fmt.Println(d.String())
+		due := time.Now().Add(d.Duration())
+		t.Props.SetDateTime(ical.PropDue, due)
+	}
 
 	if c.description != "" {
 		t.Props.SetText(ical.PropDescription, c.description)
