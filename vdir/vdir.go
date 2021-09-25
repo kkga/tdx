@@ -10,25 +10,13 @@ import (
 	"github.com/emersion/go-ical"
 )
 
-// VdirRoot represents the topmost vdir root folder
+// VdirRoot is topmost vdir root folder
 type VdirRoot struct {
 	Path string
 }
 
-// Collections represents a map all collections and their items
-type Collections map[*Collection][]*Item
-
-// Collection represents a Vdir collection
-type Collection struct {
-	Name  string
-	Color string
-	Path  string
-}
-
-const (
-	MetaDisplayName = "displayname" // MetaDisplayName is a filename vdir uses for collection name
-	MetaColor       = "color"       // MetaColor is a filename vdir uses for collection color
-)
+// VdirMap is a map all collections and their items
+type VdirMap map[*Collection][]*Item
 
 // NewVdirRoot initializes a VdirRoot checking that the directory exists
 func NewVdirRoot(path string) (*VdirRoot, error) {
@@ -42,53 +30,21 @@ func NewVdirRoot(path string) (*VdirRoot, error) {
 	return &VdirRoot{path}, nil
 }
 
-// Init initializes a Collection with a path, name and color parsed from path
-func (c *Collection) Init(path string) error {
-	f, err := os.Stat(path)
-	if errors.Is(err, fs.ErrNotExist) {
-		return errors.New("Specified path does not exist")
-	}
-	if !f.IsDir() {
-		return errors.New("Specified path is not a directory")
-	}
-
-	c.Path = path
-	c.Name = filepath.Base(path)
-
-	// parse dir for metadata
-	err = filepath.WalkDir(
-		path,
-		func(pp string, dd fs.DirEntry, err error) error {
-			if dd.Name() == MetaDisplayName {
-				name, err := os.ReadFile(pp)
-				if err != nil {
-					return err
-				}
-				c.Name = string(name)
+// ItemById finds and returns an item for specified id
+func (c VdirMap) ItemById(id int) (*Item, error) {
+	for _, items := range c {
+		for _, item := range items {
+			if item.Id == id {
+				return item, nil
 			}
-			if dd.Name() == MetaColor {
-				color, err := os.ReadFile(pp)
-				if err != nil {
-					return err
-				}
-				c.Color = string(color)
-			}
-			return nil
-		},
-	)
-	if err != nil {
-		return err
+		}
 	}
-	return nil
-}
-
-func (c Collection) String() string {
-	return c.Name
+	return nil, fmt.Errorf("Item not found: %d", id)
 }
 
 // Collections returns a map of all collections and items in vdir, items have unique id values
-func (v VdirRoot) Collections() (collections Collections, err error) {
-	collections = make(Collections)
+func (v VdirRoot) InitMap() (vdirMap VdirMap, err error) {
+	vdirMap = make(VdirMap)
 
 	isIcal := func(path string, de fs.DirEntry) bool {
 		return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)
@@ -123,7 +79,7 @@ func (v VdirRoot) Collections() (collections Collections, err error) {
 						if item.Ical != nil {
 							itemId++
 							item.Id = itemId
-							collections[c] = append(collections[c], item)
+							vdirMap[c] = append(vdirMap[c], item)
 						}
 					}
 					return nil
@@ -142,5 +98,5 @@ func (v VdirRoot) Collections() (collections Collections, err error) {
 		return
 	}
 
-	return collections, nil
+	return vdirMap, nil
 }

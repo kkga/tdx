@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
-	"github.com/kkga/tdx/vdir"
 )
 
 func NewEditCmd() *EditCmd {
@@ -39,14 +38,9 @@ func (c *EditCmd) Run() error {
 		return err
 	}
 
-	var item *vdir.Item
-
-	for _, items := range c.allCollections {
-		for _, i := range items {
-			if i.Id == id {
-				item = i
-			}
-		}
+	item, err := c.vdirMap.ItemById(id)
+	if err != nil {
+		return err
 	}
 
 	editor := os.Getenv("VISUAL")

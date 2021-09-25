@@ -27,7 +27,7 @@ func TestCollections(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			collections, err := vd.Collections()
+			collections, err := vd.InitMap()
 			if err != nil {
 				t.Fatal(err)
 			}
