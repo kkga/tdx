@@ -133,6 +133,7 @@ func (i *Item) String() (string, error) {
 			}
 			now := time.Now()
 			diff := d.Sub(now)
+			diff = diff.Round(1 * time.Hour)
 
 			var prefix string
 			var humanDate string
@@ -186,7 +187,13 @@ func (i *Item) String() (string, error) {
 	todoSb := strings.Builder{}
 	metaSb := strings.Builder{}
 
-	todoSb.WriteString(fmt.Sprintf("%2d %s", i.Id, status))
+	if i.Id != 0 {
+		todoSb.WriteString(fmt.Sprintf("%2d", i.Id))
+	} else {
+		todoSb.WriteString("  ")
+	}
+
+	todoSb.WriteString(fmt.Sprintf(" %s", status))
 
 	if prio != "" {
 		todoSb.WriteString(fmt.Sprintf(" %s", prio))

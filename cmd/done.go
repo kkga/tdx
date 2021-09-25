@@ -93,7 +93,7 @@ func (c *DoneCmd) Run() error {
 		sb.WriteString(fmt.Sprintf("%s", s))
 	}
 
-	fmt.Printf(sb.String())
+	fmt.Print(sb.String())
 
 	return nil
 }

@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
-	"github.com/hako/durafmt"
-	// "github.com/kkga/tdx/vdir"
+
 	"github.com/kkga/tdx/vdir"
+	"github.com/tj/go-naturaldate"
 )
 
 func NewAddCmd() *AddCmd {
@@ -24,7 +24,6 @@ func NewAddCmd() *AddCmd {
 	}}
 	c.fs.StringVar(&c.listFlag, "l", "", "list")
 	c.fs.StringVar(&c.priority, "p", "", "priority")
-	c.fs.StringVar(&c.due, "D", "", "due date")
 	c.fs.StringVar(&c.description, "d", "", "description")
 	return c
 }
@@ -32,7 +31,6 @@ func NewAddCmd() *AddCmd {
 type AddCmd struct {
 	Cmd
 	priority    string
-	due         string
 	description string
 }
 
@@ -43,28 +41,18 @@ func (c *AddCmd) Run() error {
 		return errors.New("Provide a todo summary")
 	}
 
+	now := time.Now()
 	summary := strings.Join(args, " ")
 	uid := vdir.GenerateUID()
 
 	t := ical.NewComponent("VTODO")
 	t.Props.SetText(ical.PropSummary, summary)
 	t.Props.SetText(ical.PropUID, uid)
-	t.Props.SetDateTime(ical.PropDateTimeStamp, time.Now())
+	t.Props.SetDateTime(ical.PropDateTimeStamp, now)
 	t.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
 
-	// TODO parse due date flag
-
-	if c.due != "" {
-		units, err := durafmt.DefaultUnitsCoder.Decode("ano,semana:SEMANAS,dia,hora,minuto,segundo,milissegundo,microssegundo")
-		if err != nil {
-			return err
-		}
-		d, err := durafmt.ParseStringShort(c.due)
-		if err != nil {
-			return err
-		}
-		fmt.Println(d.String())
-		due := time.Now().Add(d.Duration())
+	due, _ := naturaldate.Parse(summary, now, naturaldate.WithDirection(naturaldate.Future))
+	if due != now {
 		t.Props.SetDateTime(ical.PropDue, due)
 	}
 
@@ -104,7 +92,11 @@ func (c *AddCmd) Run() error {
 	}
 	item.WriteFile()
 
-	fmt.Printf("Added: %s\n", summary)
+	s, err := item.String()
+	if err != nil {
+		return err
+	}
+	fmt.Print(s)
 
 	return nil
 }
