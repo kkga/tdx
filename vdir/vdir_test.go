@@ -23,15 +23,12 @@ func TestCollections(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			vd, err := NewVdirRoot(tt.path)
+			vd := new(Vdir)
+			err := vd.Init(tt.path)
 			if err != nil {
 				t.Fatal(err)
 			}
-			collections, err := vd.InitMap()
-			if err != nil {
-				t.Fatal(err)
-			}
-			for col, items := range collections {
+			for col, items := range *vd {
 				for _, item := range items {
 					summary := item.Ical.Children[0].Props.Get(ical.PropSummary)
 					fmt.Printf("%s: %+s\n", col, summary)

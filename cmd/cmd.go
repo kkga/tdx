@@ -23,8 +23,8 @@ type Cmd struct {
 	shortDesc string
 	usageLine string
 
-	vdirRoot   *vdir.VdirRoot
-	vdirMap    vdir.VdirMap
+	// vdirMap    vdir.VdirMap
+	vdir       vdir.Vdir
 	collection *vdir.Collection
 
 	listFlag     string
@@ -58,11 +58,12 @@ func (c *Cmd) Init(args []string) error {
 		return err
 	}
 
-	if c.vdirRoot, err = vdir.NewVdirRoot(conf.Path); err != nil {
-		return err
-	}
+	// if c.vdirRoot, err = vdir.NewVdirRoot(conf.Path); err != nil {
+	// 	return err
+	// }
 
-	if c.vdirMap, err = c.vdirRoot.InitMap(); err != nil {
+	c.vdir = vdir.Vdir{}
+	if err := c.vdir.Init(conf.Path); err != nil {
 		return err
 	}
 
@@ -70,7 +71,7 @@ func (c *Cmd) Init(args []string) error {
 		return errors.New("List flag required. See 'tdx -h'.")
 	} else if c.listFlag != "" {
 		names := []string{}
-		for col := range c.vdirMap {
+		for col := range c.vdir {
 			names = append(names, col.Name)
 			if col.Name == c.listFlag {
 				c.collection = col

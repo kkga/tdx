@@ -10,57 +10,21 @@ import (
 	"github.com/emersion/go-ical"
 )
 
-// VdirRoot is topmost vdir root folder
-type VdirRoot struct {
-	Path string
-}
+// Vdir is a map of all collections and items
+type Vdir map[*Collection][]*Item
 
-// VdirMap is a map all collections and their items
-type VdirMap map[*Collection][]*Item
-
-// NewVdirRoot initializes a VdirRoot checking that the directory exists
-func NewVdirRoot(path string) (*VdirRoot, error) {
+// Init initializes the map with collections and items in path, items have unique IDs
+func (v *Vdir) Init(path string) error {
 	f, err := os.Stat(path)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, errors.New("Specified vdir path does not exist")
+		return fmt.Errorf("Specified vdir path does not exist: %s", path)
 	}
 	if !f.IsDir() {
-		return nil, errors.New("Specified vdir path is not a directory")
-	}
-	return &VdirRoot{path}, nil
-}
-
-// ItemById finds and returns an item for specified id
-func (c VdirMap) ItemById(id int) (*Item, error) {
-	for _, items := range c {
-		for _, item := range items {
-			if item.Id == id {
-				return item, nil
-			}
-		}
-	}
-	return nil, fmt.Errorf("Item not found: %d", id)
-}
-
-// Collections returns a map of all collections and items in vdir, items have unique id values
-func (v VdirRoot) InitMap() (vdirMap VdirMap, err error) {
-	vdirMap = make(VdirMap)
-
-	isIcal := func(path string, de fs.DirEntry) bool {
-		return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)
-	}
-
-	hasIcalFiles := func(path string) bool {
-		files, _ := os.ReadDir(path)
-		for _, f := range files {
-			if filepath.Ext(f.Name()) == fmt.Sprintf(".%s", ical.Extension) {
-				return true
-			}
-		}
-		return false
+		return fmt.Errorf("Specified vdir path is not a directory: %s", path)
 	}
 
 	var itemId int
+
 	walkFunc := func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() && hasIcalFiles(path) {
 			c := &Collection{}
@@ -79,7 +43,7 @@ func (v VdirRoot) InitMap() (vdirMap VdirMap, err error) {
 						if item.Ical != nil {
 							itemId++
 							item.Id = itemId
-							vdirMap[c] = append(vdirMap[c], item)
+							(*v)[c] = append((*v)[c], item)
 						}
 					}
 					return nil
@@ -92,11 +56,38 @@ func (v VdirRoot) InitMap() (vdirMap VdirMap, err error) {
 		return nil
 	}
 
-	// parse dir for vdir collections (folders)
-	err = filepath.WalkDir(v.Path, walkFunc)
+	err = filepath.WalkDir(path, walkFunc)
 	if err != nil {
-		return
+		return err
 	}
 
-	return vdirMap, nil
+	return nil
+}
+
+// isIcal reports whether path is a file that has an ical extension
+func isIcal(path string, de fs.DirEntry) bool {
+	return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)
+}
+
+// hasIcalFiles reports whether path contains ical files
+func hasIcalFiles(path string) bool {
+	files, _ := os.ReadDir(path)
+	for _, f := range files {
+		if filepath.Ext(f.Name()) == fmt.Sprintf(".%s", ical.Extension) {
+			return true
+		}
+	}
+	return false
+}
+
+// ItemById finds and returns an item for specified id
+func (v *Vdir) ItemById(id int) (*Item, error) {
+	for _, items := range *v {
+		for _, item := range items {
+			if item.Id == id {
+				return item, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("Item not found: %d", id)
 }

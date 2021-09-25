@@ -39,7 +39,7 @@ func (c *ShowCmd) Run() error {
 	var toShow []*vdir.Item
 
 	for _, id := range IDs {
-		item, err := c.vdirMap.ItemById(id)
+		item, err := c.vdir.ItemById(id)
 		if err != nil {
 			return err
 		}

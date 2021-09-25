@@ -38,7 +38,7 @@ func (c *EditCmd) Run() error {
 		return err
 	}
 
-	item, err := c.vdirMap.ItemById(id)
+	item, err := c.vdir.ItemById(id)
 	if err != nil {
 		return err
 	}
