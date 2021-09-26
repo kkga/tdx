@@ -16,14 +16,15 @@ import (
 
 func NewAddCmd() *AddCmd {
 	c := &AddCmd{Cmd: Cmd{
+		// TODO add long description of due date parsing
 		fs:           flag.NewFlagSet("add", flag.ExitOnError),
 		alias:        []string{"a"},
 		shortDesc:    "Add todo",
-		usageLine:    "[options]",
+		usageLine:    "[options] <todo>",
 		listRequired: true,
 	}}
 	c.fs.StringVar(&c.listFlag, "l", "", "`list` for new todo")
-	c.fs.StringVar(&c.priority, "p", "", "`priority`: high, medium, low")
+	c.fs.StringVar(&c.priority, "p", "", "`priority`: !!!, !!, !")
 	c.fs.StringVar(&c.description, "d", "", "`description text`")
 	return c
 }
@@ -64,13 +65,13 @@ func (c *AddCmd) Run() error {
 		prioProp := ical.NewProp(ical.PropPriority)
 		prioProp.SetValueType(ical.ValueInt)
 		switch c.priority {
-		case "high":
+		case "!!!":
 			prioProp.Value = fmt.Sprint(vdir.PriorityHigh)
 			t.Props.Add(prioProp)
-		case "medium":
+		case "!!":
 			prioProp.Value = fmt.Sprint(vdir.PriorityMedium)
 			t.Props.Add(prioProp)
-		case "low":
+		case "!":
 			prioProp.Value = fmt.Sprint(vdir.PriorityLow)
 			t.Props.Add(prioProp)
 		default:
