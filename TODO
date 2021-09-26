@@ -7,6 +7,19 @@ i should use the decoded ical data as a single source and provide printing funct
 that format the given component.
 ---
 
+COMMANDS
+- [x] list
+	- [ ] json
+	- [ ] sorting
+- [x] add
+- [x] do
+- [x] delete
+- [x] edit
+- [x] show
+- [x] purge
+- [ ] stats
+- [ ] move
+
 FEAT
 - [x] edit command
 	- [x] open $EDITOR with predefined template
