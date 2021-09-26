@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
@@ -22,7 +23,7 @@ type PurgeCmd struct {
 }
 
 func (c *PurgeCmd) Run() error {
-	var removed int
+	var toDelete []*vdir.Item
 
 	for _, items := range c.vdir {
 		for _, item := range items {
@@ -37,15 +38,36 @@ func (c *PurgeCmd) Run() error {
 
 			s := vdir.ToDoStatus(status)
 			if s == vdir.StatusCompleted || s == vdir.StatusCancelled {
-				if err := os.Remove(item.Path); err != nil {
-					return err
-				}
-				removed++
+				toDelete = append(toDelete, item)
 			}
 		}
 	}
 
-	fmt.Printf("Removed: %d\n", removed)
+	if len(toDelete) > 1 {
+		sb := strings.Builder{}
+
+		for _, item := range toDelete {
+			s, err := item.Format()
+			if err != nil {
+				return err
+			}
+			sb.WriteString(fmt.Sprintf("%s", s))
+		}
+
+		fmt.Print(sb.String())
+
+		ok := promptConfirm("Delete listed todos?", false)
+		if ok {
+			for _, i := range toDelete {
+				if err := os.Remove(i.Path); err != nil {
+					return err
+				}
+			}
+			fmt.Printf("Deleted: %d todos\n", len(toDelete))
+		}
+	} else {
+		fmt.Println("No todos to purge")
+	}
 
 	return nil
 }
