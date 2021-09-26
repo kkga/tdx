@@ -8,7 +8,7 @@ that format the given component.
 ---
 
 FEAT
-- [ ] edit command
+- [x] edit command
 	- [x] open $EDITOR with predefined template
 - [ ] json output for list
 - [x] json output for show
@@ -33,7 +33,7 @@ ENCODING
 - [ ] what is sequence?
 
 DECODING
-- [ ] parse #tags in description
+- [ ] ? parse #tags in description
 - [x] (not needed for nor) make a map of [UID]ToDo instead of slice
 
 CONFIG OPTIONS

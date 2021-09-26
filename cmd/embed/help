@@ -7,6 +7,8 @@ COMMANDS
   list, ls       list todos
   add, a         add todo
   done, do       complete todos
+  edit           edit todo
+  delete, del    delete todos
   purge          remove completed todos
   show           show detailed todo info
 
