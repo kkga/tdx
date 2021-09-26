@@ -58,6 +58,9 @@ func (c *EditCmd) Run() error {
 	defer os.Remove(tmp.Name())
 
 	editor := os.Getenv("VISUAL")
+	if editor == "" {
+		editor = os.Getenv("EDITOR")
+	}
 	editorBin, err := exec.LookPath(editor)
 	if err != nil {
 		return errors.New("Set the VISUAL env variable to edit todos")
@@ -119,12 +122,22 @@ func (c *EditCmd) Run() error {
 			}
 		case ical.PropPriority:
 			prioMap := map[string]vdir.ToDoPriority{
-				"high":   vdir.PriorityHigh,
-				"medium": vdir.PriorityMedium,
-				"low":    vdir.PriorityLow,
+				"!!!": vdir.PriorityHigh,
+				"!!":  vdir.PriorityMedium,
+				"!":   vdir.PriorityLow,
 			}
-			prio := prioMap[newVal]
-			newP.Value = fmt.Sprint(prio)
+			p := prioMap[newVal]
+			newP.Value = fmt.Sprint(p)
+		case ical.PropStatus:
+			statusMap := map[string]vdir.ToDoStatus{
+				"":    vdir.StatusNeedsAction,
+				"[ ]": vdir.StatusNeedsAction,
+				"[-]": vdir.StatusCancelled,
+				"[x]": vdir.StatusCompleted,
+				"[X]": vdir.StatusCompleted,
+			}
+			s := statusMap[newVal]
+			newP.Value = fmt.Sprint(s)
 		default:
 			newP.Value = newVal
 		}
@@ -185,9 +198,15 @@ func generateTemplate(vtodo ical.Component) string {
 	}
 
 	prioMap := map[vdir.ToDoPriority]string{
-		vdir.PriorityHigh:   "high",
-		vdir.PriorityMedium: "medium",
-		vdir.PriorityLow:    "low",
+		vdir.PriorityHigh:   "!!!",
+		vdir.PriorityMedium: "!!",
+		vdir.PriorityLow:    "!",
+	}
+
+	statusMap := map[vdir.ToDoStatus]string{
+		vdir.StatusNeedsAction: "[ ]",
+		vdir.StatusCancelled:   "[-]",
+		vdir.StatusCompleted:   "[x]",
 	}
 
 	for name, prop := range vtodo.Props {
@@ -203,6 +222,8 @@ func generateTemplate(vtodo ical.Component) string {
 			case ical.PropPriority:
 				curPrio, _ := strconv.Atoi(p.Value)
 				val = prioMap[vdir.ToDoPriority(curPrio)]
+			case ical.PropStatus:
+				val = statusMap[vdir.ToDoStatus(p.Value)]
 			default:
 				val = p.Value
 			}
@@ -231,19 +252,21 @@ func generateTemplate(vtodo ical.Component) string {
 const templateHelp = `
 --------------------
 
+Edit todo fields above. Here's a cheatsheet.
+
 DUE accepts following formats:
-- "2 Jan 2006 15:04"
-- "2 Jan 2006"
-- natural date, same as <add> command, see "tdx add -h"
+- 2 Jan 2006 15:04
+- 2 Jan 2006
+- natural date; same as <add> -- see "tdx add -h"
 
-PRIORITY can be:
-- low
-- medium
-- high
+STATUS:
+- [ ]
+- [x]
+- [-] (cancelled)
+
+PRIORITY:
+- !!!
+- !!
+- !
 - [empty]
-
-STATUS can be:
-- NEEDS-ACTION
-- COMPLETED
-- CANCELLED
 `
