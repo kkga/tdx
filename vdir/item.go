@@ -163,6 +163,8 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 		case ical.PropStatus:
 			if ToDoStatus(p.Value) == StatusCompleted {
 				status = colorStatusDone("[x]")
+			} else if ToDoStatus(p.Value) == StatusCancelled {
+				status = colorStatusDone("[-]")
 			} else {
 				status = colorStatusUndone("[ ]")
 			}
