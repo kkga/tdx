@@ -9,9 +9,10 @@ that format the given component.
 
 COMMANDS
 - [x] list
-	- [ ] json
 	- [ ] sorting
+	- [ ] json
 - [x] add
+	- [ ] parse priority from args
 - [x] do
 - [x] delete
 - [x] edit
