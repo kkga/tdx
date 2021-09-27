@@ -80,9 +80,6 @@ func (c *AddCmd) Run() error {
 	}
 
 	cal := ical.NewCalendar()
-	// TODO move this data somewhere
-	cal.Props.SetText(ical.PropVersion, "2.0")
-	cal.Props.SetText(ical.PropProductID, "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
 	cal.Children = append(cal.Children, t)
 
 	p := path.Join(c.collection.Path, fmt.Sprintf("%s.ics", uid))

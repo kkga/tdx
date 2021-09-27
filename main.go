@@ -14,7 +14,7 @@ func main() {
 	// log.SetFlags(0)
 
 	if len(os.Args) > 1 && os.Args[1] == "-v" {
-		fmt.Printf("tdx %s\n", version)
+		fmt.Printf("tdx version %s\n", version)
 		os.Exit(0)
 	}
 

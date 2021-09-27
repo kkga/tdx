@@ -1,9 +1,9 @@
-ToDo manager for vdir (iCalendar) files.
+tdx -- todo manager for vdir (iCalendar) files.
 
-USAGE
+USAGE:
   tdx <command> [options] [<args>...]
 
-COMMANDS
+COMMANDS:
   list, ls       list todos
   add, a         add todo
   done, do       complete todos
@@ -12,7 +12,7 @@ COMMANDS
   purge          remove completed todos
   show           show detailed todo info
 
-ENVIRONMENT VARIABLES
+ENVIRONMENT VARIABLES:
   TDX_PATH
         (required) path to vdir root directory
   TDX_DEFAULT_LIST
@@ -28,7 +28,7 @@ ENVIRONMENT VARIABLES
         use color in output
         values: 1 (default), 0
 
-FLAGS
+FLAGS:
   -v    print version
   -h    print help
 

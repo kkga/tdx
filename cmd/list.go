@@ -53,7 +53,7 @@ func (c *ListCmd) Run() error {
 		case s == vdir.StatusNeedsAction || s == vdir.StatusCompleted || s == vdir.StatusCancelled || s == vdir.StatusAny:
 			break
 		default:
-			return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h.", c.status)
+			return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.status)
 		}
 	}
 
