@@ -8,6 +8,7 @@ import (
 
 type ByPriority []*Item
 type ByDue []*Item
+type ByStatus []*Item
 
 func (p ByPriority) Len() int      { return len(p) }
 func (p ByPriority) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
@@ -62,5 +63,33 @@ func (d ByDue) Less(i, j int) bool {
 		return true
 	} else {
 		return v1.Before(v2)
+	}
+}
+
+func (s ByStatus) Len() int      { return len(s) }
+func (s ByStatus) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
+func (s ByStatus) Less(i, j int) bool {
+	vt1, _ := s[i].Vtodo()
+	vt2, _ := s[j].Vtodo()
+	p1 := vt1.Props.Get(ical.PropStatus)
+	p2 := vt2.Props.Get(ical.PropStatus)
+
+	var v1 string
+	var v2 string
+
+	if p1 != nil {
+		v1, _ = p1.Text()
+	}
+	if p2 != nil {
+		v2, _ = p2.Text()
+	}
+
+	if ToDoStatus(v1) == StatusCompleted || ToDoStatus(v1) == StatusCancelled {
+		return false
+	} else if ToDoStatus(v2) == StatusCompleted || ToDoStatus(v2) == StatusCancelled {
+		return true
+	} else {
+		return false
 	}
 }
