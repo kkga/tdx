@@ -295,13 +295,71 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 // WriteFile encodes ical data and writes to file at Item.Path
 func (i *Item) WriteFile() error {
-	var buf bytes.Buffer
-	err := ical.NewEncoder(&buf).Encode(i.Ical)
+	requiredIcalProps := []string{
+		ical.PropProductID,
+		ical.PropVersion,
+	}
+	for _, p := range requiredIcalProps {
+		prop := i.Ical.Props.Get(p)
+		if prop == nil || prop.Value == "" {
+			switch p {
+			case ical.PropProductID:
+				i.Ical.Props.SetText(ical.PropProductID, "-//KKGA.ME//NONSGML tdx//EN")
+			case ical.PropVersion:
+				i.Ical.Props.SetText(ical.PropVersion, "2.0")
+			}
+		}
+	}
+
+	requiredVtodoProps := []string{
+		ical.PropUID,
+		ical.PropCreated,
+		ical.PropDateTimeStamp,
+	}
+
+	vtodo, err := i.Vtodo()
 	if err != nil {
 		return err
 	}
 
-	// TODO: update modified date prop
+	t := time.Now()
+	vtodo.Props.SetDateTime(ical.PropLastModified, t)
+
+	seq := vtodo.Props.Get(ical.PropSequence)
+	seqProp := ical.NewProp(ical.PropSequence)
+	if seq == nil || seq.Value == "" {
+		seqProp.Value = "0"
+		vtodo.Props.Set(seqProp)
+	} else {
+		v, err := seq.Int()
+		if err != nil {
+			return err
+		}
+		nextSeq := fmt.Sprintf("%d", v+1)
+		seqProp.Value = nextSeq
+	}
+	vtodo.Props.Set(seqProp)
+
+	for _, p := range requiredVtodoProps {
+		prop := vtodo.Props.Get(p)
+		if prop == nil || prop.Value == "" {
+			switch p {
+			case ical.PropCreated:
+				vtodo.Props.SetDateTime(ical.PropCreated, t)
+			case ical.PropDateTimeStamp:
+				vtodo.Props.SetDateTime(ical.PropDateTimeStamp, t)
+			case ical.PropUID:
+				uid := GenerateUID()
+				vtodo.Props.SetText(ical.PropUID, uid)
+			}
+		}
+	}
+
+	var buf bytes.Buffer
+	err = ical.NewEncoder(&buf).Encode(i.Ical)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.Create(i.Path)
 	if err != nil {
