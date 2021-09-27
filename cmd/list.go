@@ -26,8 +26,8 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.multiline, "ml", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sort, "s", "", "sort todos by `field`: priority, due, created, status")
-	c.fs.StringVar(&c.status, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.StringVar(&c.sortFlag, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS")
+	c.fs.StringVar(&c.statusFlag, "S", "ANY", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
 }
 
@@ -37,26 +37,59 @@ type ListCmd struct {
 	multiline   bool
 	description bool
 	allLists    bool
-	sort        string
-	status      string
+	sortFlag    string
+	statusFlag  string
 }
 
+type sortOption string
+
+const (
+	sortOptionStatus sortOption = "STATUS"
+	sortOptionPrio   sortOption = "PRIO"
+	sortOptionDue    sortOption = "DUE"
+)
+
 func (c *ListCmd) Run() error {
-	var query string
+	var (
+		query   string
+		status  vdir.ToDoStatus
+		sorting sortOption
+	)
+
 	if len(c.fs.Args()) > 0 {
 		query = strings.Join(c.fs.Args(), "")
 	}
 
-	// check status flag
-	if c.status != "" {
-		s := vdir.ToDoStatus(c.status)
+	if c.conf.DefaultStatus != "" {
+		status = vdir.ToDoStatus(c.conf.DefaultStatus)
+	}
+
+	if c.statusFlag != "" {
+		s := vdir.ToDoStatus(c.statusFlag)
 		switch {
 		case s == vdir.StatusNeedsAction || s == vdir.StatusCompleted || s == vdir.StatusCancelled || s == vdir.StatusAny:
 			break
 		default:
-			return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.status)
+			return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.statusFlag)
 		}
+	} else if c.conf.DefaultStatus != "" {
+		c.statusFlag = c.conf.DefaultStatus
 	}
+
+	fmt.Println(c.statusFlag)
+
+	if c.sortFlag != "" {
+		s := sortOption(c.sortFlag)
+		switch {
+		case s == sortOptionStatus || s == sortOptionPrio || s == sortOptionDue:
+			break
+		default:
+			return fmt.Errorf("Incorrect sort option: %s. See: tdx list -h", c.sortFlag)
+		}
+	} else {
+		c.sortFlag = c.conf.DefaultSort
+	}
+	fmt.Println(c.sortFlag)
 
 	// if cmd has collection specified via flag, delete other collections from map
 	var collections = c.vdir
@@ -68,10 +101,10 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	// filter items
-	var filtered = make(map[vdir.Collection][]vdir.Item)
+	// filter and sort items
+	var m = make(map[vdir.Collection][]vdir.Item)
 	for k, v := range collections {
-		items, err := filterByStatus(v, vdir.ToDoStatus(c.status))
+		items, err := filterByStatus(v, vdir.ToDoStatus(c.statusFlag))
 		if err != nil {
 			return err
 		}
@@ -80,17 +113,22 @@ func (c *ListCmd) Run() error {
 			return err
 		}
 
-		items = sortByPrio(items)
+		switch c.sortFlag {
+		case string(sortOptionPrio):
+			sort.Sort(vdir.ByPriority(items))
+		case string(sortOptionDue):
+			// sort.Sort(vdir.ByDue(items))
+		}
 
 		for _, item := range items {
-			filtered[*k] = append(filtered[*k], *item)
+			m[*k] = append(m[*k], *item)
 		}
 	}
 
 	// prepare output
 	var sb = strings.Builder{}
-	for col, items := range filtered {
-		if len(filtered) > 1 {
+	for col, items := range m {
+		if len(m) > 1 {
 			colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
 			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
 		}
@@ -104,35 +142,6 @@ func (c *ListCmd) Run() error {
 
 	fmt.Print(sb.String())
 	return nil
-}
-
-func sortByPrio(items []*vdir.Item) (sorted []*vdir.Item) {
-	sorted = items
-	sort.Slice(sorted, func(i, j int) bool {
-		vt1, _ := sorted[i].Vtodo()
-		vt2, _ := sorted[j].Vtodo()
-		prio1 := vt1.Props.Get(ical.PropPriority)
-		prio2 := vt2.Props.Get(ical.PropPriority)
-
-		var prio1Val int
-		var prio2Val int
-
-		if prio1 != nil {
-			prio1Val, _ = prio1.Int()
-		}
-		if prio2 != nil {
-			prio2Val, _ = prio2.Int()
-		}
-
-		if prio1Val == 0 {
-			return false
-		} else if prio2Val == 0 {
-			return true
-		} else {
-			return prio1Val < prio2Val
-		}
-	})
-	return
 }
 
 func parseDueDate(dur time.Duration) (duration string, err error) {
