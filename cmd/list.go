@@ -26,19 +26,19 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.multiline, "ml", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sortFlag, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS")
-	c.fs.StringVar(&c.statusFlag, "S", "ANY", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.StringVar(&c.sortOption, "s", "", "sort todos by `field`: PRIO, DUE, STATUS")
+	c.fs.StringVar(&c.statusFilter, "S", "", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
 }
 
 type ListCmd struct {
 	Cmd
-	json        bool
-	multiline   bool
-	description bool
-	allLists    bool
-	sortFlag    string
-	statusFlag  string
+	json         bool
+	multiline    bool
+	description  bool
+	allLists     bool
+	sortOption   string
+	statusFilter string
 }
 
 type sortOption string
@@ -50,40 +50,33 @@ const (
 )
 
 func (c *ListCmd) Run() error {
-	var (
-		query   string
-		status  vdir.ToDoStatus
-		sorting sortOption
-	)
+	var query string
 
 	if len(c.fs.Args()) > 0 {
 		query = strings.Join(c.fs.Args(), "")
 	}
 
-	status = vdir.ToDoStatus(c.statusFlag)
-	if c.conf.DefaultStatus != "" {
-		status = vdir.ToDoStatus(c.conf.DefaultStatus)
+	// process status filter
+	if c.statusFilter == "" {
+		c.statusFilter = c.conf.DefaultStatus
 	}
-
-	switch vdir.ToDoStatus(status) {
+	switch vdir.ToDoStatus(c.statusFilter) {
 	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
 		break
 	default:
-		return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.statusFlag)
+		return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.statusFilter)
 	}
 
-	sorting = sortOption(c.sortFlag)
-	if c.conf.DefaultSort != "" {
-		sorting = sortOption(c.conf.DefaultSort)
+	// process sort option
+	if c.sortOption == "" {
+		c.sortOption = c.conf.DefaultSort
 	}
-
-	switch sortOption(sorting) {
+	switch sortOption(c.sortOption) {
 	case sortOptionStatus, sortOptionPrio, sortOptionDue:
 		break
 	default:
-		return fmt.Errorf("Incorrect sort option: %s. See: tdx list -h", c.sortFlag)
+		return fmt.Errorf("Incorrect sort option: %s. See: tdx list -h", c.sortOption)
 	}
-	fmt.Println(sorting)
 
 	// if cmd has collection specified via flag, delete other collections from map
 	collections := c.vdir
@@ -98,7 +91,7 @@ func (c *ListCmd) Run() error {
 	// filter and sort items
 	var m = make(map[vdir.Collection][]vdir.Item)
 	for k, v := range collections {
-		items, err := filterByStatus(v, vdir.ToDoStatus(status))
+		items, err := filterByStatus(v, vdir.ToDoStatus(c.statusFilter))
 		if err != nil {
 			return err
 		}
@@ -107,11 +100,14 @@ func (c *ListCmd) Run() error {
 			return err
 		}
 
-		switch sortOption(sorting) {
+		switch sortOption(c.sortOption) {
 		case sortOptionPrio:
 			sort.Sort(vdir.ByPriority(items))
+		// TODO: implement due and status sorting
 		case sortOptionDue:
 			// sort.Sort(vdir.ByDue(items))
+		case sortOptionStatus:
+			// sort.Sort(vdir.ByStatus(items))
 		}
 
 		for _, item := range items {
