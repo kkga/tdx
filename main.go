@@ -11,7 +11,7 @@ import (
 var version = "dev"
 
 func main() {
-	// log.SetFlags(0)
+	log.SetFlags(0)
 
 	if len(os.Args) > 1 && os.Args[1] == "-v" {
 		fmt.Printf("tdx version %s\n", version)
