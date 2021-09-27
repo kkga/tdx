@@ -105,9 +105,8 @@ func (c *ListCmd) Run() error {
 			sort.Sort(vdir.ByPriority(items))
 		case sortOptionDue:
 			sort.Sort(vdir.ByDue(items))
-		// TODO: implement due and status sorting
 		case sortOptionStatus:
-			// sort.Sort(vdir.ByStatus(items))
+			sort.Sort(vdir.ByStatus(items))
 		}
 
 		for _, item := range items {
