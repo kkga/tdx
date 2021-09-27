@@ -20,4 +20,6 @@ changelog:
       - "^test:"
       - "^todo:"
       - "^wip:"
+      - "minor"
+      - "WIP"
       - "typo"
