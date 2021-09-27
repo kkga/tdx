@@ -136,8 +136,11 @@ func (c *EditCmd) Run() error {
 				"[x]": vdir.StatusCompleted,
 				"[X]": vdir.StatusCompleted,
 			}
-			s := statusMap[newVal]
-			newP.Value = fmt.Sprint(s)
+			if s, exists := statusMap[newVal]; exists {
+				newP.Value = fmt.Sprint(s)
+			} else {
+				newP.Value = newVal
+			}
 		default:
 			newP.Value = newVal
 		}
@@ -220,10 +223,14 @@ func generateTemplate(vtodo ical.Component) string {
 					val = date.Format(layoutDateTime)
 				}
 			case ical.PropPriority:
-				curPrio, _ := strconv.Atoi(p.Value)
+				curPrio, _ := strconv.Atoi(strings.Trim(p.Value, " "))
 				val = prioMap[vdir.ToDoPriority(curPrio)]
 			case ical.PropStatus:
-				val = statusMap[vdir.ToDoStatus(p.Value)]
+				if v, exists := statusMap[vdir.ToDoStatus(strings.Trim(p.Value, " "))]; exists {
+					val = v
+				} else {
+					val = p.Value
+				}
 			default:
 				val = p.Value
 			}
@@ -257,7 +264,7 @@ Edit todo fields above. Here's a cheatsheet.
 DUE accepts following formats:
 - 2 Jan 2006 15:04
 - 2 Jan 2006
-- natural date; same as <add> -- see "tdx add -h"
+- natural date; same as <add>: see 'tdx add -h'
 
 STATUS:
 - [ ]

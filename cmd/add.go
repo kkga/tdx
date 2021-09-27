@@ -25,7 +25,7 @@ func NewAddCmd() *AddCmd {
 	}}
 	c.fs.StringVar(&c.listFlag, "l", "", "`list` for new todo")
 	c.fs.StringVar(&c.priority, "p", "", "`priority`: !!!, !!, !")
-	c.fs.StringVar(&c.description, "d", "", "`description text`")
+	c.fs.StringVar(&c.description, "d", "", "`description` text")
 	return c
 }
 
@@ -39,19 +39,19 @@ func (c *AddCmd) Run() error {
 	args := c.fs.Args()
 
 	if len(args) == 0 {
-		return errors.New("Provide a todo summary")
+		return errors.New("Provide a todo text")
 	}
 
-	now := time.Now()
 	summary := strings.Join(args, " ")
-	uid := vdir.GenerateUID()
 
 	t := ical.NewComponent("VTODO")
 	t.Props.SetText(ical.PropSummary, summary)
-	t.Props.SetText(ical.PropUID, uid)
-	t.Props.SetDateTime(ical.PropDateTimeStamp, now)
 	t.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
 
+	uid := vdir.GenerateUID()
+	t.Props.SetText(ical.PropUID, uid)
+
+	now := time.Now()
 	due, _ := naturaldate.Parse(summary, now, naturaldate.WithDirection(naturaldate.Future))
 	if due != now {
 		t.Props.SetDateTime(ical.PropDue, due)
@@ -75,7 +75,7 @@ func (c *AddCmd) Run() error {
 			prioProp.Value = fmt.Sprint(vdir.PriorityLow)
 			t.Props.Add(prioProp)
 		default:
-			return fmt.Errorf("Unknown priority flag: %s, expected one of: high, medium, low", c.priority)
+			return fmt.Errorf("Unknown priority flag: %s, expected one of: !!!, !!, !", c.priority)
 		}
 	}
 

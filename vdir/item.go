@@ -25,6 +25,7 @@ const (
 	StatusCompleted   ToDoStatus   = "COMPLETED"
 	StatusNeedsAction ToDoStatus   = "NEEDS-ACTION"
 	StatusCancelled   ToDoStatus   = "CANCELLED"
+	StatusInProcess   ToDoStatus   = "IN-PROCESS"
 	StatusAny         ToDoStatus   = "ANY"
 	PriorityHigh      ToDoPriority = 1
 	PriorityMedium    ToDoPriority = 5
@@ -295,6 +296,11 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 // WriteFile encodes ical data and writes to file at Item.Path
 func (i *Item) WriteFile() error {
+	if i.Path == "" {
+		return fmt.Errorf("Can not write Item without Path: %v", i)
+	}
+
+	// check and set topmost calendar object props
 	requiredIcalProps := []string{
 		ical.PropProductID,
 		ical.PropVersion,
@@ -311,35 +317,34 @@ func (i *Item) WriteFile() error {
 		}
 	}
 
-	requiredVtodoProps := []string{
-		ical.PropUID,
-		ical.PropCreated,
-		ical.PropDateTimeStamp,
-	}
-
 	vtodo, err := i.Vtodo()
 	if err != nil {
 		return err
 	}
 
+	// update modified date
 	t := time.Now()
 	vtodo.Props.SetDateTime(ical.PropLastModified, t)
 
+	// update sequence
 	seq := vtodo.Props.Get(ical.PropSequence)
 	seqProp := ical.NewProp(ical.PropSequence)
 	if seq == nil || seq.Value == "" {
 		seqProp.Value = "0"
 		vtodo.Props.Set(seqProp)
 	} else {
-		v, err := seq.Int()
-		if err != nil {
-			return err
-		}
+		v, _ := seq.Int()
 		nextSeq := fmt.Sprintf("%d", v+1)
 		seqProp.Value = nextSeq
 	}
 	vtodo.Props.Set(seqProp)
 
+	// check and set required vtodo props
+	requiredVtodoProps := []string{
+		ical.PropUID,
+		ical.PropCreated,
+		ical.PropDateTimeStamp,
+	}
 	for _, p := range requiredVtodoProps {
 		prop := vtodo.Props.Get(p)
 		if prop == nil || prop.Value == "" {
@@ -353,6 +358,25 @@ func (i *Item) WriteFile() error {
 				vtodo.Props.SetText(ical.PropUID, uid)
 			}
 		}
+	}
+
+	isStatusString := func(s string) bool {
+		switch ToDoStatus(s) {
+		case StatusNeedsAction, StatusInProcess, StatusCompleted, StatusCancelled:
+			return true
+		default:
+			return false
+		}
+	}
+
+	// check status
+	st := vtodo.Props.Get(ical.PropStatus)
+	if st == nil {
+		stProp := ical.NewProp(ical.PropStatus)
+		stProp.Value = string(StatusNeedsAction)
+		vtodo.Props.Set(stProp)
+	} else if !isStatusString(st.Value) {
+		st.Value = string(StatusNeedsAction)
 	}
 
 	var buf bytes.Buffer
