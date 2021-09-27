@@ -16,8 +16,8 @@ func Root(args []string) error {
 	}
 
 	cmds := []Runner{
-		NewAddCmd(),
 		NewListCmd(),
+		NewAddCmd(),
 		NewDoneCmd(),
 		NewShowCmd(),
 		NewDeleteCmd(),
@@ -26,11 +26,11 @@ func Root(args []string) error {
 	}
 
 	if len(args) == 0 {
-		ls := NewListCmd()
-		if err := ls.Init([]string{}); err != nil {
+		defaultCmd := NewListCmd()
+		if err := defaultCmd.Init([]string{}); err != nil {
 			return err
 		}
-		return ls.Run()
+		return defaultCmd.Run()
 	}
 
 	subcommand := os.Args[1]
@@ -44,7 +44,7 @@ func Root(args []string) error {
 		}
 	}
 
-	return fmt.Errorf("unknown subcommand: %s", subcommand)
+	return fmt.Errorf("Unknown subcommand: %s", subcommand)
 }
 
 func containsString(s []string, e string) bool {

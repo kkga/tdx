@@ -38,22 +38,12 @@ func (c *DeleteCmd) Run() error {
 
 	var toDelete []*vdir.Item
 
-	containsInt := func(ii []int, i int) bool {
-		for _, v := range ii {
-			if v == i {
-				return true
-			}
+	for _, id := range IDs {
+		item, err := c.vdir.ItemById(id)
+		if err != nil {
+			return err
 		}
-		return false
-	}
-
-	// TODO: rewrite with ItemById
-	for _, items := range c.vdir {
-		for _, item := range items {
-			if containsInt(IDs, item.Id) {
-				toDelete = append(toDelete, item)
-			}
-		}
+		toDelete = append(toDelete, item)
 	}
 
 	sb := strings.Builder{}

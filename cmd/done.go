@@ -18,7 +18,7 @@ func NewDoneCmd() *DoneCmd {
 		shortDesc: "Complete todos",
 		usageLine: "[options] <id>...",
 	}}
-	c.fs.BoolVar(&c.toggle, "t", false, "toggle complete state")
+	c.fs.BoolVar(&c.toggle, "t", false, "toggle completed state")
 	return c
 }
 
@@ -40,22 +40,12 @@ func (c *DoneCmd) Run() error {
 
 	var toComplete []*vdir.Item
 
-	containsInt := func(ii []int, i int) bool {
-		for _, v := range ii {
-			if v == i {
-				return true
-			}
+	for _, id := range IDs {
+		item, err := c.vdir.ItemById(id)
+		if err != nil {
+			return err
 		}
-		return false
-	}
-
-	// TODO: rewrite with ItemById
-	for _, items := range c.vdir {
-		for _, item := range items {
-			if containsInt(IDs, item.Id) {
-				toComplete = append(toComplete, item)
-			}
-		}
+		toComplete = append(toComplete, item)
 	}
 
 	sb := strings.Builder{}
