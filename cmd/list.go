@@ -3,6 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -79,6 +80,8 @@ func (c *ListCmd) Run() error {
 			return err
 		}
 
+		items = sortByPrio(items)
+
 		for _, item := range items {
 			filtered[*k] = append(filtered[*k], *item)
 		}
@@ -91,6 +94,7 @@ func (c *ListCmd) Run() error {
 			colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
 			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
 		}
+
 		for _, i := range items {
 			if err := writeItem(&sb, *c, i); err != nil {
 				return err
@@ -100,6 +104,35 @@ func (c *ListCmd) Run() error {
 
 	fmt.Print(sb.String())
 	return nil
+}
+
+func sortByPrio(items []*vdir.Item) (sorted []*vdir.Item) {
+	sorted = items
+	sort.Slice(sorted, func(i, j int) bool {
+		vt1, _ := sorted[i].Vtodo()
+		vt2, _ := sorted[j].Vtodo()
+		prio1 := vt1.Props.Get(ical.PropPriority)
+		prio2 := vt2.Props.Get(ical.PropPriority)
+
+		var prio1Val int
+		var prio2Val int
+
+		if prio1 != nil {
+			prio1Val, _ = prio1.Int()
+		}
+		if prio2 != nil {
+			prio2Val, _ = prio2.Int()
+		}
+
+		if prio1Val == 0 {
+			return false
+		} else if prio2Val == 0 {
+			return true
+		} else {
+			return prio1Val < prio2Val
+		}
+	})
+	return
 }
 
 func parseDueDate(dur time.Duration) (duration string, err error) {
