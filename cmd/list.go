@@ -60,39 +60,33 @@ func (c *ListCmd) Run() error {
 		query = strings.Join(c.fs.Args(), "")
 	}
 
+	status = vdir.ToDoStatus(c.statusFlag)
 	if c.conf.DefaultStatus != "" {
 		status = vdir.ToDoStatus(c.conf.DefaultStatus)
 	}
 
-	if c.statusFlag != "" {
-		s := vdir.ToDoStatus(c.statusFlag)
-		switch {
-		case s == vdir.StatusNeedsAction || s == vdir.StatusCompleted || s == vdir.StatusCancelled || s == vdir.StatusAny:
-			break
-		default:
-			return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.statusFlag)
-		}
-	} else if c.conf.DefaultStatus != "" {
-		c.statusFlag = c.conf.DefaultStatus
+	switch vdir.ToDoStatus(status) {
+	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
+		break
+	default:
+		return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.statusFlag)
 	}
 
-	fmt.Println(c.statusFlag)
-
-	if c.sortFlag != "" {
-		s := sortOption(c.sortFlag)
-		switch {
-		case s == sortOptionStatus || s == sortOptionPrio || s == sortOptionDue:
-			break
-		default:
-			return fmt.Errorf("Incorrect sort option: %s. See: tdx list -h", c.sortFlag)
-		}
-	} else {
-		c.sortFlag = c.conf.DefaultSort
+	sorting = sortOption(c.sortFlag)
+	if c.conf.DefaultSort != "" {
+		sorting = sortOption(c.conf.DefaultSort)
 	}
-	fmt.Println(c.sortFlag)
+
+	switch sortOption(sorting) {
+	case sortOptionStatus, sortOptionPrio, sortOptionDue:
+		break
+	default:
+		return fmt.Errorf("Incorrect sort option: %s. See: tdx list -h", c.sortFlag)
+	}
+	fmt.Println(sorting)
 
 	// if cmd has collection specified via flag, delete other collections from map
-	var collections = c.vdir
+	collections := c.vdir
 	if c.collection != nil && c.allLists == false {
 		for col := range collections {
 			if col != c.collection {
@@ -104,7 +98,7 @@ func (c *ListCmd) Run() error {
 	// filter and sort items
 	var m = make(map[vdir.Collection][]vdir.Item)
 	for k, v := range collections {
-		items, err := filterByStatus(v, vdir.ToDoStatus(c.statusFlag))
+		items, err := filterByStatus(v, vdir.ToDoStatus(status))
 		if err != nil {
 			return err
 		}
@@ -113,10 +107,10 @@ func (c *ListCmd) Run() error {
 			return err
 		}
 
-		switch c.sortFlag {
-		case string(sortOptionPrio):
+		switch sortOption(sorting) {
+		case sortOptionPrio:
 			sort.Sort(vdir.ByPriority(items))
-		case string(sortOptionDue):
+		case sortOptionDue:
 			// sort.Sort(vdir.ByDue(items))
 		}
 

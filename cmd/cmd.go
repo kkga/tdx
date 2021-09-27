@@ -37,9 +37,9 @@ type Cmd struct {
 type Config struct {
 	Path          string `required:"true"`
 	DefaultList   string `split_words:"true"`
-	DefaultStatus string `split_words:"true" default:"NEEDS-ACTION"`
-	DefaultSort   string `split_words:"true" default:"PRIO"`
-	DefaultDue    int    `split_words:"true" default:"48"`
+	DefaultStatus string `split_words:"true"`
+	DefaultSort   string `split_words:"true"`
+	DefaultDue    int    `split_words:"true"`
 	Color         bool   `default:"true"`
 }
 
