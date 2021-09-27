@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -11,14 +10,9 @@ import (
 var version = "dev"
 
 func main() {
-	// log.SetFlags(0)
+	log.SetFlags(0)
 
-	if len(os.Args) > 1 && os.Args[1] == "-v" {
-		fmt.Printf("tdx version %s\n", version)
-		os.Exit(0)
-	}
-
-	if err := cmd.Root(os.Args[1:]); err != nil {
+	if err := cmd.Root(os.Args[1:], version); err != nil {
 		log.Fatal(err)
 	}
 }

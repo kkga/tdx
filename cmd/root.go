@@ -9,10 +9,16 @@ import (
 //go:embed embed/help
 var helpTxt string
 
-func Root(args []string) error {
-	if len(args) > 0 && (args[0] == "-h" || args[0] == "--help") {
-		printHelp()
-		os.Exit(0)
+func Root(args []string, version string) error {
+	if len(args) > 0 {
+		switch args[0] {
+		case "-h", "--help":
+			printHelp()
+			os.Exit(0)
+		case "-v", "--version":
+			fmt.Printf("tdx version %s\n", version)
+			os.Exit(0)
+		}
 	}
 
 	cmds := []Runner{

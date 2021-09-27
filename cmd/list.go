@@ -3,6 +3,7 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -25,40 +26,60 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.multiline, "ml", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sort, "s", "", "sort todos by `field`: priority, due, created, status")
-	c.fs.StringVar(&c.status, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.StringVar(&c.sortOption, "s", "", "sort todos by `field`: PRIO, DUE, STATUS")
+	c.fs.StringVar(&c.statusFilter, "S", "", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
 }
 
 type ListCmd struct {
 	Cmd
-	json        bool
-	multiline   bool
-	description bool
-	allLists    bool
-	sort        string
-	status      string
+	json         bool
+	multiline    bool
+	description  bool
+	allLists     bool
+	sortOption   string
+	statusFilter string
 }
+
+type sortOption string
+
+const (
+	sortOptionStatus sortOption = "STATUS"
+	sortOptionPrio   sortOption = "PRIO"
+	sortOptionDue    sortOption = "DUE"
+)
 
 func (c *ListCmd) Run() error {
 	var query string
+
 	if len(c.fs.Args()) > 0 {
 		query = strings.Join(c.fs.Args(), "")
 	}
 
-	// check status flag
-	if c.status != "" {
-		s := vdir.ToDoStatus(c.status)
-		switch {
-		case s == vdir.StatusNeedsAction || s == vdir.StatusCompleted || s == vdir.StatusCancelled || s == vdir.StatusAny:
-			break
-		default:
-			return fmt.Errorf("Incorrect status filter: %s. See: tdx list -h", c.status)
-		}
+	// process status filter
+	if c.statusFilter == "" {
+		c.statusFilter = c.conf.DefaultStatus
+	}
+	switch vdir.ToDoStatus(c.statusFilter) {
+	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
+		break
+	default:
+		return fmt.Errorf("Unknown status filter: %s, see 'tdx list -h'", c.statusFilter)
+	}
+
+	// process sort option
+	if c.sortOption == "" {
+		c.sortOption = c.conf.DefaultSort
+	}
+	switch sortOption(c.sortOption) {
+	case sortOptionStatus, sortOptionPrio, sortOptionDue:
+		break
+	default:
+		return fmt.Errorf("Unknown sort option: %s, see 'tdx list -h'", c.sortOption)
 	}
 
 	// if cmd has collection specified via flag, delete other collections from map
-	var collections = c.vdir
+	collections := c.vdir
 	if c.collection != nil && c.allLists == false {
 		for col := range collections {
 			if col != c.collection {
@@ -67,10 +88,10 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	// filter items
-	var filtered = make(map[vdir.Collection][]vdir.Item)
+	// filter and sort items
+	var m = make(map[vdir.Collection][]vdir.Item)
 	for k, v := range collections {
-		items, err := filterByStatus(v, vdir.ToDoStatus(c.status))
+		items, err := filterByStatus(v, vdir.ToDoStatus(c.statusFilter))
 		if err != nil {
 			return err
 		}
@@ -79,18 +100,28 @@ func (c *ListCmd) Run() error {
 			return err
 		}
 
+		switch sortOption(c.sortOption) {
+		case sortOptionPrio:
+			sort.Sort(vdir.ByPriority(items))
+		case sortOptionDue:
+			sort.Sort(vdir.ByDue(items))
+		case sortOptionStatus:
+			sort.Sort(vdir.ByStatus(items))
+		}
+
 		for _, item := range items {
-			filtered[*k] = append(filtered[*k], *item)
+			m[*k] = append(m[*k], *item)
 		}
 	}
 
 	// prepare output
 	var sb = strings.Builder{}
-	for col, items := range filtered {
-		if len(filtered) > 1 {
+	for col, items := range m {
+		if len(m) > 1 {
 			colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
 			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
 		}
+
 		for _, i := range items {
 			if err := writeItem(&sb, *c, i); err != nil {
 				return err

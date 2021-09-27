@@ -30,13 +30,15 @@ type Cmd struct {
 
 	listFlag     string
 	listRequired bool
+
+	conf Config
 }
 
 type Config struct {
 	Path          string `required:"true"`
 	DefaultList   string `split_words:"true"`
 	DefaultStatus string `split_words:"true" default:"NEEDS-ACTION"`
-	DefaultSort   string `split_words:"true" default:"PRIORITY"`
+	DefaultSort   string `split_words:"true" default:"PRIO"`
 	DefaultDue    int    `split_words:"true" default:"48"`
 	Color         bool   `default:"true"`
 }
@@ -46,13 +48,14 @@ func (c *Cmd) Name() string    { return c.fs.Name() }
 func (c *Cmd) Alias() []string { return c.alias }
 
 func (c *Cmd) Init(args []string) error {
-	var conf Config
-	err := envconfig.Process("TDX", &conf)
+	var Conf Config
+	err := envconfig.Process("TDX", &Conf)
 	if err != nil {
 		return err
 	}
+	c.conf = Conf
 
-	c.listFlag = conf.DefaultList
+	c.listFlag = c.conf.DefaultList
 	c.fs.Usage = c.usage
 
 	if err := c.fs.Parse(args); err != nil {
@@ -60,7 +63,7 @@ func (c *Cmd) Init(args []string) error {
 	}
 
 	c.vdir = vdir.Vdir{}
-	if err := c.vdir.Init(conf.Path); err != nil {
+	if err := c.vdir.Init(c.conf.Path); err != nil {
 		return err
 	}
 

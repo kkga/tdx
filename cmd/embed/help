@@ -5,26 +5,24 @@ USAGE
   tdx <command> [options] [<args>...]
 
 COMMANDS
-  list, ls              list todos
-  add, a                add todo
-  done, do              complete todos
-  edit, e               edit todo
-  delete, del           delete todos
-  purge                 remove completed todos
-  show                  show todo info
+  list, ls       list todos
+  add, a         add todo
+  done, do       complete todos
+  edit, e        edit todo
+  delete, del    delete todos
+  purge          remove completed todos
+  show           show todo info
 
   See 'tdx <command> -h' for command usage
 
 ENVIRONMENT VARIABLES
-  TDX_PATH              path to vdir directory, required
+  TDX_PATH              path to vdir directory (required)
   TDX_DEFAULT_LIST      list to use for <list>, <add> commands
-  TDX_DEFAULT_STATUS    status filter for <list> command
-                          values: NEEDS-ACTION (default), COMPLETED, CANCELLED, ANY
-  TDX_DEFAULT_DUE       due duration for new todos
-                          default: 48h
-  TDX_COLOR             use color in output
-                          values: 1 (default), 0
+  TDX_DEFAULT_STATUS    status filter for <list> command, see 'tdx list -h'
+  TDX_DEFAULT_SORT      sorting order for <list> command, see 'tdx list -h'
+  TDX_DEFAULT_DUE       due duration for new todos (default: 48h)
+  TDX_COLOR             use color in output, valid options: 1 (default), 0
 
 FLAGS
-  -v                    print version
-  -h                    print help
+  -v    print version
+  -h    print help

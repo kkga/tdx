@@ -22,14 +22,15 @@ type ToDoStatus string
 type ToDoPriority int
 
 const (
-	StatusCompleted   ToDoStatus   = "COMPLETED"
-	StatusNeedsAction ToDoStatus   = "NEEDS-ACTION"
-	StatusCancelled   ToDoStatus   = "CANCELLED"
-	StatusInProcess   ToDoStatus   = "IN-PROCESS"
-	StatusAny         ToDoStatus   = "ANY"
-	PriorityHigh      ToDoPriority = 1
-	PriorityMedium    ToDoPriority = 5
-	PriorityLow       ToDoPriority = 6
+	StatusCompleted   ToDoStatus = "COMPLETED"
+	StatusNeedsAction ToDoStatus = "NEEDS-ACTION"
+	StatusCancelled   ToDoStatus = "CANCELLED"
+	StatusInProcess   ToDoStatus = "IN-PROCESS"
+	StatusAny         ToDoStatus = "ANY"
+
+	PriorityHigh   ToDoPriority = 1
+	PriorityMedium ToDoPriority = 5
+	PriorityLow    ToDoPriority = 6
 )
 
 type FormatOption int
