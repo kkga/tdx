@@ -1,36 +1,30 @@
 tdx -- todo manager for vdir (iCalendar) files
 Gadzhi Kharkharov <me@kkga.me>
 
-USAGE:
-    tdx <command> [options] [<args>...]
+USAGE
+  tdx <command> [options] [<args>...]
 
-COMMANDS:
-    list, ls       list todos
-    add, a         add todo
-    done, do       complete todos
-    edit, e        edit todo
-    delete, del    delete todos
-    purge          remove completed todos
-    show           show todo info
+COMMANDS
+  list, ls              list todos
+  add, a                add todo
+  done, do              complete todos
+  edit, e               edit todo
+  delete, del           delete todos
+  purge                 remove completed todos
+  show                  show todo info
 
-    See 'tdx <command> -h' for command usage
+  See 'tdx <command> -h' for command usage
 
-ENVIRONMENT VARIABLES:
-    TDX_PATH
-            (required) path to vdir directory
-    TDX_DEFAULT_LIST
-            list to use for <list>, <add> commands
-            can be overridden with '-l'
-    TDX_DEFAULT_STATUS
-            status filter for <list> command
-            values: NEEDS-ACTION (default), COMPLETED, CANCELLED, ANY
-    TDX_DEFAULT_DUE
-            due duration for new todos
-            default value: 48h
-    TDX_COLOR
-            use color in output
-            values: 1 (default), 0
+ENVIRONMENT VARIABLES
+  TDX_PATH              path to vdir directory, required
+  TDX_DEFAULT_LIST      list to use for <list>, <add> commands
+  TDX_DEFAULT_STATUS    status filter for <list> command
+                          values: NEEDS-ACTION (default), COMPLETED, CANCELLED, ANY
+  TDX_DEFAULT_DUE       due duration for new todos
+                          default: 48h
+  TDX_COLOR             use color in output
+                          values: 1 (default), 0
 
-FLAGS:
-    -v    print version
-    -h    print help
+FLAGS
+  -v                    print version
+  -h                    print help
