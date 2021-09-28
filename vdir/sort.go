@@ -9,6 +9,7 @@ import (
 type ByPriority []*Item
 type ByDue []*Item
 type ByStatus []*Item
+type ByCreated []*Item
 
 func (p ByPriority) Len() int      { return len(p) }
 func (p ByPriority) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
@@ -91,5 +92,33 @@ func (s ByStatus) Less(i, j int) bool {
 		return true
 	} else {
 		return false
+	}
+}
+
+func (c ByCreated) Len() int      { return len(c) }
+func (c ByCreated) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+
+func (c ByCreated) Less(i, j int) bool {
+	vt1, _ := c[i].Vtodo()
+	vt2, _ := c[j].Vtodo()
+	p1 := vt1.Props.Get(ical.PropCreated)
+	p2 := vt2.Props.Get(ical.PropCreated)
+
+	var v1 time.Time
+	var v2 time.Time
+
+	if p1 != nil {
+		v1, _ = p1.DateTime(time.UTC)
+	}
+	if p2 != nil {
+		v2, _ = p2.DateTime(time.UTC)
+	}
+
+	if v1.IsZero() {
+		return true
+	} else if v2.IsZero() {
+		return false
+	} else {
+		return v1.After(v2)
 	}
 }

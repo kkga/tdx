@@ -27,7 +27,7 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sortOption, "s", "", "sort todos by `field`: PRIO, DUE, STATUS")
+	c.fs.StringVar(&c.sortOption, "s", "", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
 	c.fs.StringVar(&c.statusFilter, "S", "", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
 }
@@ -45,9 +45,10 @@ type ListCmd struct {
 type sortOption string
 
 const (
-	sortOptionStatus sortOption = "STATUS"
-	sortOptionPrio   sortOption = "PRIO"
-	sortOptionDue    sortOption = "DUE"
+	sortOptionStatus  sortOption = "STATUS"
+	sortOptionPrio    sortOption = "PRIO"
+	sortOptionDue     sortOption = "DUE"
+	sortOptionCreated sortOption = "CREATED"
 )
 
 func (c *ListCmd) Run() error {
@@ -73,7 +74,7 @@ func (c *ListCmd) Run() error {
 		c.sortOption = c.conf.DefaultSort
 	}
 	switch sortOption(c.sortOption) {
-	case sortOptionStatus, sortOptionPrio, sortOptionDue:
+	case sortOptionStatus, sortOptionPrio, sortOptionDue, sortOptionCreated:
 		break
 	default:
 		return fmt.Errorf("Unknown sort option: %q, see %q", c.sortOption, "tdx list -h")
@@ -108,6 +109,8 @@ func (c *ListCmd) Run() error {
 			sort.Sort(vdir.ByDue(items))
 		case sortOptionStatus:
 			sort.Sort(vdir.ByStatus(items))
+		case sortOptionCreated:
+			sort.Sort(vdir.ByCreated(items))
 		}
 
 		for _, item := range items {
