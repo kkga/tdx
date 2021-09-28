@@ -70,7 +70,7 @@ func (c *Cmd) Init(args []string) error {
 	}
 
 	if c.listRequired && c.listFlag == "" {
-		return errors.New("List flag required. See 'tdx -h'.")
+		return errors.New("List flag required. See 'tdx <command> -h'")
 	} else if c.listFlag != "" {
 		names := []string{}
 		for col := range c.vdir {
