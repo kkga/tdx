@@ -21,9 +21,10 @@ func NewListCmd() *ListCmd {
 		shortDesc: "List todos, optionally filtered by query",
 		usageLine: "[options] [query]",
 	}}
+	// TODO handle json flag
 	c.fs.BoolVar(&c.json, "json", false, "json output")
 	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
-	c.fs.BoolVar(&c.multiline, "ml", false, "use 2-line output for dates and description")
+	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sortOption, "s", "", "sort todos by `field`: PRIO, DUE, STATUS")
