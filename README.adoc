@@ -18,7 +18,7 @@ Features
 * completing todos;
 * editing todos in a `$VISUAL`/`$EDITOR` program;
 * deleting todos;
-* purgin completed/cancelled todos.
+* purging completed/cancelled todos.
 
 Demo
 ----
