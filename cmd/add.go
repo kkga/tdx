@@ -57,6 +57,8 @@ func (c *AddCmd) Run() error {
 		t.Props.SetDateTime(ical.PropDue, due)
 	}
 
+	// TODO add default due date from conf
+
 	if c.description != "" {
 		t.Props.SetText(ical.PropDescription, c.description)
 	}
