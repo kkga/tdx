@@ -6,4 +6,4 @@ Simple, standards-based, cli todo manager.
 
 #### Quick demo
 
-./doc/demo.mp4
+https://user-images.githubusercontent.com/1460122/135115870-b0236b4a-aa53-45f9-b534-111d2e4849a8.mp4
