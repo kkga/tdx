@@ -31,19 +31,19 @@ func (c *PurgeCmd) Run() error {
 			if err != nil {
 				return err
 			}
-			status, err := vtodo.Props.Text(ical.PropStatus)
+			s, err := vtodo.Props.Text(ical.PropStatus)
 			if err != nil {
 				return err
 			}
 
-			s := vdir.ToDoStatus(status)
-			if s == vdir.StatusCompleted || s == vdir.StatusCancelled {
+			switch vdir.ToDoStatus(s) {
+			case vdir.StatusCancelled, vdir.StatusCompleted:
 				toDelete = append(toDelete, item)
 			}
 		}
 	}
 
-	if len(toDelete) > 1 {
+	if len(toDelete) > 0 {
 		sb := strings.Builder{}
 
 		for _, item := range toDelete {
