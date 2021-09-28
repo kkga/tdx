@@ -91,3 +91,15 @@ func (v *Vdir) ItemById(id int) (*Item, error) {
 	}
 	return nil, fmt.Errorf("Item not found: %d", id)
 }
+
+// ItemByPath finds and returns an item for specified path
+func (v *Vdir) ItemByPath(path string) (*Item, error) {
+	for _, items := range *v {
+		for _, item := range items {
+			if item.Path == path {
+				return item, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("Item not found: %s", path)
+}

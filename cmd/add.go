@@ -90,7 +90,16 @@ func (c *AddCmd) Run() error {
 	}
 	item.WriteFile()
 
-	s, err := item.Format()
+	if err := c.vdir.Init(c.conf.Path); err != nil {
+		return err
+	}
+
+	addedItem, err := c.vdir.ItemByPath(p)
+	if err != nil {
+		return err
+	}
+
+	s, err := addedItem.Format()
 	if err != nil {
 		return err
 	}
