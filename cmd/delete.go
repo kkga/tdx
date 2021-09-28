@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/kkga/tdx/vdir"
@@ -26,14 +24,9 @@ type DeleteCmd struct {
 }
 
 func (c *DeleteCmd) Run() error {
-	if len(c.fs.Args()) == 0 {
-		return errors.New("Specify one or multiple IDs")
-	}
-
-	IDs := make([]int, len(c.fs.Args()))
-
-	for i, s := range c.fs.Args() {
-		IDs[i], _ = strconv.Atoi(s)
+	IDs, err := c.argsToIDs()
+	if err != nil {
+		return err
 	}
 
 	var toDelete []*vdir.Item

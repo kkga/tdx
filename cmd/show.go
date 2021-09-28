@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/kkga/tdx/vdir"
@@ -26,14 +24,9 @@ type ShowCmd struct {
 }
 
 func (c *ShowCmd) Run() error {
-	if len(c.fs.Args()) == 0 {
-		return errors.New("Specify one or multiple IDs")
-	}
-
-	IDs := make([]int, len(c.fs.Args()))
-
-	for i, s := range c.fs.Args() {
-		IDs[i], _ = strconv.Atoi(s)
+	IDs, err := c.argsToIDs()
+	if err != nil {
+		return err
 	}
 
 	var toShow []*vdir.Item

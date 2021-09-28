@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
@@ -96,6 +97,21 @@ func (c *Cmd) usage() {
 		fmt.Println("OPTIONS")
 		c.fs.PrintDefaults()
 	}
+}
+
+func (c *Cmd) argsToIDs() (IDs []int, err error) {
+	if len(c.fs.Args()) == 0 {
+		return IDs, errors.New("Specify one or multiple IDs")
+	}
+
+	for _, s := range c.fs.Args() {
+		id, err := strconv.Atoi(s)
+		if err != nil {
+			return IDs, fmt.Errorf("Invalid todo ID: %q", s)
+		}
+		IDs = append(IDs, id)
+	}
+	return
 }
 
 func promptConfirm(label string, def bool) bool {
