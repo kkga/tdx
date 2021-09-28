@@ -1,14 +1,17 @@
-`tdx` is a todo manager for https://en.wikipedia.org/wiki/ICalendar[iCalendar] files.
+:iCalendar: https://en.wikipedia.org/wiki/ICalendar[iCalendar]
+:vdirsyncer: https://github.com/pimutils/vdirsyncer[Vdirsyncer]
+:vdirstorage: https://vdirsyncer.pimutils.org/en/latest/vdir.html[storage format]
+:vdirdocs: https://vdirsyncer.pimutils.org/en/stable/index.html[Vdirsyncer documentation]
 
-It is designed to work with https://github.com/pimutils/vdirsyncer[Vdirsyncer]
-and expects to operate in its https://vdirsyncer.pimutils.org/en/latest/vdir.html[storage format].
+`tdx` is a todo manager for {iCalendar} files.
 
-iCalendar-compatibility means it can be used as CLI companion to any CalDAV-enabled
-todo program, such as iOS Reminders.
-See more in https://vdirsyncer.pimutils.org/en/stable/index.html[Vdirsyncer documentation]
-on how to set up calendars and synchronization.
+It is designed to work with {vdirsyncer} and expects to operate in its
+{vdirstorage}.
 
----
+iCalendar-compatibility means it can be used as a CLI companion to any
+CalDAV-enabled todo program, such as iOS Reminders. See more on how to set up
+calendars and synchronization in {vdirdocs}.
+
 
 Features
 --------
@@ -23,12 +26,13 @@ Features
 Demo
 ----
 
+.Quick demo of basic interactions
 https://user-images.githubusercontent.com/1460122/135115870-b0236b4a-aa53-45f9-b534-111d2e4849a8.mp4
 
 Usage
 -----
 
-.*General usage*
+.General usage
 -------------------------------------------------------------------------------
 ❭ tdx -h
 tdx -- todo manager for vdir (iCalendar) files
@@ -62,9 +66,9 @@ FLAGS
 -------------------------------------------------------------------------------
 
 
-.*Adding todos*
+.Adding todos
 -------------------------------------------------------------------------------
-~ ❭ tdx add -h
+❭ tdx add -h
 Add new todo
 
 USAGE
@@ -86,9 +90,9 @@ PRIORITY
 
 OPTIONS
   -d description
-    	description text
+        description text
   -l list
-    	list for new todo
+        list for new todo
 -------------------------------------------------------------------------------
 
 Configuration
@@ -96,25 +100,27 @@ Configuration
 
 `tdx` is configured through environment variables.
 
-*TDX_PATH* `<path>`::
-    *required* +
+*TDX_PATH* (required)::
+    `<path>` +
     path to http://vdirsyncer.pimutils.org/en/stable/vdir.html[vdir directory]; +
     either root path containing multiple collections or path to specific
     collection containing _*.ics_ files
-*TDX_DEFAULT_LIST* `<list name>`::
+*TDX_DEFAULT_LIST*::
+    `<list name>` +
     list to use for *list* and *add* commands; +
     can be overridden with `-l` flag
-*TDX_DEFAULT_STATUS* `NEEDS-ACTION|COMPLETED|CANCELLED|ANY`::
-    default: `NEEDS-ACTION` +
+*TDX_DEFAULT_STATUS*::
+    `NEEDS-ACTION|COMPLETED|CANCELLED|ANY`, default: `NEEDS-ACTION` +
     status filter for *list* command; +
     can be overridden with `-S` flag
-*TDX_DEFAULT_SORT* `PRIO|DUE|STATUS|CREATED`::
-    default: `PRIO` +
+*TDX_DEFAULT_SORT*::
+    `PRIO|DUE|STATUS|CREATED`, default: `PRIO` +
     sorting option for *list* command; +
     can be overridden with `-s` flag
-*TDX_DEFAULT_DUE* `<hours>`::
-    default: `0` +
+*TDX_DEFAULT_DUE*::
+    `<hours>`, default: `0` +
     due date offset (in hours) for new todos; +
     if set to `0`, due dates are not set
-*NO_COLOR* `<any>`::
+*NO_COLOR*::
+    `<any>` +
     disables color in output
