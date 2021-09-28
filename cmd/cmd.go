@@ -23,7 +23,8 @@ type Runner interface {
 type Cmd struct {
 	fs        *flag.FlagSet
 	alias     []string
-	shortDesc string
+	short     string
+	long      string
 	usageLine string
 
 	vdir       vdir.Vdir
@@ -87,11 +88,16 @@ func (c *Cmd) Init(args []string) error {
 }
 
 func (c *Cmd) usage() {
-	fmt.Println(c.shortDesc)
+	fmt.Println(c.short)
 	fmt.Println()
 
 	fmt.Println("USAGE")
 	fmt.Printf("  tdx %s %s\n\n", c.fs.Name(), c.usageLine)
+
+	if c.long != "" {
+		fmt.Println(c.long)
+		fmt.Println()
+	}
 
 	if strings.Contains(c.usageLine, "[options]") {
 		fmt.Println("OPTIONS")

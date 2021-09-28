@@ -13,7 +13,7 @@ func NewDeleteCmd() *DeleteCmd {
 	c := &DeleteCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("delete", flag.ExitOnError),
 		alias:     []string{"del"},
-		shortDesc: "Delete todos",
+		short: "Delete todos",
 		usageLine: "<id>...",
 	}}
 	return c

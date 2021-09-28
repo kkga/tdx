@@ -18,7 +18,7 @@ func NewListCmd() *ListCmd {
 	c := &ListCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("list", flag.ExitOnError),
 		alias:     []string{"ls", "l"},
-		shortDesc: "List todos, optionally filtered by query",
+		short:     "List todos, optionally filtered by query",
 		usageLine: "[options] [query]",
 	}}
 	// TODO handle json flag
@@ -116,6 +116,10 @@ func (c *ListCmd) Run() error {
 		for _, item := range items {
 			m[*k] = append(m[*k], *item)
 		}
+	}
+
+	if len(m) == 0 {
+		return fmt.Errorf("No todos found")
 	}
 
 	// prepare output

@@ -11,7 +11,7 @@ import (
 func NewShowCmd() *ShowCmd {
 	c := &ShowCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("show", flag.ExitOnError),
-		shortDesc: "Show detailed info for todo",
+		short: "Show detailed info for todo",
 		usageLine: "[options] <id>...",
 	}}
 	c.fs.BoolVar(&c.raw, "r", false, "raw output")

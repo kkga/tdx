@@ -13,7 +13,7 @@ import (
 func NewPurgeCmd() *PurgeCmd {
 	c := &PurgeCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("purge", flag.ExitOnError),
-		shortDesc: "Remove completed and cancelled todos",
+		short: "Remove completed and cancelled todos",
 	}}
 	return c
 }

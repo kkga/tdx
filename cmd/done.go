@@ -13,7 +13,7 @@ func NewDoneCmd() *DoneCmd {
 	c := &DoneCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("done", flag.ExitOnError),
 		alias:     []string{"do"},
-		shortDesc: "Complete todos",
+		short: "Complete todos",
 		usageLine: "[options] <id>...",
 	}}
 	c.fs.BoolVar(&c.toggle, "t", false, "toggle completed state")
