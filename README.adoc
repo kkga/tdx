@@ -1,0 +1,120 @@
+`tdx` is a todo manager for https://en.wikipedia.org/wiki/ICalendar[iCalendar] files.
+
+It is designed to work with https://github.com/pimutils/vdirsyncer[Vdirsyncer]
+and expects to operate in its https://vdirsyncer.pimutils.org/en/latest/vdir.html[storage format].
+
+iCalendar-compatibility means it can be used as CLI companion to any CalDAV-enabled
+todo program, such as iOS Reminders.
+See more in https://vdirsyncer.pimutils.org/en/stable/index.html[Vdirsyncer documentation]
+on how to set up calendars and synchronization.
+
+---
+
+Features
+--------
+
+* adding todos with automatic date and priority parsing;
+* listing todos, with various sorting and filtering options;
+* completing todos;
+* editing todos in a `$VISUAL`/`$EDITOR` program;
+* deleting todos;
+* purgin completed/cancelled todos.
+
+Demo
+----
+
+https://user-images.githubusercontent.com/1460122/135115870-b0236b4a-aa53-45f9-b534-111d2e4849a8.mp4
+
+Usage
+-----
+
+.*General usage*
+-------------------------------------------------------------------------------
+❭ tdx -h
+tdx -- todo manager for vdir (iCalendar) files
+Gadzhi Kharkharov <me@kkga.me>
+
+USAGE
+  tdx <command> [options] [<args>...]
+
+COMMANDS
+  list, ls       list todos
+  add, a         add todo
+  done, do       complete todos
+  edit, e        edit todo
+  delete, del    delete todos
+  purge          remove completed todos
+  show           show todo info
+
+  See 'tdx <command> -h' for command usage
+
+ENVIRONMENT VARIABLES
+  TDX_PATH              path to vdir directory (required)
+  TDX_DEFAULT_LIST      list to use for <list>, <add> commands
+  TDX_DEFAULT_STATUS    status filter for <list> command, see 'tdx list -h'
+  TDX_DEFAULT_SORT      sorting order for <list> command, see 'tdx list -h'
+  TDX_DEFAULT_DUE       due duration for new todos (default: 48h)
+  NO_COLOR              disable colors in output
+
+FLAGS
+  -v    print version
+  -h    print help
+-------------------------------------------------------------------------------
+
+
+.*Adding todos*
+-------------------------------------------------------------------------------
+~ ❭ tdx add -h
+Add new todo
+
+USAGE
+  tdx add [options] <todo>
+
+DUE DATE
+  If todo text contains a date in one of the following
+  formats, it will be applied as due date:
+  * "today", "tomorrow", "in 3 days", "in 2 weeks"
+  * "next week", "next month", "next monday"
+  * ordinal date: "december 1st", "15th november"
+
+PRIORITY
+  If todo text contains one or more "!" chars,
+  they will be converted to priority:
+  * "!!!" (high)
+  * "!!"  (medium)
+  * "!"   (low)
+
+OPTIONS
+  -d description
+    	description text
+  -l list
+    	list for new todo
+-------------------------------------------------------------------------------
+
+Configuration
+-------------
+
+`tdx` is configured through environment variables.
+
+*TDX_PATH* `<path>`::
+    *required* +
+    path to http://vdirsyncer.pimutils.org/en/stable/vdir.html[vdir directory];
+    either root path containing multiple collections or path to specific
+    collection containing _*.ics_ files
+*TDX_DEFAULT_LIST* `<list name>`::
+    list to use for *list* and *add* commands; +
+    can be overridden with `-l` flag
+*TDX_DEFAULT_STATUS* `NEEDS-ACTION | COMPLETED | CANCELLED | ANY`::
+    default: `NEEDS-ACTION` +
+    status filter for *list* command; +
+    can be overridden with `-S` flag
+*TDX_DEFAULT_SORT* `PRIO | DUE | STATUS | CREATED`::
+    default: `PRIO` +
+    sorting option for *list* command; +
+    can be overridden with `-s` flag
+*TDX_DEFAULT_DUE* `<hours>`::
+    default: `0` +
+    due date offset (in hours) for new todos; +
+    if set to `0`, due dates are not set
+*NO_COLOR* `<any>`::
+    disables color in output
