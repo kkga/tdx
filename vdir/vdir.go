@@ -17,10 +17,10 @@ type Vdir map[*Collection][]*Item
 func (v *Vdir) Init(path string) error {
 	f, err := os.Stat(path)
 	if errors.Is(err, fs.ErrNotExist) {
-		return fmt.Errorf("Specified vdir path does not exist: %s", path)
+		return fmt.Errorf("Specified vdir path does not exist: %q", path)
 	}
 	if !f.IsDir() {
-		return fmt.Errorf("Specified vdir path is not a directory: %s", path)
+		return fmt.Errorf("Specified vdir path is not a directory: %q", path)
 	}
 
 	var itemId int
@@ -101,5 +101,5 @@ func (v *Vdir) ItemByPath(path string) (*Item, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("Item not found: %s", path)
+	return nil, fmt.Errorf("Item not found: %q", path)
 }

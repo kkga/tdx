@@ -78,7 +78,7 @@ func (c *Cmd) Init(args []string) error {
 			}
 		}
 		if c.collection == nil {
-			return fmt.Errorf("List does not exist: %s\nAvailable lists: %s", c.listFlag, strings.Join(names, ", "))
+			return fmt.Errorf("List does not exist: %q\nAvailable lists: %s", c.listFlag, strings.Join(names, ", "))
 		}
 	}
 

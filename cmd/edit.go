@@ -43,7 +43,7 @@ func (c *EditCmd) Run() error {
 
 	id, err := strconv.Atoi(c.fs.Arg(0))
 	if err != nil {
-		return fmt.Errorf("Invalid todo ID: %s", c.fs.Arg(0))
+		return fmt.Errorf("Invalid todo ID: %q", c.fs.Arg(0))
 	}
 
 	item, err := c.vdir.ItemById(id)

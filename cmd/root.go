@@ -50,7 +50,7 @@ func Root(args []string, version string) error {
 		}
 	}
 
-	return fmt.Errorf("Unknown subcommand: %s", subcommand)
+	return fmt.Errorf("Unknown subcommand: %q", subcommand)
 }
 
 func containsString(s []string, e string) bool {

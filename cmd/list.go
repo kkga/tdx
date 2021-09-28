@@ -64,7 +64,7 @@ func (c *ListCmd) Run() error {
 	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
 		break
 	default:
-		return fmt.Errorf("Unknown status filter: %s, see 'tdx list -h'", c.statusFilter)
+		return fmt.Errorf("Unknown status filter: %q, see %q", c.statusFilter, "tdx list -h")
 	}
 
 	// process sort option
@@ -75,7 +75,7 @@ func (c *ListCmd) Run() error {
 	case sortOptionStatus, sortOptionPrio, sortOptionDue:
 		break
 	default:
-		return fmt.Errorf("Unknown sort option: %s, see 'tdx list -h'", c.sortOption)
+		return fmt.Errorf("Unknown sort option: %q, see %q", c.sortOption, "tdx list -h")
 	}
 
 	// if cmd has collection specified via flag, delete other collections from map

@@ -90,7 +90,7 @@ func (i *Item) Vtodo() (*ical.Component, error) {
 			return comp, nil
 		}
 	}
-	return nil, fmt.Errorf("Vtodo not found: %s", i.Ical.Name)
+	return nil, fmt.Errorf("Vtodo not found: %q", i.Ical.Name)
 }
 
 // FormatFull returns a full detailed info about an item

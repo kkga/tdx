@@ -75,7 +75,7 @@ func (c *AddCmd) Run() error {
 			prioProp.Value = fmt.Sprint(vdir.PriorityLow)
 			t.Props.Add(prioProp)
 		default:
-			return fmt.Errorf("Unknown priority flag: %s, expected one of: !!!, !!, !", c.priority)
+			return fmt.Errorf("Unknown priority flag: %q, expected one of: !!!, !!, !", c.priority)
 		}
 	}
 
