@@ -9,6 +9,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,8 @@ const (
 	PriorityMedium ToDoPriority = 5
 	PriorityLow    ToDoPriority = 6
 )
+
+const HashtagRe = "\\B#\\w+"
 
 type FormatOption int
 
@@ -173,6 +176,17 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 		case ical.PropSummary:
 			summary = p.Value
+			tags, err := i.Tags()
+			if err != nil {
+				return "", err
+			}
+			if len(tags) > 0 {
+				c := color.New(color.FgBlue).SprintFunc()
+				// re := regexp.MustCompile(HashtagRe)
+				for _, t := range tags {
+					summary = strings.ReplaceAll(summary, t, c(t))
+				}
+			}
 
 		case ical.PropDescription:
 			description = colorDesc(fmt.Sprintf("%s", p.Value))
@@ -404,6 +418,23 @@ func (i *Item) WriteFile() error {
 	}
 
 	return nil
+}
+
+// Tags returns a slice of hashtag strings parsed from summary
+func (i *Item) Tags() (tags []string, err error) {
+	re := regexp.MustCompile(HashtagRe)
+
+	vt, err := i.Vtodo()
+	if err != nil {
+		return
+	}
+	summary, err := vt.Props.Text(ical.PropSummary)
+	if err != nil {
+		return
+	}
+
+	tags = re.FindAllString(summary, -1)
+	return
 }
 
 // GenerateUID returns a random string containing timestamp and hostname

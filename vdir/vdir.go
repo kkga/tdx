@@ -66,22 +66,6 @@ func (v *Vdir) Init(path string) error {
 	return nil
 }
 
-// isIcal reports whether path is a file that has an ical extension
-func isIcal(path string, de fs.DirEntry) bool {
-	return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)
-}
-
-// hasIcalFiles reports whether path contains ical files
-func hasIcalFiles(path string) bool {
-	files, _ := os.ReadDir(path)
-	for _, f := range files {
-		if filepath.Ext(f.Name()) == fmt.Sprintf(".%s", ical.Extension) {
-			return true
-		}
-	}
-	return false
-}
-
 // ItemById finds and returns an item for specified id
 func (v *Vdir) ItemById(id int) (*Item, error) {
 	for _, items := range *v {
@@ -104,4 +88,20 @@ func (v *Vdir) ItemByPath(path string) (*Item, error) {
 		}
 	}
 	return nil, fmt.Errorf("Item not found: %q", path)
+}
+
+// isIcal reports whether path is a file that has an ical extension
+func isIcal(path string, de fs.DirEntry) bool {
+	return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)
+}
+
+// hasIcalFiles reports whether path contains ical files
+func hasIcalFiles(path string) bool {
+	files, _ := os.ReadDir(path)
+	for _, f := range files {
+		if filepath.Ext(f.Name()) == fmt.Sprintf(".%s", ical.Extension) {
+			return true
+		}
+	}
+	return false
 }
