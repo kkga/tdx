@@ -1,3 +1,5 @@
+// The vdir package implements a simple library to interact with vdir
+// filesystem storage: https://vdirsyncer.pimutils.org/en/stable/vdir.html
 package vdir
 
 import (
