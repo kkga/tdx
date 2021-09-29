@@ -5,21 +5,26 @@ Looks like i'm overthinking this...
 Instead of trying to convert ical component into ToDo and then back without loosing data,
 i should use the decoded ical data as a single source and provide printing functions
 that format the given component.
+
 ---
 
 COMMANDS
-- [x] list
-	- [ ] sorting
+- [ ] list
+	- [x] sorting
 	- [ ] json
+	- [ ] add a flag to organize by tags instead of list
+	- [ ] filter by range of dates (e.g. due next X days)
+	- [ ] parse tags in summary
+	- [ ] use lowercase for status and sort flags
 - [x] add
-	- [ ] parse priority from args
+	- [x] parse priority from args
 - [x] do
 - [x] delete
 - [x] edit
 - [x] show
 - [x] purge
-- [ ] stats
-- [ ] move
+- [ ] stats: total lists, total todos, etc
+- [ ] move between lists
 
 FEAT
 - [x] edit command
@@ -43,8 +48,8 @@ ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
 - [x] generate UID of specific format?
 - [x] read about priority ical spec
-- [ ] update modified date on write
-- [ ] what is sequence?
+- [x] update modified date on write
+- [x] what is sequence?
 
 DECODING
 - [ ] ? parse #tags in description
