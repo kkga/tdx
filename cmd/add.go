@@ -84,9 +84,7 @@ func (c *AddCmd) Run() error {
 		t.Props.SetText(ical.PropDescription, c.description)
 	}
 
-	now := time.Now()
-	due, _ := naturaldate.Parse(summary, now, naturaldate.WithDirection(naturaldate.Future))
-	if due != now {
+	if due, err := parseDueDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
 	}
 
@@ -114,4 +112,14 @@ func (c *AddCmd) Run() error {
 	fmt.Print(s)
 
 	return nil
+}
+
+func parseDueDate(s string) (t time.Time, err error) {
+	now := time.Now()
+	due, _ := naturaldate.Parse(s, now, naturaldate.WithDirection(naturaldate.Future))
+	if due != now {
+		t = due
+		return t, nil
+	}
+	return t, errors.New("No date found")
 }
