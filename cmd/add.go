@@ -16,7 +16,6 @@ import (
 
 func NewAddCmd() *AddCmd {
 	c := &AddCmd{Cmd: Cmd{
-		// TODO add long description of due date parsing
 		fs:    flag.NewFlagSet("add", flag.ExitOnError),
 		alias: []string{"a"},
 		short: "Add new todo",

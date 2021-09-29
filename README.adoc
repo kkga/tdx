@@ -57,7 +57,6 @@ ENVIRONMENT VARIABLES
   TDX_DEFAULT_LIST      list to use for <list>, <add> commands
   TDX_DEFAULT_STATUS    status filter for <list> command, see 'tdx list -h'
   TDX_DEFAULT_SORT      sorting order for <list> command, see 'tdx list -h'
-  TDX_DEFAULT_DUE       due duration for new todos (default: 48h)
   NO_COLOR              disable colors in output
 
 FLAGS
@@ -117,10 +116,6 @@ Configuration
     `PRIO|DUE|STATUS|CREATED`, default: `PRIO` +
     sorting option for *list* command; +
     can be overridden with `-s` flag
-*TDX_DEFAULT_DUE*::
-    `<hours>`, default: `0` +
-    due date offset (in hours) for new todos; +
-    if set to `0`, due dates are not set
 *NO_COLOR*::
     `<any>` +
     disables color in output

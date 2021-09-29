@@ -20,7 +20,6 @@ ENVIRONMENT VARIABLES
   TDX_DEFAULT_LIST      list to use for <list>, <add> commands
   TDX_DEFAULT_STATUS    status filter for <list> command, see 'tdx list -h'
   TDX_DEFAULT_SORT      sorting order for <list> command, see 'tdx list -h'
-  TDX_DEFAULT_DUE       due duration for new todos (default: 48h)
   NO_COLOR              disable colors in output
 
 FLAGS

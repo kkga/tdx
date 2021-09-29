@@ -41,7 +41,6 @@ type Config struct {
 	DefaultList   string `split_words:"true"`
 	DefaultStatus string `split_words:"true" default:"NEEDS-ACTION"`
 	DefaultSort   string `split_words:"true" default:"PRIO"`
-	DefaultDue    int    `split_words:"true" default:"48"`
 	Color         bool   `default:"true"`
 }
 
