@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# requires:
+# - fzf (https://github.com/junegunn/fzf)
+
+tdx ls -S ANY -s CREATED |
+	fzf \
+		--header="[ret] Toggle, [c-e] Edit, [c-t] Add (from query), [c-x] Delete" \
+		--bind="enter:execute-silent(tdx do -t {1})+reload(tdx ls -S ANY -s CREATED)" \
+		--bind="ctrl-e:execute(tdx edit {1})+abort" \
+		--bind="ctrl-t:execute-silent(tdx add {q})+clear-query+reload(tdx ls -S ANY -s CREATED)" \
+		--bind="ctrl-x:execute-silent(tdx del -y {1})+reload(tdx ls -S ANY -s CREATED)" \
+		--preview-window=right:50%:border-left --preview="tdx show {1}"
