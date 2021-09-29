@@ -13,14 +13,16 @@ func NewDeleteCmd() *DeleteCmd {
 	c := &DeleteCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("delete", flag.ExitOnError),
 		alias:     []string{"del"},
-		short: "Delete todos",
-		usageLine: "<id>...",
+		short:     "Delete todos",
+		usageLine: "[options] <id>...",
 	}}
+	c.fs.BoolVar(&c.yes, "y", false, "do not ask for confimation")
 	return c
 }
 
 type DeleteCmd struct {
 	Cmd
+	yes bool
 }
 
 func (c *DeleteCmd) Run() error {
@@ -51,8 +53,17 @@ func (c *DeleteCmd) Run() error {
 
 	fmt.Print(sb.String())
 
-	ok := promptConfirm("Delete listed todos?", false)
-	if ok {
+	if !c.yes {
+		ok := promptConfirm("Delete listed todos?", false)
+		if ok {
+			for _, i := range toDelete {
+				if err := os.Remove(i.Path); err != nil {
+					return err
+				}
+			}
+			fmt.Printf("Deleted: %d todos\n", len(toDelete))
+		}
+	} else {
 		for _, i := range toDelete {
 			if err := os.Remove(i.Path); err != nil {
 				return err
