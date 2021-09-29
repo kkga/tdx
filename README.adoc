@@ -119,3 +119,25 @@ Configuration
 *NO_COLOR*::
     `<any>` +
     disables color in output
+
+Installation
+------------
+
+From release binaries
+~~~~~~~~~~~~~~~~~~~~~
+
+Download the compiled binary for your system from
+https://github.com/kkga/tdx/releases[Releases] page and put it somewhere
+in your `$PATH`.
+
+From source
+~~~~~~~~~~~
+
+Requires https://golang.org/[Go] installed on your system.
+
+Clone the repository and run `go build`, then copy the compiled binary
+somewhere in your `$PATH`.
+
+If Go is https://golang.org/ref/mod#go-install[configured] to install
+packages in `$PATH`, it's also possible to install without cloning the
+repository: run `go install github.com/kkga/tdx@latest`.
