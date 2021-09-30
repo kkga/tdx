@@ -176,13 +176,13 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 		case ical.PropSummary:
 			summary = p.Value
+
 			tags, err := i.Tags()
 			if err != nil {
 				return "", err
 			}
 			if len(tags) > 0 {
 				c := color.New(color.FgBlue).SprintFunc()
-				// re := regexp.MustCompile(HashtagRe)
 				for _, t := range tags {
 					summary = strings.ReplaceAll(summary, t, c(t))
 				}
@@ -206,35 +206,35 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 			var prefix string
 			var humanDate string
-			var colorizer = color.New(color.Reset).SprintFunc()
+			var col = color.New(color.Reset).SprintFunc()
 
 			if diff.Hours() < 24 {
 				if now.Day() == d.Day() {
-					colorizer = color.New(color.FgGreen).SprintFunc()
+					col = color.New(color.FgGreen).SprintFunc()
 					prefix = ""
 					humanDate = "today"
 				} else if math.Signbit(diff.Hours()) {
-					colorizer = color.New(color.FgRed).SprintFunc()
+					col = color.New(color.FgRed).SprintFunc()
 					prefix = "overdue "
 					humanDate = "yesterday"
 				} else {
-					colorizer = color.New(color.FgGreen).SprintFunc()
+					col = color.New(color.FgGreen).SprintFunc()
 					prefix = ""
 					humanDate = "tomorrow"
 				}
 			} else {
 				if math.Signbit(diff.Hours()) {
 					prefix = "overdue "
-					colorizer = color.New(color.FgRed).SprintFunc()
+					col = color.New(color.FgRed).SprintFunc()
 				} else {
 					prefix = "in "
-					colorizer = color.New(color.Faint).SprintFunc()
+					col = color.New(color.Faint).SprintFunc()
 				}
 
 				humanDate = durafmt.ParseShort(diff).String()
 			}
 
-			due = colorizer(fmt.Sprintf("(%s%s)", prefix, humanDate))
+			due = col(fmt.Sprintf("(%s%s)", prefix, humanDate))
 
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
