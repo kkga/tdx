@@ -37,7 +37,7 @@ Usage
 
 .General usage
 -------------------------------------------------------------------------------
-❭ tdx -h
+> tdx -h
 tdx -- todo manager for vdir (iCalendar) files
 Gadzhi Kharkharov <x@kkga.me>
 
@@ -70,7 +70,7 @@ FLAGS
 
 .Adding todos
 -------------------------------------------------------------------------------
-❭ tdx add -h
+> tdx add -h
 Add new todo
 
 USAGE
@@ -147,6 +147,6 @@ If Go is https://golang.org/ref/mod#go-install[configured] to install
 packages in `$PATH`, it's also possible to install without cloning the
 repository:
 
----
+----
 go install github.com/kkga/tdx@latest
----
+----
