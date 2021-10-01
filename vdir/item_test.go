@@ -13,9 +13,9 @@ func TestTags(t *testing.T) {
 	vdpath := path.Join(cwd, "testdata/vdir/with_tags/")
 	var tests = []struct {
 		path string
-		want []string
+		want []Tag
 	}{
-		{vdpath, []string{"#Quebec", "#go", "#sway", "#Later"}},
+		{vdpath, []Tag{"#Quebec", "#go", "#sway", "#Later"}},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
@@ -23,7 +23,7 @@ func TestTags(t *testing.T) {
 			if err := vd.Init(tt.path); err != nil {
 				t.Fatal(err)
 			}
-			got := []string{}
+			got := []Tag{}
 			for _, items := range vd {
 				for _, item := range items {
 					tags, err := item.Tags()

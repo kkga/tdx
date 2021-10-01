@@ -56,6 +56,14 @@ type Item struct {
 	Ical *ical.Calendar
 }
 
+// Tag represents a hashtag label in todo summary
+type Tag string
+
+// String returns a lowercased tag string
+func (t Tag) String() string {
+	return strings.ToLower(string(t))
+}
+
 // Init initializes an Item with a decoded ical data from path
 func (i *Item) Init(path string) error {
 	file, err := os.Open(path)
@@ -184,7 +192,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			if len(tags) > 0 {
 				c := color.New(color.FgBlue).SprintFunc()
 				for _, t := range tags {
-					summary = strings.ReplaceAll(summary, t, c(t))
+					summary = strings.ReplaceAll(summary, string(t), c(t))
 				}
 			}
 
@@ -421,7 +429,7 @@ func (i *Item) WriteFile() error {
 }
 
 // Tags returns a slice of hashtag strings parsed from summary
-func (i *Item) Tags() (tags []string, err error) {
+func (i *Item) Tags() (tags []Tag, err error) {
 	re := regexp.MustCompile(HashtagRe)
 
 	vt, err := i.Vtodo()
@@ -433,7 +441,11 @@ func (i *Item) Tags() (tags []string, err error) {
 		return
 	}
 
-	tags = re.FindAllString(summary, -1)
+	tt := re.FindAllString(summary, -1)
+
+	for _, t := range tt {
+		tags = append(tags, Tag(t))
+	}
 	return
 }
 
