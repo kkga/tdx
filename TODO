@@ -8,6 +8,13 @@ that format the given component.
 
 ---
 
+BUGS
+- [x] Collections() messes up the map with non-existing items in various collections
+	- [x] this is the result of incorrect path (higher up tree), should prob check if
+				the path actually contains calendars
+- [ ] add tests for vdir package
+- [ ] new todos have a zero due
+
 COMMANDS
 - [ ] list
 	- [x] sorting
@@ -42,11 +49,6 @@ FEAT
 		- https://github.com/tj/go-naturaldate
 		- https://github.com/bcampbell/fuzzytime
 
-BUGS
-- [x] Collections() messes up the map with non-existing items in various collections
-	- [x] this is the result of incorrect path (higher up tree), should prob check if
-				the path actually contains calendars
-- [ ] add tests for vdir package
 
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
