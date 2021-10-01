@@ -11,11 +11,11 @@ that format the given component.
 COMMANDS
 - [ ] list
 	- [x] sorting
-	- [ ] json
-	- [ ] add a flag to organize by tags instead of list
+	- [x] add a flag to organize by tags instead of list
+	- [x] parse tags in summary
 	- [ ] filter by range of dates (e.g. due next X days)
-	- [ ] parse tags in summary
 	- [ ] use lowercase for status and sort flags
+	- [ ] json
 - [x] add
 	- [x] parse priority from args
 - [x] do
@@ -25,6 +25,10 @@ COMMANDS
 - [x] purge
 - [ ] stats: total lists, total todos, etc
 - [ ] move between lists
+
+MISC
+- store collection names in a sorted slice before printing
+- don't require list name if only one list
 
 FEAT
 - [x] edit command

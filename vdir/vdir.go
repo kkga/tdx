@@ -90,6 +90,34 @@ func (v *Vdir) ItemByPath(path string) (*Item, error) {
 	return nil, fmt.Errorf("Item not found: %q", path)
 }
 
+// Tags returns a slice of all tags found in todos inside vdir
+func (v *Vdir) Tags() (tags []Tag, err error) {
+	containsTag := func(tags []Tag, tag Tag) bool {
+		for _, t := range tags {
+			if tag == t {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, items := range *v {
+		for _, item := range items {
+			tt, err := item.Tags()
+			if err != nil {
+				return tags, err
+			}
+			for _, tag := range tt {
+				if !containsTag(tags, tag) {
+					tags = append(tags, tag)
+				}
+			}
+		}
+	}
+
+	return
+}
+
 // isIcal reports whether path is a file that has an ical extension
 func isIcal(path string, de fs.DirEntry) bool {
 	return !de.IsDir() && filepath.Ext(path) == fmt.Sprintf(".%s", ical.Extension)

@@ -21,6 +21,7 @@ func NewListCmd() *ListCmd {
 	}}
 	// TODO handle json flag
 	c.fs.BoolVar(&c.json, "json", false, "json output")
+	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
 	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
@@ -33,6 +34,7 @@ func NewListCmd() *ListCmd {
 type ListCmd struct {
 	Cmd
 	json         bool
+	byTag        bool
 	multiline    bool
 	description  bool
 	allLists     bool
@@ -88,16 +90,14 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	// filter and sort items
-	var m = make(map[vdir.Collection][]vdir.Item)
-	for k, v := range collections {
-		items, err := filterByStatus(v, vdir.ToDoStatus(c.statusFilter))
+	filterAndSortItems := func(ii []*vdir.Item) (items []*vdir.Item, err error) {
+		items, err = filterByStatus(ii, vdir.ToDoStatus(c.statusFilter))
 		if err != nil {
-			return err
+			return
 		}
 		items, err = filterByQuery(items, query)
 		if err != nil {
-			return err
+			return
 		}
 
 		switch sortOption(c.sortOption) {
@@ -111,31 +111,75 @@ func (c *ListCmd) Run() error {
 			sort.Sort(vdir.ByCreated(items))
 		}
 
-		for _, item := range items {
-			m[*k] = append(m[*k], *item)
+		return
+	}
+
+	var m = make(map[string][]*vdir.Item)
+	if c.byTag {
+		emptyTag := vdir.Tag("[no tags]")
+
+		allItems := []*vdir.Item{}
+		for _, items := range collections {
+			allItems = append(allItems, items...)
 		}
+
+		allItems, err := filterAndSortItems(allItems)
+		if err != nil {
+			return err
+		}
+
+		for _, item := range allItems {
+			tags, err := item.Tags()
+			if err != nil {
+				return err
+			}
+			if len(tags) > 0 {
+				for _, tag := range tags {
+					m[tag.String()] = append(m[tag.String()], item)
+				}
+			} else {
+				m[emptyTag.String()] = append(m[emptyTag.String()], item)
+			}
+		}
+	} else {
+		for col, items := range collections {
+			items, err := filterAndSortItems(items)
+			if err != nil {
+				return err
+			}
+
+			for _, item := range items {
+				m[col.String()] = append(m[col.String()], item)
+			}
+		}
+
 	}
 
 	if len(m) == 0 {
 		return fmt.Errorf("No todos found")
 	}
 
-	// prepare output
-	var sb = strings.Builder{}
-	for col, items := range m {
-		if len(m) > 1 {
-			colorList := color.New(color.Bold, color.FgYellow).SprintFunc()
-			sb.WriteString(colorList(fmt.Sprintf("== %s (%d) ==\n", col.Name, len(items))))
-		}
+	// sort map keys and prepare output
+	keys := []string{}
+	for key := range m {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
 
-		for _, i := range items {
-			if err := writeItem(&sb, *c, i); err != nil {
+	col := color.New(color.Bold, color.FgYellow).SprintFunc()
+
+	var sb = strings.Builder{}
+	for _, key := range keys {
+		sb.WriteString(col(fmt.Sprintf("== %s\n", key)))
+		for _, i := range m[key] {
+			if err := writeItem(&sb, *c, *i); err != nil {
 				return err
 			}
 		}
 	}
 
 	fmt.Print(sb.String())
+
 	return nil
 }
 
