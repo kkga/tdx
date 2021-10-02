@@ -28,21 +28,16 @@ type Cmd struct {
 	long      string
 	usageLine string
 
-	vdir       vdir.Vdir
-	collection *vdir.Collection
-
-	listFlag     string
-	listRequired bool
-
 	conf Config
+	args []string
+
+	vdir vdir.Vdir
 }
 
 type Config struct {
-	Path          string `required:"true"`
-	DefaultList   string `split_words:"true"`
-	DefaultStatus string `split_words:"true" default:"NEEDS-ACTION"`
-	DefaultSort   string `split_words:"true" default:"PRIO"`
-	Color         bool   `default:"true"`
+	Path     string `required:"true"`    // Path to vdir
+	ListOpts string `split_words:"true"` // Default options for list command
+	AddOpts  string `split_words:"true"` // Default options for add command
 }
 
 func (c *Cmd) Run() error      { return nil }
@@ -50,41 +45,43 @@ func (c *Cmd) Name() string    { return c.fs.Name() }
 func (c *Cmd) Alias() []string { return c.alias }
 
 func (c *Cmd) Init(args []string) error {
-	var Conf Config
-	err := envconfig.Process("TDX", &Conf)
+	var conf Config
+	err := envconfig.Process("TDX", &conf)
 	if err != nil {
 		return err
 	}
-	c.conf = Conf
 
-	c.listFlag = c.conf.DefaultList
+	c.conf = conf
+	c.args = args
 	c.fs.Usage = c.usage
-
-	if err := c.fs.Parse(args); err != nil {
-		return err
-	}
 
 	c.vdir = vdir.Vdir{}
 	if err := c.vdir.Init(c.conf.Path); err != nil {
 		return err
 	}
 
-	if c.listRequired && c.listFlag == "" {
-		return errors.New("List flag required. See 'tdx <command> -h'")
-	} else if c.listFlag != "" {
-		names := []string{}
-		for col := range c.vdir {
-			names = append(names, col.Name)
-			if col.Name == c.listFlag {
-				c.collection = col
-			}
-		}
-		if c.collection == nil {
-			return fmt.Errorf("List does not exist: %q\nAvailable lists: %s", c.listFlag, strings.Join(names, ", "))
-		}
+	if err := c.fs.Parse(args); err != nil {
+		return err
 	}
 
 	return nil
+}
+
+func (c *Cmd) checkListFlag(list string, required bool, cmd Runner) error {
+	if list == "" && required {
+		return fmt.Errorf("List flag required. See 'tdx %s -h'", cmd.Name())
+	} else if list != "" {
+		names := []string{}
+		for col := range c.vdir {
+			names = append(names, col.Name)
+			if col.Name == list {
+				return nil
+			}
+		}
+		return fmt.Errorf("List does not exist: %q\nAvailable lists: %s", list, strings.Join(names, ", "))
+	} else {
+		return nil
+	}
 }
 
 func (c *Cmd) usage() {

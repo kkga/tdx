@@ -9,6 +9,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -33,6 +34,8 @@ const (
 	PriorityLow    ToDoPriority = 6
 )
 
+const HashtagRe = "\\B#\\w+"
+
 type FormatOption int
 
 const (
@@ -51,6 +54,14 @@ type Item struct {
 	Id   int
 	Path string
 	Ical *ical.Calendar
+}
+
+// Tag represents a hashtag label in todo summary
+type Tag string
+
+// String returns a lowercased tag string
+func (t Tag) String() string {
+	return strings.ToLower(string(t))
 }
 
 // Init initializes an Item with a decoded ical data from path
@@ -174,6 +185,17 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 		case ical.PropSummary:
 			summary = p.Value
 
+			tags, err := i.Tags()
+			if err != nil {
+				return "", err
+			}
+			if len(tags) > 0 {
+				c := color.New(color.FgBlue).SprintFunc()
+				for _, t := range tags {
+					summary = strings.ReplaceAll(summary, string(t), c(t))
+				}
+			}
+
 		case ical.PropDescription:
 			description = colorDesc(fmt.Sprintf("%s", p.Value))
 
@@ -192,35 +214,35 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 			var prefix string
 			var humanDate string
-			var colorizer = color.New(color.Reset).SprintFunc()
+			var col = color.New(color.Reset).SprintFunc()
 
 			if diff.Hours() < 24 {
 				if now.Day() == d.Day() {
-					colorizer = color.New(color.FgGreen).SprintFunc()
+					col = color.New(color.FgGreen).SprintFunc()
 					prefix = ""
 					humanDate = "today"
 				} else if math.Signbit(diff.Hours()) {
-					colorizer = color.New(color.FgRed).SprintFunc()
+					col = color.New(color.FgRed).SprintFunc()
 					prefix = "overdue "
 					humanDate = "yesterday"
 				} else {
-					colorizer = color.New(color.FgGreen).SprintFunc()
+					col = color.New(color.FgGreen).SprintFunc()
 					prefix = ""
 					humanDate = "tomorrow"
 				}
 			} else {
 				if math.Signbit(diff.Hours()) {
 					prefix = "overdue "
-					colorizer = color.New(color.FgRed).SprintFunc()
+					col = color.New(color.FgRed).SprintFunc()
 				} else {
 					prefix = "in "
-					colorizer = color.New(color.Faint).SprintFunc()
+					col = color.New(color.Faint).SprintFunc()
 				}
 
 				humanDate = durafmt.ParseShort(diff).String()
 			}
 
-			due = colorizer(fmt.Sprintf("(%s%s)", prefix, humanDate))
+			due = col(fmt.Sprintf("(%s%s)", prefix, humanDate))
 
 		case ical.PropPriority:
 			v, err := strconv.Atoi(p.Value)
@@ -404,6 +426,27 @@ func (i *Item) WriteFile() error {
 	}
 
 	return nil
+}
+
+// Tags returns a slice of hashtag strings parsed from summary
+func (i *Item) Tags() (tags []Tag, err error) {
+	re := regexp.MustCompile(HashtagRe)
+
+	vt, err := i.Vtodo()
+	if err != nil {
+		return
+	}
+	summary, err := vt.Props.Text(ical.PropSummary)
+	if err != nil {
+		return
+	}
+
+	tt := re.FindAllString(summary, -1)
+
+	for _, t := range tt {
+		tags = append(tags, Tag(t))
+	}
+	return
 }
 
 // GenerateUID returns a random string containing timestamp and hostname

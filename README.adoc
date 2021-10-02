@@ -19,8 +19,11 @@ calendars and synchronization in {vdirdocs}.
 Features
 --------
 
-* adding todos with automatic date and priority parsing;
-* listing todos, with sorting and filtering options;
+* adding todos;
+** automatic date and priority parsing;
+* listing todos,
+** sorting and filtering by fields;
+** automatic hashtag parsing and output organized by tags;
 * completing todos;
 * editing todos in a `$VISUAL`/`$EDITOR` program;
 * deleting todos;
@@ -56,11 +59,20 @@ COMMANDS
   See 'tdx <command> -h' for command usage
 
 ENVIRONMENT VARIABLES
-  TDX_PATH              path to vdir directory (required)
-  TDX_DEFAULT_LIST      list to use for <list>, <add> commands
-  TDX_DEFAULT_STATUS    status filter for <list> command, see 'tdx list -h'
-  TDX_DEFAULT_SORT      sorting order for <list> command, see 'tdx list -h'
-  NO_COLOR              disable colors in output
+  TDX_PATH (required)
+        path to vdir directory;
+        either root vdir directory with multiple collections
+        or direct path to a single collection.
+  TDX_LIST_OPTS
+        default options for <list> command, see 'tdx list -h';
+        for example, to organize by tags and use a specified list:
+        TDX_LIST_OPTS='-t -l myList'
+  TDX_ADD_OPTS
+        default options for <add> command, see 'tdx add -h';
+        for example, to use a default list for new todos:
+        TDX_ADD_OPTS='-l myList'
+  NO_COLOR
+        disable colors in output
 
 FLAGS
   -v    print version
@@ -103,26 +115,18 @@ Configuration
 `tdx` is configured through environment variables.
 
 *TDX_PATH* (required)::
-    `<path>` +
     path to http://vdirsyncer.pimutils.org/en/stable/vdir.html[vdir directory]; +
     either root path containing multiple collections or path to specific
     collection containing _*.ics_ files
-*TDX_DEFAULT_LIST*::
-    `<list name>` +
-    list to use for *list* and *add* commands; +
-    can be overridden with `-l` flag
-*TDX_DEFAULT_STATUS*::
-    `NEEDS-ACTION|COMPLETED|CANCELLED|ANY` +
-    default: `NEEDS-ACTION` +
-    status filter for *list* command; +
-    can be overridden with `-S` flag
-*TDX_DEFAULT_SORT*::
-    `PRIO|DUE|STATUS|CREATED` +
-    default: `PRIO` +
-    sorting option for *list* command; +
-    can be overridden with `-s` flag
+*TDX_LIST_OPTS*::
+    default options for *<list>* command, see `tdx list -h`; +
+    for example, to organize by tags and use a specified list: +
+    `TDX_LIST_OPTS='-t -l myList'`
+*TDX_ADD_OPTS*::
+    default options for *<add>* command, see `tdx add -h`; +
+    for example, to use a default list for new todos: +
+    `TDX_ADD_OPTS='-l myList'`
 *NO_COLOR*::
-    `<any>` +
     disables color in output
 
 Installation

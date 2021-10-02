@@ -8,14 +8,21 @@ that format the given component.
 
 ---
 
+BUGS
+- [x] Collections() messes up the map with non-existing items in various collections
+	- [x] this is the result of incorrect path (higher up tree), should prob check if
+				the path actually contains calendars
+- [ ] add tests for vdir package
+- [ ] new todos have a zero due
+
 COMMANDS
 - [ ] list
 	- [x] sorting
-	- [ ] json
-	- [ ] add a flag to organize by tags instead of list
+	- [x] add a flag to organize by tags instead of list
+	- [x] parse tags in summary
 	- [ ] filter by range of dates (e.g. due next X days)
-	- [ ] parse tags in summary
 	- [ ] use lowercase for status and sort flags
+	- [ ] json
 - [x] add
 	- [x] parse priority from args
 - [x] do
@@ -25,6 +32,10 @@ COMMANDS
 - [x] purge
 - [ ] stats: total lists, total todos, etc
 - [ ] move between lists
+
+MISC
+- store collection names in a sorted slice before printing
+- don't require list name if only one list
 
 FEAT
 - [x] edit command
@@ -38,11 +49,6 @@ FEAT
 		- https://github.com/tj/go-naturaldate
 		- https://github.com/bcampbell/fuzzytime
 
-BUGS
-- [x] Collections() messes up the map with non-existing items in various collections
-	- [x] this is the result of incorrect path (higher up tree), should prob check if
-				the path actually contains calendars
-- [ ] add tests for vdir package
 
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
