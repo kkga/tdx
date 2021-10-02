@@ -14,6 +14,7 @@ import (
 
 func NewListCmd() *ListCmd {
 	c := &ListCmd{Cmd: Cmd{
+		// TODO: add long description about env var
 		fs:        flag.NewFlagSet("list", flag.ExitOnError),
 		alias:     []string{"ls", "l"},
 		short:     "List todos, optionally filtered by query",
@@ -24,12 +25,14 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
 	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
-	c.fs.StringVar(&c.listFlag, "l", "", "show only todos from specified `list`")
+	c.fs.StringVar(&c.list, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sortOption, "s", "", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
-	c.fs.StringVar(&c.statusFilter, "S", "", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.StringVar(&c.sortOption, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
+	c.fs.StringVar(&c.statusFilter, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
 	return c
 }
+
+// var byTag = flag.Bool
 
 type ListCmd struct {
 	Cmd
@@ -38,6 +41,7 @@ type ListCmd struct {
 	multiline    bool
 	description  bool
 	allLists     bool
+	list         string
 	sortOption   string
 	statusFilter string
 }
@@ -58,34 +62,46 @@ func (c *ListCmd) Run() error {
 		query = strings.Join(c.fs.Args(), "")
 	}
 
-	// process status filter
-	if c.statusFilter == "" {
-		c.statusFilter = c.conf.DefaultStatus
+	if len(c.conf.ListOpts) > 0 {
+		c.fs.Parse(strings.Split(c.conf.ListOpts, " "))
 	}
+
+	if err := c.fs.Parse(c.args); err != nil {
+		return err
+	}
+
+	// fmt.Println("conf:", c.conf.ListOpts)
+	// fmt.Println("opts:", c.args)
+	// fmt.Println(c.statusFilter)
+
 	switch vdir.ToDoStatus(c.statusFilter) {
+	case "":
+		break
 	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
 		break
 	default:
 		return fmt.Errorf("Unknown status filter: %q, see %q", c.statusFilter, "tdx list -h")
 	}
 
-	// process sort option
-	if c.sortOption == "" {
-		c.sortOption = c.conf.DefaultSort
-	}
 	switch sortOption(c.sortOption) {
+	case "":
+		break
 	case sortOptionStatus, sortOptionPrio, sortOptionDue, sortOptionCreated:
 		break
 	default:
 		return fmt.Errorf("Unknown sort option: %q, see %q", c.sortOption, "tdx list -h")
 	}
 
-	// if cmd has collection specified via flag, delete other collections from map
-	collections := c.vdir
-	if c.collection != nil && c.allLists == false {
-		for col := range collections {
-			if col != c.collection {
-				delete(collections, col)
+	// if list flag set, delete other collections from map
+	vd := c.vdir
+
+	if c.list != "" && c.allLists == false {
+		if err := c.checkListFlag(c.list, false, c); err != nil {
+			return err
+		}
+		for col := range vd {
+			if col.Name != c.list {
+				delete(vd, col)
 			}
 		}
 	}
@@ -115,11 +131,12 @@ func (c *ListCmd) Run() error {
 	}
 
 	var m = make(map[string][]*vdir.Item)
+
 	if c.byTag {
 		emptyTag := vdir.Tag("[no tags]")
 
 		allItems := []*vdir.Item{}
-		for _, items := range collections {
+		for _, items := range vd {
 			allItems = append(allItems, items...)
 		}
 
@@ -142,7 +159,7 @@ func (c *ListCmd) Run() error {
 			}
 		}
 	} else {
-		for col, items := range collections {
+		for col, items := range vd {
 			items, err := filterAndSortItems(items)
 			if err != nil {
 				return err

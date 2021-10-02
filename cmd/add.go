@@ -16,6 +16,7 @@ import (
 
 func NewAddCmd() *AddCmd {
 	c := &AddCmd{Cmd: Cmd{
+		// TODO: add long description about env var
 		fs:    flag.NewFlagSet("add", flag.ExitOnError),
 		alias: []string{"a"},
 		short: "Add new todo",
@@ -32,10 +33,9 @@ PRIORITY
   * "!!!" (high)
   * "!!"  (medium)
   * "!"   (low)`,
-		usageLine:    "[options] <todo>",
-		listRequired: true,
+		usageLine: "[options] <todo>",
 	}}
-	c.fs.StringVar(&c.listFlag, "l", "", "`list` for new todo")
+	c.fs.StringVar(&c.list, "l", "", "`list` for new todo")
 	c.fs.StringVar(&c.description, "d", "", "`description` text")
 	return c
 }
@@ -43,11 +43,23 @@ PRIORITY
 type AddCmd struct {
 	Cmd
 	description string
+	list        string
 }
 
 func (c *AddCmd) Run() error {
-	args := c.fs.Args()
+	var collection *vdir.Collection
 
+	if err := c.checkListFlag(c.list, true, c); err != nil {
+		return err
+	}
+
+	for col := range c.vdir {
+		if col.Name == c.list {
+			collection = col
+		}
+	}
+
+	args := c.fs.Args()
 	if len(args) == 0 {
 		return errors.New("Provide a todo text")
 	}
@@ -88,7 +100,7 @@ func (c *AddCmd) Run() error {
 		t.Props.SetDateTime(ical.PropDue, due)
 	}
 
-	p := path.Join(c.collection.Path, fmt.Sprintf("%s.ics", uid))
+	p := path.Join(collection.Path, fmt.Sprintf("%s.ics", uid))
 
 	item := &vdir.Item{
 		Path: p,
@@ -116,6 +128,7 @@ func (c *AddCmd) Run() error {
 
 func parseDueDate(s string) (t time.Time, err error) {
 	now := time.Now()
+	// TODO: this creates a zero date if nothing parsed
 	due, _ := naturaldate.Parse(s, now, naturaldate.WithDirection(naturaldate.Future))
 	if due != now {
 		t = due
