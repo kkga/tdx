@@ -19,15 +19,15 @@ calendars and synchronization in {vdirdocs}.
 Features
 --------
 
-* adding todos;
-** automatic date and priority parsing;
-* listing todos,
-** sorting and filtering by fields;
-** automatic hashtag parsing and output organized by tags;
-* completing todos;
-* editing todos in a `$VISUAL`/`$EDITOR` program;
-* deleting todos;
-* purging completed/cancelled todos.
+* adding todos
+** automatic date and priority parsing
+* listing todos
+** sorting and filtering by fields
+** automatic hashtag parsing and output organized by tags
+* completing todos
+* editing todos in a `$VISUAL`/`$EDITOR` program
+* deleting todos
+* purging completed/cancelled todos
 
 Demo
 ----
