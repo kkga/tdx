@@ -49,12 +49,18 @@ type AddCmd struct {
 func (c *AddCmd) Run() error {
 	var collection *vdir.Collection
 
-	if err := c.checkListFlag(c.list, true, c); err != nil {
-		return err
-	}
-
-	for col := range c.vdir {
-		if col.Name == c.list {
+	if len(c.vdir) > 1 {
+		if err := c.checkListFlag(c.list, true, c); err != nil {
+			return err
+		}
+		for col := range c.vdir {
+			if col.Name == c.list {
+				collection = col
+			}
+		}
+	} else {
+		// if only one collection, use it without requiring a list flag
+		for col := range c.vdir {
 			collection = col
 		}
 	}
