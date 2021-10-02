@@ -37,6 +37,7 @@ type Cmd struct {
 type Config struct {
 	Path     string `required:"true"`
 	ListOpts string `split_words:"true"`
+	AddOpts  string `split_words:"true"`
 }
 
 func (c *Cmd) Run() error      { return nil }
