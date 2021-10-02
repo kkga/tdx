@@ -141,10 +141,8 @@ func (c *AddCmd) Run() error {
 
 func parseDueDate(s string) (t time.Time, err error) {
 	now := time.Now()
-	// TODO: this creates a zero date if nothing parsed
 	due, _ := naturaldate.Parse(s, now, naturaldate.WithDirection(naturaldate.Future))
-	fmt.Println(due.String())
-	if due != now {
+	if !due.IsZero() && due != now {
 		t = due
 		return t, nil
 	}
