@@ -109,7 +109,7 @@ func (c *AddCmd) Run() error {
 		t.Props.SetText(ical.PropDescription, c.description)
 	}
 
-	if due, err := parseDueDate(summary); err != nil {
+	if due, err := parseDueDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
 	}
 
