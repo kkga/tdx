@@ -32,8 +32,6 @@ func NewListCmd() *ListCmd {
 	return c
 }
 
-// var byTag = flag.Bool
-
 type ListCmd struct {
 	Cmd
 	json         bool
@@ -70,31 +68,16 @@ func (c *ListCmd) Run() error {
 		return err
 	}
 
-	// fmt.Println("conf:", c.conf.ListOpts)
-	// fmt.Println("opts:", c.args)
-	// fmt.Println(c.statusFilter)
-
-	switch vdir.ToDoStatus(c.statusFilter) {
-	case "":
-		break
-	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
-		break
-	default:
-		return fmt.Errorf("Unknown status filter: %q, see %q", c.statusFilter, "tdx list -h")
+	if err := checkStatusFlag(c.statusFilter); err != nil {
+		return err
 	}
 
-	switch sortOption(c.sortOption) {
-	case "":
-		break
-	case sortOptionStatus, sortOptionPrio, sortOptionDue, sortOptionCreated:
-		break
-	default:
-		return fmt.Errorf("Unknown sort option: %q, see %q", c.sortOption, "tdx list -h")
+	if err := checkSortFlag(c.sortOption); err != nil {
+		return err
 	}
 
-	// if list flag set, delete other collections from map
+	// if list flag set, delete other collections from vdir
 	vd := c.vdir
-
 	if c.list != "" && c.allLists == false {
 		if err := c.checkListFlag(c.list, false, c); err != nil {
 			return err
@@ -259,4 +242,26 @@ func writeItem(sb *strings.Builder, c ListCmd, item vdir.Item) error {
 	sb.WriteString(s)
 
 	return nil
+}
+
+func checkStatusFlag(flag string) error {
+	switch vdir.ToDoStatus(flag) {
+	case "":
+		return nil
+	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
+		return nil
+	default:
+		return fmt.Errorf("Unknown status filter: %q, see %q", flag, "tdx list -h")
+	}
+}
+
+func checkSortFlag(flag string) error {
+	switch sortOption(flag) {
+	case "":
+		return nil
+	case sortOptionStatus, sortOptionPrio, sortOptionDue, sortOptionCreated:
+		return nil
+	default:
+		return fmt.Errorf("Unknown sort option: %q, see %q", flag, "tdx list -h")
+	}
 }

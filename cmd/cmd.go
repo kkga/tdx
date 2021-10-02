@@ -35,9 +35,9 @@ type Cmd struct {
 }
 
 type Config struct {
-	Path     string `required:"true"`
-	ListOpts string `split_words:"true"`
-	AddOpts  string `split_words:"true"`
+	Path     string `required:"true"`    // Path to vdir
+	ListOpts string `split_words:"true"` // Default options for list command
+	AddOpts  string `split_words:"true"` // Default options for add command
 }
 
 func (c *Cmd) Run() error      { return nil }
@@ -53,15 +53,14 @@ func (c *Cmd) Init(args []string) error {
 
 	c.conf = conf
 	c.args = args
-
 	c.fs.Usage = c.usage
-
-	if err := c.fs.Parse(c.args); err != nil {
-		return err
-	}
 
 	c.vdir = vdir.Vdir{}
 	if err := c.vdir.Init(c.conf.Path); err != nil {
+		return err
+	}
+
+	if err := c.fs.Parse(args); err != nil {
 		return err
 	}
 
