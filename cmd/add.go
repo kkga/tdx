@@ -47,8 +47,15 @@ type AddCmd struct {
 }
 
 func (c *AddCmd) Run() error {
-	var collection *vdir.Collection
+	if len(c.conf.AddOpts) > 0 {
+		c.fs.Parse(strings.Split(c.conf.AddOpts, " "))
+	}
 
+	if err := c.fs.Parse(c.args); err != nil {
+		return err
+	}
+
+	var collection *vdir.Collection
 	if len(c.vdir) > 1 {
 		if err := c.checkListFlag(c.list, true, c); err != nil {
 			return err
