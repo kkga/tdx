@@ -22,11 +22,11 @@ func NewListCmd() *ListCmd {
 		long: `ENVIRONMENT VARIABLES
   TDX_LIST_OPTS
         default options for <list> command;
-        for example, to organize by tags and use a specified list:
-        TDX_LIST_OPTS='-t -l myList'`,
+        example: show todos due in the next 2 days, from 'myList', organized by tags...
+            TDX_LIST_OPTS='-d=2 -l=myList -t'`,
 	}}
 	// TODO handle json flag
-	c.fs.BoolVar(&c.json, "json", false, "json output")
+	// c.fs.BoolVar(&c.json, "json", false, "json output")
 	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
 	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
@@ -40,7 +40,7 @@ func NewListCmd() *ListCmd {
 
 type ListCmd struct {
 	Cmd
-	json         bool
+	// json         bool
 	byTag        bool
 	multiline    bool
 	description  bool
