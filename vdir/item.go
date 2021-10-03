@@ -428,7 +428,7 @@ func (i *Item) WriteFile() error {
 	return nil
 }
 
-// Tags returns a slice of hashtag strings parsed from summary
+// Tags returns a slice of hashtag strings parsed from summary and description
 func (i *Item) Tags() (tags []Tag, err error) {
 	re := regexp.MustCompile(HashtagRe)
 
@@ -440,10 +440,18 @@ func (i *Item) Tags() (tags []Tag, err error) {
 	if err != nil {
 		return
 	}
+	description, err := vt.Props.Text(ical.PropDescription)
+	if err != nil {
+		return
+	}
 
-	tt := re.FindAllString(summary, -1)
+	st := re.FindAllString(summary, -1)
+	dt := re.FindAllString(description, -1)
 
-	for _, t := range tt {
+	for _, t := range st {
+		tags = append(tags, Tag(t))
+	}
+	for _, t := range dt {
 		tags = append(tags, Tag(t))
 	}
 	return
