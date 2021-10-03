@@ -21,7 +21,7 @@ func NewEditCmd() *EditCmd {
 	c := &EditCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("edit", flag.ExitOnError),
 		alias:     []string{"e"},
-		short: "Edit todo",
+		short:     "Edit todo",
 		usageLine: "[options] <id>",
 	}}
 	return c

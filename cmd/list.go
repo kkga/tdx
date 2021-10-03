@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-ical"
 
@@ -21,31 +22,33 @@ func NewListCmd() *ListCmd {
 		long: `ENVIRONMENT VARIABLES
   TDX_LIST_OPTS
         default options for <list> command;
-        for example, to organize by tags and use a specified list:
-        TDX_LIST_OPTS='-t -l myList'`,
+        example: show todos due in the next 2 days, from 'myList', organized by tags...
+            TDX_LIST_OPTS='-d=2 -l=myList -t'`,
 	}}
 	// TODO handle json flag
-	c.fs.BoolVar(&c.json, "json", false, "json output")
+	// c.fs.BoolVar(&c.json, "json", false, "json output")
 	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
 	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
-	c.fs.StringVar(&c.list, "l", "", "show only todos from specified `list`")
+	c.fs.StringVar(&c.listFilter, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sortOption, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
 	c.fs.StringVar(&c.statusFilter, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.IntVar(&c.dueFilter, "d", 0, "show todos due in the next N `days`")
 	return c
 }
 
 type ListCmd struct {
 	Cmd
-	json         bool
+	// json         bool
 	byTag        bool
 	multiline    bool
 	description  bool
 	allLists     bool
-	list         string
-	sortOption   string
+	dueFilter    int
+	listFilter   string
 	statusFilter string
+	sortOption   string
 }
 
 type sortOption string
@@ -82,12 +85,12 @@ func (c *ListCmd) Run() error {
 
 	// if list flag set, delete other collections from vdir
 	vd := c.vdir
-	if c.list != "" && c.allLists == false {
-		if err := c.checkListFlag(c.list, false, c); err != nil {
+	if c.listFilter != "" && c.allLists == false {
+		if err := c.checkListFlag(c.listFilter, false, c); err != nil {
 			return err
 		}
 		for col := range vd {
-			if col.Name != c.list {
+			if col.Name != c.listFilter {
 				delete(vd, col)
 			}
 		}
@@ -95,6 +98,10 @@ func (c *ListCmd) Run() error {
 
 	filterAndSortItems := func(ii []*vdir.Item) (items []*vdir.Item, err error) {
 		items, err = filterByStatus(ii, vdir.ToDoStatus(c.statusFilter))
+		if err != nil {
+			return
+		}
+		items, err = filterByDue(items, c.dueFilter)
 		if err != nil {
 			return
 		}
@@ -203,6 +210,29 @@ func filterByStatus(items []*vdir.Item, status vdir.ToDoStatus) (filtered []*vdi
 					filtered = append(filtered, i)
 				}
 			}
+		}
+	}
+	return
+}
+
+func filterByDue(items []*vdir.Item, dueDays int) (filtered []*vdir.Item, err error) {
+	if dueDays == 0 {
+		return items, nil
+	}
+	now := time.Now()
+	inDueDays := now.AddDate(0, 0, dueDays)
+
+	for _, i := range items {
+		vt, err := i.Vtodo()
+		if err != nil {
+			return nil, err
+		}
+		due, err := vt.Props.DateTime(ical.PropDue, time.Local)
+		if err != nil {
+			return nil, err
+		}
+		if !due.IsZero() && due.Before(inDueDays) {
+			filtered = append(filtered, i)
 		}
 	}
 	return
