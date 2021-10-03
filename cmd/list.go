@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-ical"
 
@@ -33,6 +34,7 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sortOption, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
 	c.fs.StringVar(&c.statusFilter, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
+	c.fs.IntVar(&c.due, "d", 2, "show todos due in the next N days")
 	return c
 }
 
@@ -43,6 +45,7 @@ type ListCmd struct {
 	multiline    bool
 	description  bool
 	allLists     bool
+	due          int
 	list         string
 	sortOption   string
 	statusFilter string
@@ -99,6 +102,10 @@ func (c *ListCmd) Run() error {
 			return
 		}
 		items, err = filterByQuery(items, query)
+		if err != nil {
+			return
+		}
+		items, err = filterByDue(items, c.due)
 		if err != nil {
 			return
 		}
@@ -203,6 +210,30 @@ func filterByStatus(items []*vdir.Item, status vdir.ToDoStatus) (filtered []*vdi
 					filtered = append(filtered, i)
 				}
 			}
+		}
+	}
+	return
+}
+
+func filterByDue(items []*vdir.Item, dueDays int) (filtered []*vdir.Item, err error) {
+	if dueDays == 0 {
+		return items, nil
+	}
+	now := time.Now()
+	inDueDays := now.AddDate(0, 0, dueDays)
+
+	for _, i := range items {
+		vt, err := i.Vtodo()
+		if err != nil {
+			return filtered, err
+		}
+		due, err := vt.Props.DateTime(ical.PropDue, time.Local)
+		if err != nil {
+			return filtered, err
+		}
+		fmt.Println(due, inDueDays)
+		if !due.IsZero() && due.Before(inDueDays) {
+			filtered = append(filtered, i)
 		}
 	}
 	return
