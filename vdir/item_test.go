@@ -15,7 +15,7 @@ func TestTags(t *testing.T) {
 		path string
 		want []Tag
 	}{
-		{vdpath, []Tag{"#Quebec", "#go", "#sway", "#Later"}},
+		{vdpath, []Tag{"#Quebec", "#1some", "#tags", "#go", "#sway", "#Later"}},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
