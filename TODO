@@ -20,7 +20,8 @@ COMMANDS
 	- [x] sorting
 	- [x] add a flag to organize by tags instead of list
 	- [x] parse tags in summary
-	- [ ] filter by range of dates (e.g. due next X days)
+		- [ ] parse tags in description
+	- [x] filter by range of dates (e.g. due next X days)
 	- [ ] use lowercase for status and sort flags
 	- [ ] json
 - [x] add
