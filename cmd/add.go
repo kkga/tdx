@@ -37,8 +37,8 @@ func NewAddCmd() *AddCmd {
 ENVIRONMENT VARIABLES
   TDX_ADD_OPTS
         default options for <add> command;
-        for example, to use a default list for new todos:
-        TDX_ADD_OPTS='-l myList'`,
+        example: use a default list for new todos...
+            TDX_ADD_OPTS='-l=myList'`,
 	}}
 	c.fs.StringVar(&c.list, "l", "", "`list` for new todo")
 	c.fs.StringVar(&c.description, "d", "", "`description` text")
