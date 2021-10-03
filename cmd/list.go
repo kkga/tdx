@@ -14,11 +14,15 @@ import (
 
 func NewListCmd() *ListCmd {
 	c := &ListCmd{Cmd: Cmd{
-		// TODO: add long description about env var
 		fs:        flag.NewFlagSet("list", flag.ExitOnError),
 		alias:     []string{"ls", "l"},
-		short:     "List todos, optionally filtered by query",
 		usageLine: "[options] [query]",
+		short:     "List todos, optionally filtered by query",
+		long: `ENVIRONMENT VARIABLES
+  TDX_LIST_OPTS
+        default options for <list> command;
+        for example, to organize by tags and use a specified list:
+        TDX_LIST_OPTS='-t -l myList'`,
 	}}
 	// TODO handle json flag
 	c.fs.BoolVar(&c.json, "json", false, "json output")

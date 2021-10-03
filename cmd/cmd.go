@@ -91,15 +91,16 @@ func (c *Cmd) usage() {
 	fmt.Println("USAGE")
 	fmt.Printf("  tdx %s %s\n\n", c.fs.Name(), c.usageLine)
 
-	if c.long != "" {
-		fmt.Println(c.long)
-		fmt.Println()
-	}
-
 	if strings.Contains(c.usageLine, "[options]") {
 		fmt.Println("OPTIONS")
 		c.fs.PrintDefaults()
 	}
+
+	if c.long != "" {
+		fmt.Println()
+		fmt.Println(c.long)
+	}
+
 }
 
 func (c *Cmd) argsToIDs() (IDs []int, err error) {

@@ -16,24 +16,29 @@ import (
 
 func NewAddCmd() *AddCmd {
 	c := &AddCmd{Cmd: Cmd{
-		// TODO: add long description about env var
-		fs:    flag.NewFlagSet("add", flag.ExitOnError),
-		alias: []string{"a"},
-		short: "Add new todo",
-		long: `DUE DATE
-  If todo text contains a date in one of the following
-  formats, it will be applied as due date:
-  * "today", "tomorrow", "in 3 days", "in 2 weeks"
-  * "next week", "next month", "next monday"
-  * ordinal date: "december 1st", "15th november"
-
-PRIORITY
-  If todo text contains one or more "!" chars,
-  they will be converted to priority:
-  * "!!!" (high)
-  * "!!"  (medium)
-  * "!"   (low)`,
+		fs:        flag.NewFlagSet("add", flag.ExitOnError),
+		alias:     []string{"a"},
+		short:     "Add new todo",
 		usageLine: "[options] <todo>",
+		long: `AUTOMATIC PROPERTY PARSING
+  due date
+        If todo text contains a date in one of the following
+        forms, it will be applied as due date:
+        - "today", "tomorrow", "in 3 days", "in 2 weeks"
+        - "next week", "next month", "next monday"
+        - ordinal date: "december 1st", "15th november"
+  priority
+        If todo text contains one or more "!" chars,
+        they will be converted to priority:
+        - "!!!" (high)
+        - "!!"  (medium)
+        - "!"   (low)
+
+ENVIRONMENT VARIABLES
+  TDX_ADD_OPTS
+        default options for <add> command;
+        for example, to use a default list for new todos:
+        TDX_ADD_OPTS='-l myList'`,
 	}}
 	c.fs.StringVar(&c.list, "l", "", "`list` for new todo")
 	c.fs.StringVar(&c.description, "d", "", "`description` text")
@@ -44,6 +49,7 @@ type AddCmd struct {
 	Cmd
 	description string
 	list        string
+	due         int
 }
 
 func (c *AddCmd) Run() error {
