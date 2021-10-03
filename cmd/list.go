@@ -30,11 +30,11 @@ func NewListCmd() *ListCmd {
 	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
 	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
-	c.fs.StringVar(&c.list, "l", "", "show only todos from specified `list`")
+	c.fs.StringVar(&c.listFilter, "l", "", "show only todos from specified `list`")
 	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
 	c.fs.StringVar(&c.sortOption, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
 	c.fs.StringVar(&c.statusFilter, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
-	c.fs.IntVar(&c.due, "d", 0, "show todos due in the next N `days`")
+	c.fs.IntVar(&c.dueFilter, "d", 0, "show todos due in the next N `days`")
 	return c
 }
 
@@ -45,10 +45,10 @@ type ListCmd struct {
 	multiline    bool
 	description  bool
 	allLists     bool
-	due          int
-	list         string
-	sortOption   string
+	dueFilter    int
+	listFilter   string
 	statusFilter string
+	sortOption   string
 }
 
 type sortOption string
@@ -85,12 +85,12 @@ func (c *ListCmd) Run() error {
 
 	// if list flag set, delete other collections from vdir
 	vd := c.vdir
-	if c.list != "" && c.allLists == false {
-		if err := c.checkListFlag(c.list, false, c); err != nil {
+	if c.listFilter != "" && c.allLists == false {
+		if err := c.checkListFlag(c.listFilter, false, c); err != nil {
 			return err
 		}
 		for col := range vd {
-			if col.Name != c.list {
+			if col.Name != c.listFilter {
 				delete(vd, col)
 			}
 		}
@@ -101,7 +101,7 @@ func (c *ListCmd) Run() error {
 		if err != nil {
 			return
 		}
-		items, err = filterByDue(items, c.due)
+		items, err = filterByDue(items, c.dueFilter)
 		if err != nil {
 			return
 		}
