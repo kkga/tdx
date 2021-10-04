@@ -19,11 +19,11 @@ func NewAddCmd() *AddCmd {
 		usageLine: "[options] <todo>",
 		long: `AUTOMATIC PROPERTY PARSING
   due date
-        If todo text contains a date in one of the following
-        forms, it will be applied as due date:
-        - "today", "tomorrow", "in 3 days", "in 2 weeks"
-        - "next week", "next month", "next monday"
-        - ordinal date: "december 1st", "15th november"
+        If todo text contains a date in any of the following
+        forms, it will be converted to due date:
+        - "today", "tomorrow", "next tuesday"
+        - "in 3 days", "in a few days", "in 2 weeks", "in a month"
+        - "december 1st", "15 nov", "jul"
   priority
         If todo text contains one or more "!" chars,
         they will be converted to priority:
