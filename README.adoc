@@ -65,7 +65,7 @@ ENVIRONMENT VARIABLES
         or direct path to a single collection.
   TDX_LIST_OPTS
         default options for <list> command, see 'tdx list -h';
-        example: show todos due in the next 2 days, from 'myList', organized by tags...
+        example: filter by due date in next 2 days, from 'myList', organized by tags...
             TDX_LIST_OPTS='-d=2 -l=myList -t'
   TDX_ADD_OPTS
         default options for <add> command, see 'tdx add -h';
