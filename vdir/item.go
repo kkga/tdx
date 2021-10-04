@@ -242,6 +242,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 				humanDate = durafmt.ParseShort(diff).String()
 			}
 
+			humanDate = strings.TrimPrefix(humanDate, "-")
 			due = col(fmt.Sprintf("(%s%s)", prefix, humanDate))
 
 		case ical.PropPriority:
