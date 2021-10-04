@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/emersion/go-ical"
 
 	"github.com/kkga/tdx/vdir"
-	"github.com/tj/go-naturaldate"
 )
 
 func NewAddCmd() *AddCmd {
@@ -115,7 +113,7 @@ func (c *AddCmd) Run() error {
 		t.Props.SetText(ical.PropDescription, c.description)
 	}
 
-	if due, err := parseDueDate(summary); err == nil {
+	if due, err := parseDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
 	}
 
@@ -143,14 +141,4 @@ func (c *AddCmd) Run() error {
 	fmt.Print(s)
 
 	return nil
-}
-
-func parseDueDate(s string) (t time.Time, err error) {
-	now := time.Now()
-	due, _ := naturaldate.Parse(s, now, naturaldate.WithDirection(naturaldate.Future))
-	if !due.IsZero() && due != now {
-		t = due
-		return t, nil
-	}
-	return t, errors.New("No date found")
 }

@@ -9,9 +9,14 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kkga/tdx/vdir"
+	"github.com/olebedev/when"
+	"github.com/olebedev/when/rules/common"
+	"github.com/olebedev/when/rules/en"
+	"github.com/olebedev/when/rules/ru"
 )
 
 type Runner interface {
@@ -143,4 +148,29 @@ func promptConfirm(label string, def bool) bool {
 			return false
 		}
 	}
+}
+
+func parseDate(s string) (t time.Time, err error) {
+	w := when.New(nil)
+	w.Add(en.All...)
+	w.Add(ru.All...)
+	w.Add(common.All...)
+
+	r, err := w.Parse(s, time.Now())
+	if err != nil {
+		return t, err
+	}
+	if r == nil {
+		return t, errors.New("No date found")
+	}
+
+	fmt.Println(
+		"found time:",
+		r.Time.Format("2 Jan 2006 15:04:05"),
+		"mentioned in:",
+		s[r.Index:r.Index+len(r.Text)],
+	)
+
+	t = r.Time
+	return
 }
