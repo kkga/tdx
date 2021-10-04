@@ -9,9 +9,14 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/kkga/tdx/vdir"
+	"github.com/olebedev/when"
+	"github.com/olebedev/when/rules/common"
+	"github.com/olebedev/when/rules/en"
+	"github.com/olebedev/when/rules/ru"
 )
 
 type Runner interface {
@@ -143,4 +148,42 @@ func promptConfirm(label string, def bool) bool {
 			return false
 		}
 	}
+}
+
+func parseDate(s string) (t time.Time, text string, err error) {
+	w := when.New(nil)
+	w.Add(en.All...)
+	w.Add(ru.All...)
+	w.Add(common.All...)
+
+	now := time.Now()
+
+	r, err := w.Parse(s, now)
+	if err != nil {
+		return t, text, err
+	}
+	if r == nil {
+		return t, text, errors.New("No date found")
+	}
+
+	// strip clock from time if it's the same as now (i.e. not specified)
+	rH, rM, rS := r.Time.Clock()
+	nH, nM, nS := now.Clock()
+	if time.Date(0, 0, 0, rH, rM, rS, 0, time.Local).Equal(time.Date(0, 0, 0, nH, nM, nS, 0, time.Local)) {
+		y, m, d := r.Time.Date()
+		t = time.Date(y, m, d, 0, 0, 0, 0, time.Local)
+	} else {
+		t = r.Time
+	}
+
+	text = r.Text
+
+	fmt.Println(
+		"found time:",
+		t.Format("2 Jan 2006 15:04:05"),
+		"mentioned in:",
+		s[r.Index:r.Index+len(r.Text)],
+	)
+
+	return
 }

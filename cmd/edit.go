@@ -14,7 +14,6 @@ import (
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
-	"github.com/tj/go-naturaldate"
 )
 
 func NewEditCmd() *EditCmd {
@@ -110,15 +109,8 @@ func (c *EditCmd) Run() error {
 				newP.SetDateTime(t)
 			} else if t, _ := time.Parse(layoutDate, newVal); !t.IsZero() {
 				newP.SetDateTime(t)
-			} else {
-				now := time.Now()
-				due, err := naturaldate.Parse(newVal, now, naturaldate.WithDirection(naturaldate.Future))
-				if err != nil {
-					return err
-				}
-				if due != now {
-					newP.SetDateTime(due)
-				}
+			} else if due, _, err := parseDate(newVal); err == nil {
+				newP.SetDateTime(due)
 			}
 		case ical.PropPriority:
 			prioMap := map[string]vdir.ToDoPriority{

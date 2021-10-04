@@ -216,7 +216,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			var humanDate string
 			var col = color.New(color.Reset).SprintFunc()
 
-			if diff.Hours() < 24 {
+			if math.Abs(diff.Hours()) < 24 {
 				if now.Day() == d.Day() {
 					col = color.New(color.FgGreen).SprintFunc()
 					prefix = ""
@@ -242,6 +242,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 				humanDate = durafmt.ParseShort(diff).String()
 			}
 
+			humanDate = strings.TrimPrefix(humanDate, "-")
 			due = col(fmt.Sprintf("(%s%s)", prefix, humanDate))
 
 		case ical.PropPriority:

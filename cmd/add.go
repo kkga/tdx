@@ -6,12 +6,9 @@ import (
 	"fmt"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/emersion/go-ical"
-
 	"github.com/kkga/tdx/vdir"
-	"github.com/tj/go-naturaldate"
 )
 
 func NewAddCmd() *AddCmd {
@@ -22,11 +19,11 @@ func NewAddCmd() *AddCmd {
 		usageLine: "[options] <todo>",
 		long: `AUTOMATIC PROPERTY PARSING
   due date
-        If todo text contains a date in one of the following
-        forms, it will be applied as due date:
-        - "today", "tomorrow", "in 3 days", "in 2 weeks"
-        - "next week", "next month", "next monday"
-        - ordinal date: "december 1st", "15th november"
+        If todo text contains a date in any of the following
+        forms, it will be converted to due date:
+        - "today", "tomorrow", "next tuesday"
+        - "in 3 days", "in a few days", "in 2 weeks", "in a month"
+        - "december 1st", "15 nov", "jul"
   priority
         If todo text contains one or more "!" chars,
         they will be converted to priority:
@@ -109,15 +106,19 @@ func (c *AddCmd) Run() error {
 		t.Props.Add(prioProp)
 	}
 
-	t.Props.SetText(ical.PropSummary, summary)
-
 	if c.description != "" {
 		t.Props.SetText(ical.PropDescription, c.description)
 	}
 
-	if due, err := parseDueDate(summary); err == nil {
+	if due, text, err := parseDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
+		fmt.Println(summary)
+		fmt.Println(text)
+		summary = strings.Trim(strings.Replace(summary, text, "", 1), " ")
+		fmt.Println(summary)
 	}
+
+	t.Props.SetText(ical.PropSummary, summary)
 
 	p := path.Join(collection.Path, fmt.Sprintf("%s.ics", uid))
 
@@ -143,14 +144,4 @@ func (c *AddCmd) Run() error {
 	fmt.Print(s)
 
 	return nil
-}
-
-func parseDueDate(s string) (t time.Time, err error) {
-	now := time.Now()
-	due, _ := naturaldate.Parse(s, now, naturaldate.WithDirection(naturaldate.Future))
-	if !due.IsZero() && due != now {
-		t = due
-		return t, nil
-	}
-	return t, errors.New("No date found")
 }
