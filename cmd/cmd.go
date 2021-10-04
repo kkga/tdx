@@ -156,7 +156,9 @@ func parseDate(s string) (t time.Time, err error) {
 	w.Add(ru.All...)
 	w.Add(common.All...)
 
-	r, err := w.Parse(s, time.Now())
+	now := time.Now()
+
+	r, err := w.Parse(s, now)
 	if err != nil {
 		return t, err
 	}
@@ -164,13 +166,22 @@ func parseDate(s string) (t time.Time, err error) {
 		return t, errors.New("No date found")
 	}
 
+	// strip clock from time if it's the same as now (i.e. not specified)
+	rH, rM, rS := r.Time.Clock()
+	nH, nM, nS := now.Clock()
+	if time.Date(0, 0, 0, rH, rM, rS, 0, time.Local).Equal(time.Date(0, 0, 0, nH, nM, nS, 0, time.Local)) {
+		y, m, d := r.Time.Date()
+		t = time.Date(y, m, d, 0, 0, 0, 0, time.Local)
+	} else {
+		t = r.Time
+	}
+
 	fmt.Println(
 		"found time:",
-		r.Time.Format("2 Jan 2006 15:04:05"),
+		t.Format("2 Jan 2006 15:04:05"),
 		"mentioned in:",
 		s[r.Index:r.Index+len(r.Text)],
 	)
 
-	t = r.Time
 	return
 }
