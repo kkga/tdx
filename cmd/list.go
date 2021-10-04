@@ -200,16 +200,16 @@ func filterByStatus(items []*vdir.Item, status vdir.ToDoStatus) (filtered []*vdi
 	}
 
 	for _, i := range items {
-		for _, comp := range i.Ical.Children {
-			if comp.Name == ical.CompToDo {
-				s, propErr := comp.Props.Text(ical.PropStatus)
-				if propErr != nil {
-					return nil, propErr
-				}
-				if s == string(status) {
-					filtered = append(filtered, i)
-				}
-			}
+		vt, err := i.Vtodo()
+		if err != nil {
+			return nil, err
+		}
+		s, propErr := vt.Props.Text(ical.PropStatus)
+		if propErr != nil {
+			return nil, propErr
+		}
+		if s == string(status) {
+			filtered = append(filtered, i)
 		}
 	}
 	return
@@ -244,16 +244,16 @@ func filterByQuery(items []*vdir.Item, query string) (filtered []*vdir.Item, err
 	}
 
 	for _, i := range items {
-		for _, comp := range i.Ical.Children {
-			if comp.Name == ical.CompToDo {
-				summary, propErr := comp.Props.Text(ical.PropSummary)
-				if propErr != nil {
-					return nil, propErr
-				}
-				if strings.Contains(strings.ToLower(summary), strings.ToLower(query)) {
-					filtered = append(filtered, i)
-				}
-			}
+		vt, err := i.Vtodo()
+		if err != nil {
+			return nil, err
+		}
+		summary, propErr := vt.Props.Text(ical.PropSummary)
+		if propErr != nil {
+			return nil, propErr
+		}
+		if strings.Contains(strings.ToLower(summary), strings.ToLower(query)) {
+			filtered = append(filtered, i)
 		}
 	}
 	return
