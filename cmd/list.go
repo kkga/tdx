@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/emersion/go-ical"
-
 	"github.com/fatih/color"
 	"github.com/kkga/tdx/vdir"
 )

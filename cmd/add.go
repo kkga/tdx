@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/emersion/go-ical"
-
 	"github.com/kkga/tdx/vdir"
 )
 
