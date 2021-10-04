@@ -109,7 +109,7 @@ func (c *EditCmd) Run() error {
 				newP.SetDateTime(t)
 			} else if t, _ := time.Parse(layoutDate, newVal); !t.IsZero() {
 				newP.SetDateTime(t)
-			} else if due, err := parseDate(newVal); err == nil {
+			} else if due, _, err := parseDate(newVal); err == nil {
 				newP.SetDateTime(due)
 			}
 		case ical.PropPriority:

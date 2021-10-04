@@ -106,15 +106,19 @@ func (c *AddCmd) Run() error {
 		t.Props.Add(prioProp)
 	}
 
-	t.Props.SetText(ical.PropSummary, summary)
-
 	if c.description != "" {
 		t.Props.SetText(ical.PropDescription, c.description)
 	}
 
-	if due, err := parseDate(summary); err == nil {
+	if due, text, err := parseDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
+		fmt.Println(summary)
+		fmt.Println(text)
+		summary = strings.Trim(strings.Replace(summary, text, "", 1), " ")
+		fmt.Println(summary)
 	}
+
+	t.Props.SetText(ical.PropSummary, summary)
 
 	p := path.Join(collection.Path, fmt.Sprintf("%s.ics", uid))
 

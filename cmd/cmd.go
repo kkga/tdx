@@ -150,7 +150,7 @@ func promptConfirm(label string, def bool) bool {
 	}
 }
 
-func parseDate(s string) (t time.Time, err error) {
+func parseDate(s string) (t time.Time, text string, err error) {
 	w := when.New(nil)
 	w.Add(en.All...)
 	w.Add(ru.All...)
@@ -160,10 +160,10 @@ func parseDate(s string) (t time.Time, err error) {
 
 	r, err := w.Parse(s, now)
 	if err != nil {
-		return t, err
+		return t, text, err
 	}
 	if r == nil {
-		return t, errors.New("No date found")
+		return t, text, errors.New("No date found")
 	}
 
 	// strip clock from time if it's the same as now (i.e. not specified)
@@ -175,6 +175,8 @@ func parseDate(s string) (t time.Time, err error) {
 	} else {
 		t = r.Time
 	}
+
+	text = r.Text
 
 	fmt.Println(
 		"found time:",
