@@ -22,19 +22,19 @@ func NewListCmd() *ListCmd {
 		long: `ENVIRONMENT VARIABLES
   TDX_LIST_OPTS
         default options for <list> command;
-        example: show todos due in the next 2 days, from 'myList', organized by tags...
+        example: filter by due date in next 2 days, from 'myList', organized by tags...
             TDX_LIST_OPTS='-d=2 -l=myList -t'`,
 	}}
 	// TODO handle json flag
 	// c.fs.BoolVar(&c.json, "json", false, "json output")
 	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
-	c.fs.BoolVar(&c.description, "desc", false, "show todo description in output")
+	c.fs.BoolVar(&c.description, "desc", false, "show description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
-	c.fs.StringVar(&c.listFilter, "l", "", "show only todos from specified `list`")
-	c.fs.BoolVar(&c.allLists, "a", false, "show todos from all lists (overrides -l)")
-	c.fs.StringVar(&c.sortOption, "s", "PRIO", "sort todos by `field`: PRIO, DUE, STATUS, CREATED")
-	c.fs.StringVar(&c.statusFilter, "S", "NEEDS-ACTION", "show only todos with specified `status`: NEEDS-ACTION, COMPLETED, CANCELLED, ANY")
-	c.fs.IntVar(&c.dueFilter, "d", 0, "show todos due in the next N `days`")
+	c.fs.StringVar(&c.listFilter, "l", "", "filter by `list`")
+	c.fs.BoolVar(&c.allLists, "a", false, "show all lists (overrides -l)")
+	c.fs.StringVar(&c.sortOption, "s", "prio", "sort by `field`: prio, due, status, created")
+	c.fs.StringVar(&c.statusFilter, "S", "needs-action", "filter by `status`: needs-action, completed, cancelled, any")
+	c.fs.IntVar(&c.dueFilter, "d", 0, "filter by due date in next N `days`")
 	return c
 }
 
@@ -97,7 +97,7 @@ func (c *ListCmd) Run() error {
 	}
 
 	filterAndSortItems := func(ii []*vdir.Item) (items []*vdir.Item, err error) {
-		items, err = filterByStatus(ii, vdir.ToDoStatus(c.statusFilter))
+		items, err = filterByStatus(ii, vdir.ToDoStatus(strings.ToUpper(c.statusFilter)))
 		if err != nil {
 			return
 		}
@@ -110,7 +110,7 @@ func (c *ListCmd) Run() error {
 			return
 		}
 
-		switch sortOption(c.sortOption) {
+		switch sortOption(strings.ToUpper(c.sortOption)) {
 		case sortOptionPrio:
 			sort.Sort(vdir.ByPriority(items))
 		case sortOptionDue:
@@ -279,7 +279,7 @@ func writeItem(sb *strings.Builder, c ListCmd, item vdir.Item) error {
 }
 
 func checkStatusFlag(flag string) error {
-	switch vdir.ToDoStatus(flag) {
+	switch vdir.ToDoStatus(strings.ToUpper(flag)) {
 	case "":
 		return nil
 	case vdir.StatusNeedsAction, vdir.StatusCompleted, vdir.StatusCancelled, vdir.StatusAny:
@@ -290,7 +290,7 @@ func checkStatusFlag(flag string) error {
 }
 
 func checkSortFlag(flag string) error {
-	switch sortOption(flag) {
+	switch sortOption(strings.ToUpper(flag)) {
 	case "":
 		return nil
 	case sortOptionStatus, sortOptionPrio, sortOptionDue, sortOptionCreated:
