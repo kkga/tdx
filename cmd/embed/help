@@ -19,14 +19,14 @@ ENVIRONMENT VARIABLES
   TDX_PATH (required)
         path to vdir directory;
         either root vdir directory with multiple collections
-        or direct path to a single collection.
+        or direct path to a single collection
   TDX_LIST_OPTS
         default options for <list> command, see 'tdx list -h';
-        example: show todos due in the next 2 days, from 'myList', organized by tags...
+        example: show todos due in the next 2 days, from 'myList', organized by tags:
             TDX_LIST_OPTS='-d=2 -l=myList -t'
   TDX_ADD_OPTS
         default options for <add> command, see 'tdx add -h';
-        example: use a default list for new todos...
+        example: use a default list for new todos:
             TDX_ADD_OPTS='-l=myList'
   NO_COLOR
         disable colors in output
