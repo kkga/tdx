@@ -144,11 +144,6 @@ func (i *Item) FormatFull(options ...FormatFullOption) (string, error) {
 
 // Format returns a readable representation of an item ready for output
 func (i *Item) Format(options ...FormatOption) (string, error) {
-	colorStatusDone := color.New(color.Faint).SprintFunc()
-	colorStatusUndone := color.New(color.FgBlue).SprintFunc()
-	colorPrioHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
-	colorPrioMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
-	colorDesc := color.New(color.Faint, color.Italic).SprintFunc()
 
 	vtodo, err := i.Vtodo()
 	if err != nil {
@@ -174,12 +169,14 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 		switch name {
 
 		case ical.PropStatus:
+			colDone := color.New(color.Faint).SprintFunc()
+			colUndone := color.New(color.FgBlue).SprintFunc()
 			if ToDoStatus(p.Value) == StatusCompleted {
-				status = colorStatusDone("[x]")
+				status = colDone("[x]")
 			} else if ToDoStatus(p.Value) == StatusCancelled {
-				status = colorStatusDone("[-]")
+				status = colDone("[-]")
 			} else {
-				status = colorStatusUndone("[ ]")
+				status = colUndone("[ ]")
 			}
 
 		case ical.PropSummary:
@@ -197,7 +194,8 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			}
 
 		case ical.PropDescription:
-			description = colorDesc(fmt.Sprintf("%s", p.Value))
+			col := color.New(color.Faint, color.Italic).SprintFunc()
+			description = col(fmt.Sprintf("%s", p.Value))
 
 		case ical.PropRecurrenceRule:
 			c := color.New(color.FgGreen).SprintFunc()
@@ -246,17 +244,19 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			due = col(fmt.Sprintf("(%s%s)", prefix, humanDate))
 
 		case ical.PropPriority:
+			colHigh := color.New(color.FgHiRed, color.Bold).SprintFunc()
+			colMedium := color.New(color.FgHiYellow, color.Bold).SprintFunc()
 			v, err := strconv.Atoi(p.Value)
 			if err != nil {
 				return "", err
 			}
 			switch {
 			case ToDoPriority(v) == PriorityHigh:
-				prio = colorPrioHigh("!!!")
+				prio = colHigh("!!!")
 			case ToDoPriority(v) > PriorityHigh && ToDoPriority(v) <= PriorityMedium:
-				prio = colorPrioMedium("!!")
+				prio = colMedium("!!")
 			case ToDoPriority(v) > PriorityMedium:
-				prio = colorPrioMedium("!")
+				prio = colMedium("!")
 			}
 
 		}
@@ -296,8 +296,9 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 	}
 
 	if checkOpt(FormatDescription) && description != "" {
+		colFaint := color.New(color.Faint).SprintFunc()
 		if due != "" {
-			metaSb.WriteString(fmt.Sprintf(" %s %s", colorDesc("|"), description))
+			metaSb.WriteString(fmt.Sprintf(" %s %s", colFaint("|"), description))
 		} else {
 			metaSb.WriteString(fmt.Sprintf("%s", description))
 		}
@@ -306,7 +307,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 	if metaSb.String() != "" {
 		var meta string
 		if checkOpt(FormatMultiline) {
-			meta = fmt.Sprintf("\n       %s %s\n", colorDesc("↳"), metaSb.String())
+			meta = fmt.Sprintf("\n       %s\n", metaSb.String())
 		} else {
 			meta = fmt.Sprintf(" %s\n", metaSb.String())
 		}
