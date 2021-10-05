@@ -5,6 +5,7 @@ package vdir
 import (
 	"errors"
 	"fmt"
+	"log"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -40,7 +41,7 @@ func (v *Vdir) Init(path string) error {
 					if isIcal(pp, dd) {
 						item := new(Item)
 						if err := item.Init(pp); err != nil {
-							return err
+							log.Println(err);
 						}
 						if item.Ical != nil {
 							itemId++
