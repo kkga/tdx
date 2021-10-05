@@ -13,6 +13,7 @@ BUGS
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
 				the path actually contains calendars
 - [x] new todos have a zero due
+- [ ] show problematic file when ical returns an error
 - [ ] don't add item to tagged map twice (e.g. tag in summary+description)
 
 MISC
