@@ -12,8 +12,13 @@ BUGS
 - [x] Collections() messes up the map with non-existing items in various collections
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
 				the path actually contains calendars
-- [ ] add tests for vdir package
-- [ ] new todos have a zero due
+- [x] new todos have a zero due
+- [ ] add more tests for vdir package
+	- [ ] test for a vdir with many files
+
+MISC
+- [x] store collection names in a sorted slice before printing
+- [x] don't require list name if only one list
 
 COMMANDS
 - [ ] list
@@ -22,7 +27,7 @@ COMMANDS
 	- [x] parse tags in summary
 		- [x] parse tags in description
 	- [x] filter by range of dates (e.g. due next X days)
-	- [ ] use lowercase for status and sort flags
+	- [x] use lowercase for status and sort flags
 	- [ ] json
 - [x] add
 	- [x] parse priority from args
@@ -33,10 +38,6 @@ COMMANDS
 - [x] purge
 - [ ] stats: total lists, total todos, etc
 - [ ] move between lists
-
-MISC
-- store collection names in a sorted slice before printing
-- don't require list name if only one list
 
 FEAT
 - [x] edit command
@@ -50,7 +51,6 @@ FEAT
 		- https://github.com/tj/go-naturaldate
 		- https://github.com/bcampbell/fuzzytime
 
-
 ENCODING
 - [x] use a NewToDo func similar to NewEvent in go-ical
 - [x] generate UID of specific format?
@@ -59,7 +59,7 @@ ENCODING
 - [x] what is sequence?
 
 DECODING
-- [ ] ? parse #tags in description
+- [x] ? parse #tags in description
 - [x] (not needed for nor) make a map of [UID]ToDo instead of slice
 
 CONFIG OPTIONS
