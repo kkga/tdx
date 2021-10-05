@@ -449,11 +449,24 @@ func (i *Item) Tags() (tags []Tag, err error) {
 	st := re.FindAllString(summary, -1)
 	dt := re.FindAllString(description, -1)
 
+	tagExists := func(tags []Tag, t Tag) bool {
+		for _, tag := range tags {
+			if tag == t {
+				return true
+			}
+		}
+		return false
+	}
+
 	for _, t := range st {
-		tags = append(tags, Tag(t))
+		if !tagExists(tags, Tag(t)) {
+			tags = append(tags, Tag(t))
+		}
 	}
 	for _, t := range dt {
-		tags = append(tags, Tag(t))
+		if !tagExists(tags, Tag(t)) {
+			tags = append(tags, Tag(t))
+		}
 	}
 	return
 }
