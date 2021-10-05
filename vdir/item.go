@@ -66,7 +66,7 @@ type DecodeError struct {
 }
 
 func (d *DecodeError) Error() string {
-	return fmt.Sprintf("%s\npath: %s", d.Err, d.Path)
+	return fmt.Sprintf("%s (%s)", d.Err, d.Path)
 }
 
 // String returns a lowercased tag string
