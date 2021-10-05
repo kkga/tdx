@@ -13,12 +13,13 @@ BUGS
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
 				the path actually contains calendars
 - [x] new todos have a zero due
-- [ ] add more tests for vdir package
-	- [ ] test for a vdir with many files
+- [ ] don't add item to tagged map twice (e.g. tag in summary+description)
 
 MISC
 - [x] store collection names in a sorted slice before printing
 - [x] don't require list name if only one list
+- [ ] add more tests for vdir package
+	- [ ] test for a vdir with many files
 
 COMMANDS
 - [ ] list
