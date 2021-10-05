@@ -59,6 +59,16 @@ type Item struct {
 // Tag represents a hashtag label in todo summary
 type Tag string
 
+// DecodeError represents and error occured during ical decoding
+type DecodeError struct {
+	Path string
+	Err  error
+}
+
+func (d *DecodeError) Error() string {
+	return fmt.Sprintf("%s\npath: %s", d.Err, d.Path)
+}
+
 // String returns a lowercased tag string
 func (t Tag) String() string {
 	return strings.ToLower(string(t))
@@ -80,7 +90,10 @@ func (i *Item) Init(path string) error {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return err
+			return &DecodeError{
+				i.Path,
+				err,
+			}
 		}
 
 		// filter only items that contain vtodo

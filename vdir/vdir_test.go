@@ -9,26 +9,21 @@ import (
 	"github.com/emersion/go-ical"
 )
 
-var (
-	cwd, _ = os.Getwd()
-	// testVdirPath = path.Join(cwd, "test_data")
-	testVdirPath = path.Join("/home/kkga/.local/share/calendars/")
-)
-
-func TestCollections(t *testing.T) {
+func TestInit(t *testing.T) {
+	cwd, _ := os.Getwd()
+	vdpath := path.Join(cwd, "testdata/vdir/corrupted/")
 	var tests = []struct {
 		path string
 	}{
-		{testVdirPath},
+		{vdpath},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {
-			vd := new(Vdir)
-			err := vd.Init(tt.path)
-			if err != nil {
+			vd := Vdir{}
+			if err := vd.Init(tt.path); err != nil {
 				t.Fatal(err)
 			}
-			for col, items := range *vd {
+			for col, items := range vd {
 				for _, item := range items {
 					summary := item.Ical.Children[0].Props.Get(ical.PropSummary)
 					fmt.Printf("%s: %+s\n", col, summary)
