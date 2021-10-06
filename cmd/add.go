@@ -112,10 +112,7 @@ func (c *AddCmd) Run() error {
 
 	if due, text, err := parseDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
-		fmt.Println(summary)
-		fmt.Println(text)
 		summary = strings.Trim(strings.Replace(summary, text, "", 1), " ")
-		fmt.Println(summary)
 	}
 
 	t.Props.SetText(ical.PropSummary, summary)
