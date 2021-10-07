@@ -23,6 +23,8 @@ MISC
 	- [ ] test for a vdir with many files
 
 COMMANDS
+- [ ] tag
+	- [ ] e.g. `tdx tag 4 -someTag +otherTag` -- similar to notmuch
 - [ ] list
 	- [x] sorting
 	- [x] add a flag to organize by tags instead of list
