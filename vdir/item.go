@@ -211,7 +211,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			description = col(fmt.Sprintf("%s", p.Value))
 
 		case ical.PropRecurrenceRule:
-			c := color.New(color.FgGreen).SprintFunc()
+			c := color.New(color.FgYellow).SprintFunc()
 			repeat = c("⟳")
 
 		case ical.PropDue:
@@ -229,7 +229,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 			if math.Abs(diff.Hours()) < 24 {
 				if now.Day() == d.Day() {
-					col = color.New(color.FgGreen).SprintFunc()
+					col = color.New(color.FgYellow).SprintFunc()
 					prefix = ""
 					humanDate = "today"
 				} else if math.Signbit(diff.Hours()) {
@@ -237,7 +237,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 					prefix = "overdue "
 					humanDate = "yesterday"
 				} else {
-					col = color.New(color.FgGreen).SprintFunc()
+					col = color.New(color.FgYellow).SprintFunc()
 					prefix = ""
 					humanDate = "tomorrow"
 				}

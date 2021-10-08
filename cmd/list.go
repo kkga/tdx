@@ -176,11 +176,11 @@ func (c *ListCmd) Run() error {
 	}
 	sort.Strings(keys)
 
-	col := color.New(color.Bold, color.FgYellow).SprintFunc()
+	col := color.New(color.Bold, color.FgGreen).SprintFunc()
 
 	var sb = strings.Builder{}
 	for _, key := range keys {
-		sb.WriteString(col(fmt.Sprintf("-- %s\n", key)))
+		sb.WriteString(col(fmt.Sprintf("-- %s --\n", key)))
 		for _, i := range m[key] {
 			if err := writeItem(&sb, *c, *i); err != nil {
 				return err
