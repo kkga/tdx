@@ -13,10 +13,11 @@ BUGS
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
 				the path actually contains calendars
 - [x] new todos have a zero due
-- [ ] show problematic file when ical returns an error
-- [ ] don't add item to tagged map twice (e.g. tag in summary+description)
+- [x] show problematic file when ical returns an error
+- [x] don't add item to tagged map twice (e.g. tag in summary+description)
 
 MISC
+- [ ] don't colorize due dates if todo is completed
 - [x] store collection names in a sorted slice before printing
 - [x] don't require list name if only one list
 - [ ] add more tests for vdir package
