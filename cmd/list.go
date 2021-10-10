@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
-	"github.com/emersion/go-ical"
 	"github.com/fatih/color"
 	"github.com/kkga/tdx/vdir"
 )
@@ -26,7 +24,7 @@ func NewListCmd() *ListCmd {
 	}}
 	// TODO handle json flag
 	// c.fs.BoolVar(&c.json, "json", false, "json output")
-	c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
+	// c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
 	c.fs.BoolVar(&c.description, "desc", false, "show description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFilter, "l", "", "filter by `list`")
@@ -34,20 +32,24 @@ func NewListCmd() *ListCmd {
 	c.fs.StringVar(&c.sortOption, "s", "prio", "sort by `field`: prio, due, status, created")
 	c.fs.StringVar(&c.statusFilter, "S", "needs-action", "filter by `status`: needs-action, completed, cancelled, any")
 	c.fs.IntVar(&c.dueFilter, "d", 0, "filter by due date in next N `days`")
+	c.fs.StringVar(&c.tagFilter, "t", "", "filter todos by given tags")
+	c.fs.StringVar(&c.tagExcludeFilter, "T", "", "exclude todos with given tags")
 	return c
 }
 
 type ListCmd struct {
 	Cmd
 	// json         bool
-	byTag        bool
-	multiline    bool
-	description  bool
-	allLists     bool
-	dueFilter    int
-	listFilter   string
-	statusFilter string
-	sortOption   string
+	byTag            bool
+	multiline        bool
+	description      bool
+	allLists         bool
+	tagFilter        string
+	tagExcludeFilter string
+	dueFilter        int
+	listFilter       string
+	statusFilter     string
+	sortOption       string
 }
 
 type sortOption string
@@ -95,20 +97,31 @@ func (c *ListCmd) Run() error {
 		}
 	}
 
-	filterAndSortItems := func(ii []*vdir.Item) (items []*vdir.Item, err error) {
-		items, err = filterByStatus(ii, vdir.ToDoStatus(strings.ToUpper(c.statusFilter)))
+	filterItems := func(items []*vdir.Item) (filtered []*vdir.Item, err error) {
+		filtered = items
+
+		filtered, err = vdir.Filter(vdir.ByStatus(filtered), vdir.ToDoStatus(c.statusFilter))
 		if err != nil {
 			return
 		}
-		items, err = filterByDue(items, c.dueFilter)
+		filtered, err = vdir.Filter(vdir.ByTag(filtered), vdir.Tag(c.tagFilter))
 		if err != nil {
 			return
 		}
-		items, err = filterByQuery(items, query)
+		filtered, err = vdir.Filter(vdir.ByDue(filtered), c.dueFilter)
+		if err != nil {
+			return
+		}
+		filtered, err = vdir.Filter(vdir.ByText(filtered), query)
 		if err != nil {
 			return
 		}
 
+		return
+
+	}
+
+	sortItems := func(items []*vdir.Item) {
 		switch sortOption(strings.ToUpper(c.sortOption)) {
 		case sortOptionPrio:
 			sort.Sort(vdir.ByPriority(items))
@@ -119,8 +132,6 @@ func (c *ListCmd) Run() error {
 		case sortOptionCreated:
 			sort.Sort(vdir.ByCreated(items))
 		}
-
-		return
 	}
 
 	var m = make(map[string][]*vdir.Item)
@@ -128,17 +139,19 @@ func (c *ListCmd) Run() error {
 	if c.byTag {
 		emptyTag := vdir.Tag("[no tags]")
 
-		allItems := []*vdir.Item{}
-		for _, items := range vd {
-			allItems = append(allItems, items...)
+		items := []*vdir.Item{}
+		for _, ii := range vd {
+			items = append(items, ii...)
 		}
 
-		allItems, err := filterAndSortItems(allItems)
+		items, err := filterItems(items)
 		if err != nil {
 			return err
 		}
 
-		for _, item := range allItems {
+		sortItems(items)
+
+		for _, item := range items {
 			tags, err := item.Tags()
 			if err != nil {
 				return err
@@ -153,10 +166,11 @@ func (c *ListCmd) Run() error {
 		}
 	} else {
 		for col, items := range vd {
-			items, err := filterAndSortItems(items)
+			items, err := filterItems(items)
 			if err != nil {
 				return err
 			}
+			sortItems(items)
 
 			for _, item := range items {
 				m[col.String()] = append(m[col.String()], item)
@@ -191,71 +205,6 @@ func (c *ListCmd) Run() error {
 	fmt.Print(sb.String())
 
 	return nil
-}
-
-func filterByStatus(items []*vdir.Item, status vdir.ToDoStatus) (filtered []*vdir.Item, err error) {
-	if status == vdir.StatusAny {
-		return items, nil
-	}
-
-	for _, i := range items {
-		vt, err := i.Vtodo()
-		if err != nil {
-			return nil, err
-		}
-		s, propErr := vt.Props.Text(ical.PropStatus)
-		if propErr != nil {
-			return nil, propErr
-		}
-		if s == string(status) {
-			filtered = append(filtered, i)
-		}
-	}
-	return
-}
-
-func filterByDue(items []*vdir.Item, dueDays int) (filtered []*vdir.Item, err error) {
-	if dueDays == 0 {
-		return items, nil
-	}
-	now := time.Now()
-	inDueDays := now.AddDate(0, 0, dueDays)
-
-	for _, i := range items {
-		vt, err := i.Vtodo()
-		if err != nil {
-			return nil, err
-		}
-		due, err := vt.Props.DateTime(ical.PropDue, time.Local)
-		if err != nil {
-			return nil, err
-		}
-		if !due.IsZero() && due.Before(inDueDays) {
-			filtered = append(filtered, i)
-		}
-	}
-	return
-}
-
-func filterByQuery(items []*vdir.Item, query string) (filtered []*vdir.Item, err error) {
-	if query == "" {
-		return items, nil
-	}
-
-	for _, i := range items {
-		vt, err := i.Vtodo()
-		if err != nil {
-			return nil, err
-		}
-		summary, propErr := vt.Props.Text(ical.PropSummary)
-		if propErr != nil {
-			return nil, propErr
-		}
-		if strings.Contains(strings.ToLower(summary), strings.ToLower(query)) {
-			filtered = append(filtered, i)
-		}
-	}
-	return
 }
 
 func writeItem(sb *strings.Builder, c ListCmd, item vdir.Item) error {
