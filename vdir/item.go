@@ -480,12 +480,12 @@ func (i *Item) Tags() (tags []Tag, err error) {
 
 	for _, t := range st {
 		if !tagExists(tags, Tag(t)) {
-			tags = append(tags, Tag(t))
+			tags = append(tags, Tag(strings.ToLower(t)))
 		}
 	}
 	for _, t := range dt {
 		if !tagExists(tags, Tag(t)) {
-			tags = append(tags, Tag(t))
+			tags = append(tags, Tag(strings.ToLower(t)))
 		}
 	}
 	return
@@ -497,11 +497,15 @@ func (i *Item) HasTag(t Tag) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if !strings.HasPrefix(string(t), "#") {
+		t = Tag(fmt.Sprintf("#%s", string(t)))
+	}
 
 	for _, tag := range tags {
 		if tag == t {
 			return true, nil
 		}
+		println(t, tag, t == tag)
 	}
 	return false, nil
 }
