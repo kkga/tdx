@@ -24,7 +24,10 @@ func NewListCmd() *ListCmd {
 	}}
 	// TODO handle json flag
 	// c.fs.BoolVar(&c.json, "json", false, "json output")
+
+	// TODO think of a better way to organize output by tags/lists/...
 	// c.fs.BoolVar(&c.byTag, "t", false, "organize by tags")
+
 	c.fs.BoolVar(&c.description, "desc", false, "show description in output")
 	c.fs.BoolVar(&c.multiline, "2l", false, "use 2-line output for dates and description")
 	c.fs.StringVar(&c.listFilter, "l", "", "filter by `list`")
@@ -32,8 +35,10 @@ func NewListCmd() *ListCmd {
 	c.fs.StringVar(&c.sortOption, "s", "prio", "sort by `field`: prio, due, status, created")
 	c.fs.StringVar(&c.statusFilter, "S", "needs-action", "filter by `status`: needs-action, completed, cancelled, any")
 	c.fs.IntVar(&c.dueFilter, "d", 0, "filter by due date in next N `days`")
+
 	c.fs.StringVar(&c.tagFilter, "t", "", "filter todos by given tags")
 	c.fs.StringVar(&c.tagExcludeFilter, "T", "", "exclude todos with given tags")
+
 	return c
 }
 
@@ -105,6 +110,10 @@ func (c *ListCmd) Run() error {
 			return
 		}
 		filtered, err = vdir.Filter(vdir.ByTag(filtered), vdir.Tag(c.tagFilter))
+		if err != nil {
+			return
+		}
+		filtered, err = vdir.Filter(vdir.ByTagExclude(filtered), vdir.Tag(c.tagExcludeFilter))
 		if err != nil {
 			return
 		}
