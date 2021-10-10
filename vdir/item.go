@@ -69,9 +69,14 @@ func (d *DecodeError) Error() string {
 	return fmt.Sprintf("%s (%s)", d.Err, d.Path)
 }
 
-// String returns a lowercased tag string
+// String returns a lowercased tag string without hashtag prefix
 func (t Tag) String() string {
-	return strings.ToLower(string(t))
+	return strings.ToLower(strings.TrimPrefix(string(t), "#"))
+}
+
+// String returns a lowercased todo status string
+func (s ToDoStatus) String() string {
+	return strings.ToLower(string(s))
 }
 
 // Init initializes an Item with a decoded ical data from path
@@ -202,7 +207,8 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			if len(tags) > 0 {
 				c := color.New(color.FgBlue).SprintFunc()
 				for _, t := range tags {
-					summary = strings.ReplaceAll(summary, string(t), c(t))
+					tag := c(fmt.Sprintf("#%s", t))
+					summary = strings.ReplaceAll(summary, string(t), tag)
 				}
 			}
 
@@ -483,6 +489,21 @@ func (i *Item) Tags() (tags []Tag, err error) {
 		}
 	}
 	return
+}
+
+// HasTag reports whether an item has a given tag
+func (i *Item) HasTag(t Tag) (bool, error) {
+	tags, err := i.Tags()
+	if err != nil {
+		return false, err
+	}
+
+	for _, tag := range tags {
+		if tag == t {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // GenerateUID returns a random string containing timestamp and hostname
