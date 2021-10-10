@@ -51,16 +51,8 @@ func (t ByTag) Keep(item Item, i interface{}) (bool, error) {
 		return true, nil
 	}
 
-	tags, err := item.Tags()
-	if err != nil {
-		return false, err
-	}
-	for _, t := range tags {
-		if tag.String() == t.String() {
-			return true, nil
-		}
-	}
-	return false, nil
+	hasTag, err := item.HasTag(tag)
+	return hasTag, err
 }
 
 func (x ByTagExclude) Items() []*Item { return x }
@@ -70,16 +62,8 @@ func (x ByTagExclude) Keep(item Item, i interface{}) (bool, error) {
 		return true, nil
 	}
 
-	tags, err := item.Tags()
-	if err != nil {
-		return false, err
-	}
-	for _, t := range tags {
-		if tag.String() != t.String() {
-			return true, nil
-		}
-	}
-	return false, nil
+	hasTag, err := item.HasTag(tag)
+	return !hasTag, err
 }
 
 func (d ByDue) Items() []*Item { return d }

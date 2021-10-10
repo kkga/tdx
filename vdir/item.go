@@ -505,7 +505,6 @@ func (i *Item) HasTag(t Tag) (bool, error) {
 		if tag == t {
 			return true, nil
 		}
-		println(t, tag, t == tag)
 	}
 	return false, nil
 }
