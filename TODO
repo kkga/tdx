@@ -27,6 +27,8 @@ COMMANDS
 - [ ] tag
 	- [ ] e.g. `tdx tag 4 -someTag +otherTag` -- similar to notmuch
 - [ ] list
+	- [ ] add custom usage output for list command
+		- current one is hard to scan
 	- [x] sorting
 	- [x] add a flag to organize by tags instead of list
 	- [x] parse tags in summary
