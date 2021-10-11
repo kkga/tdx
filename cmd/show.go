@@ -1,26 +1,29 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/kkga/tdx/vdir"
+	flag "github.com/spf13/pflag"
 )
 
 func NewShowCmd() *ShowCmd {
 	c := &ShowCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("show", flag.ExitOnError),
+		name:      "show",
 		short:     "Show detailed info for todo",
 		usageLine: "[options] <id>...",
 	}}
-	c.fs.BoolVar(&c.raw, "r", false, "raw output")
+	c.fs.BoolVarP(&c.raw, "raw", "r", false, "raw output")
+	c.fs.StringVarP(&c.test, "test", "t", "", "test flag")
 	return c
 }
 
 type ShowCmd struct {
 	Cmd
-	raw bool
+	raw  bool
+	test string
 }
 
 func (c *ShowCmd) Run() error {
@@ -28,6 +31,8 @@ func (c *ShowCmd) Run() error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(c.fs.Args())
 
 	var toShow []*vdir.Item
 

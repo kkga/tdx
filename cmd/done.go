@@ -1,19 +1,19 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
+	flag "github.com/spf13/pflag"
 )
 
 func NewDoneCmd() *DoneCmd {
 	c := &DoneCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("done", flag.ExitOnError),
 		alias:     []string{"do"},
-		short: "Complete todos",
+		short:     "Complete todos",
 		usageLine: "[options] <id>...",
 	}}
 	c.fs.BoolVar(&c.toggle, "t", false, "toggle completed state")

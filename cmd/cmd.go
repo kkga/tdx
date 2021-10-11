@@ -4,8 +4,8 @@ package cmd
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -17,6 +17,11 @@ import (
 	"github.com/olebedev/when/rules/common"
 	"github.com/olebedev/when/rules/en"
 	"github.com/olebedev/when/rules/ru"
+	flag "github.com/spf13/pflag"
+)
+
+var (
+	BinaryName string
 )
 
 type Runner interface {
@@ -28,6 +33,7 @@ type Runner interface {
 
 type Cmd struct {
 	fs        *flag.FlagSet
+	name      string
 	alias     []string
 	short     string
 	long      string
@@ -46,7 +52,7 @@ type Config struct {
 }
 
 func (c *Cmd) Run() error      { return nil }
-func (c *Cmd) Name() string    { return c.fs.Name() }
+func (c *Cmd) Name() string    { return c.name }
 func (c *Cmd) Alias() []string { return c.alias }
 
 func (c *Cmd) Init(args []string) error {
@@ -66,8 +72,15 @@ func (c *Cmd) Init(args []string) error {
 	}
 
 	if err := c.fs.Parse(args); err != nil {
-		return err
+		// return err
+		log.Fatal(err)
 	}
+
+	// h, err := c.fs.GetBool("help")
+	// if h {
+	// 	c.fs.PrintDefaults()
+	// 	os.Exit(2)
+	// }
 
 	return nil
 }
@@ -90,11 +103,12 @@ func (c *Cmd) checkListFlag(list string, required bool, cmd Runner) error {
 }
 
 func (c *Cmd) usage() {
+	fmt.Println()
 	fmt.Println(c.short)
 	fmt.Println()
 
 	fmt.Println("USAGE")
-	fmt.Printf("  tdx %s %s\n\n", c.fs.Name(), c.usageLine)
+	fmt.Printf("  tdx %s %s\n\n", c.name, c.usageLine)
 
 	if strings.Contains(c.usageLine, "[options]") {
 		fmt.Println("OPTIONS")

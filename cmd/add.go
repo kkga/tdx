@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"path"
 	"strings"
 
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
+	flag "github.com/spf13/pflag"
 )
 
 func NewAddCmd() *AddCmd {

@@ -3,7 +3,7 @@ package cmd
 import (
 	"bufio"
 	"errors"
-	"flag"
+	flag "github.com/spf13/pflag"
 	"fmt"
 	"os"
 	"os/exec"
