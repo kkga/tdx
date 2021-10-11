@@ -13,13 +13,15 @@ import (
 )
 
 var (
-	list         string
-	allLists     bool
+	lists         []string
+	listsExcluded []string
+	allLists      bool
+
 	sorting      string
 	due          int
 	status       string
-	tags         string
-	tagsExcluded string
+	tags         []string
+	tagsExcluded []string
 	description  bool
 	multiline    bool
 	byTag        bool
@@ -40,13 +42,14 @@ const (
 )
 
 func init() {
-	listCmd.Flags().StringVarP(&list, "list", "l", "", "filter by `LIST`")
+	listCmd.Flags().StringSliceVarP(&lists, "lists", "l", []string{}, "filter by `LISTS`, comma-separated (e.g. 'tasks,other')")
 	listCmd.Flags().BoolVarP(&allLists, "all", "a", false, "show todos from all lists (overrides -l)")
-	listCmd.Flags().StringVarP(&sorting, "sort", "s", "prio", "sort by `FIELD`: prio, due, status, created")
-	listCmd.Flags().IntVarP(&due, "due", "d", 0, "filter by due date in next N `DAYS`")
+	listCmd.Flags().IntVarP(&due, "due", "d", 0, "filter by due date in next `N` days")
 	listCmd.Flags().StringVarP(&status, "status", "S", "needs-action", "filter by `STATUS`: needs-action, completed, cancelled, any")
-	listCmd.Flags().StringVarP(&tags, "tag", "t", "", "filter todos by given `TAGS`")
-	listCmd.Flags().StringVarP(&tagsExcluded, "no-tag", "T", "", "exclude todos with given `TAGS`")
+	listCmd.Flags().StringSliceVarP(&tags, "tag", "t", []string{}, "filter todos by given `TAGS`")
+	listCmd.Flags().StringSliceVarP(&tagsExcluded, "no-tag", "T", []string{}, "exclude todos with given `TAGS`")
+
+	listCmd.Flags().StringVarP(&sorting, "sort", "s", "prio", "sort by `FIELD`: prio, due, status, created")
 	listCmd.Flags().BoolVar(&description, "description", false, "show description in output")
 	listCmd.Flags().BoolVar(&byTag, "by-tag", false, "organize by tags")
 	listCmd.Flags().BoolVar(&multiline, "two-line", false, "use 2-line output for dates and description")
@@ -56,7 +59,7 @@ func init() {
 }
 
 var listCmd = &cobra.Command{
-	Use:     "list",
+	Use:     "list [flags] [query]",
 	Aliases: []string{"ls", "l"},
 	Short:   "List todos",
 	Long:    "List todos, optionally filtered by query.",
@@ -75,6 +78,7 @@ func runList(vd vdir.Vdir, flags *flag.FlagSet, args []string) error {
 		query = strings.Join(args, "")
 	}
 
+	// TODO: this is a good place to set default opts from env?
 	// if len(c.conf.ListOpts) > 0 {
 	// 	c.fs.Parse(strings.Split(c.conf.ListOpts, " "))
 	// }
@@ -93,12 +97,14 @@ func runList(vd vdir.Vdir, flags *flag.FlagSet, args []string) error {
 
 	// if list flag set, delete other collections from vdir
 	collections := vd
-	if list != "" && allLists == false {
-		if err := checkList(collections, list, false); err != nil {
-			return err
+	if len(lists) > 0 && allLists == false {
+		for _, list := range lists {
+			if err := checkList(collections, list, false); err != nil {
+				return err
+			}
 		}
 		for col := range collections {
-			if col.Name != list {
+			if !containsString(lists, col.Name) {
 				delete(collections, col)
 			}
 		}
@@ -111,14 +117,14 @@ func runList(vd vdir.Vdir, flags *flag.FlagSet, args []string) error {
 		if err != nil {
 			return
 		}
-		filtered, err = vdir.Filter(vdir.ByTag(filtered), vdir.Tag(tags))
-		if err != nil {
-			return
-		}
-		filtered, err = vdir.Filter(vdir.ByTagExclude(filtered), vdir.Tag(tagsExcluded))
-		if err != nil {
-			return
-		}
+		// filtered, err = vdir.Filter(vdir.ByTag(filtered), tags)
+		// if err != nil {
+		// 	return
+		// }
+		// filtered, err = vdir.Filter(vdir.ByTagExclude(filtered), tagsExcluded)
+		// if err != nil {
+		// 	return
+		// }
 		filtered, err = vdir.Filter(vdir.ByDue(filtered), due)
 		if err != nil {
 			return

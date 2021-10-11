@@ -57,6 +57,7 @@ func (t ByTag) Keep(item Item, i interface{}) (bool, error) {
 
 func (x ByTagExclude) Items() []*Item { return x }
 func (x ByTagExclude) Keep(item Item, i interface{}) (bool, error) {
+	// TODO handle different types of args: e.g. []string, []Tag, string, Tag
 	tag := i.(Tag)
 	if tag.String() == "" {
 		return true, nil
