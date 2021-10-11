@@ -20,10 +20,6 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-var (
-	BinaryName string
-)
-
 type Runner interface {
 	Init([]string) error
 	Run() error
@@ -85,12 +81,12 @@ func (c *Cmd) Init(args []string) error {
 	return nil
 }
 
-func (c *Cmd) checkListFlag(list string, required bool, cmd Runner) error {
+func checkList(vd vdir.Vdir, list string, required bool) error {
 	if list == "" && required {
-		return fmt.Errorf("List flag required. See 'tdx %s -h'", cmd.Name())
+		return errors.New("List flag required. See 'tdx %s -h'")
 	} else if list != "" {
 		names := []string{}
-		for col := range c.vdir {
+		for col := range vd {
 			names = append(names, col.Name)
 			if col.Name == list {
 				return nil

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "embed"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -12,14 +13,21 @@ var helpTxt string
 
 var vdirPath string
 
+// var vd vdir.Vdir
+
 var rootCmd = &cobra.Command{
-	Use:          "tdx",
-	Short:        "tdx -- todo manager for vdir (iCalendar) files",
-	Long:         `long output`,
-	Version:      "TODO",
-	SilenceUsage: true,
-	// Run: func(cmd *cobra.Command, args []string) {
-	// 	// fmt.Println("some stuff")
+	Use:              "tdx",
+	Short:            "tdx -- todo manager for vdir (iCalendar) files",
+	Long:             `long output`,
+	Version:          "devdddd",
+	SilenceUsage:     true,
+	TraverseChildren: true,
+	// RunE: func(cmd *cobra.Command, args []string) error {
+	// 	vd = vdir.Vdir{}
+	// 	if err := vd.Init(c.conf.Path); err != nil {
+	// 		return err
+	// 	}
+	// 	return vd.Init(vdirPath)
 	// },
 }
 
@@ -30,10 +38,14 @@ func Execute() {
 }
 
 func init() {
-	BinaryName = os.Args[0]
-	rootCmd.Flags().StringVarP(&vdirPath, "path", "p", "", "path to vdir folder")
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	defaultPath := fmt.Sprintf("%s/.local/share/calendars/migadu", home)
+
+	rootCmd.Flags().StringVarP(&vdirPath, "path", "p", defaultPath, "path to vdir folder")
 	rootCmd.MarkFlagRequired("path")
-	// rootCmd.Flags().BoolP("version", "v", false, "print version")
+
 }
 
 // func Root(args []string, version string) error {

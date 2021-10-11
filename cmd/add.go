@@ -60,9 +60,9 @@ func (c *AddCmd) Run() error {
 
 	var collection *vdir.Collection
 	if len(c.vdir) > 1 {
-		if err := c.checkListFlag(c.list, true, c); err != nil {
-			return err
-		}
+		// if err := checkList(c.list, vd, true, list); err != nil {
+		// 	return err
+		// }
 		for col := range c.vdir {
 			if col.Name == c.list {
 				collection = col
