@@ -5,81 +5,67 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kelseyhightower/envconfig"
 	"github.com/kkga/tdx/vdir"
 	"github.com/olebedev/when"
 	"github.com/olebedev/when/rules/common"
 	"github.com/olebedev/when/rules/en"
 	"github.com/olebedev/when/rules/ru"
-	flag "github.com/spf13/pflag"
 )
 
-type Runner interface {
-	Init([]string) error
-	Run() error
-	Name() string
-	Alias() []string
-}
+// type Cmd struct {
+// 	fs        *flag.FlagSet
+// 	name      string
+// 	alias     []string
+// 	short     string
+// 	long      string
+// 	usageLine string
 
-type Cmd struct {
-	fs        *flag.FlagSet
-	name      string
-	alias     []string
-	short     string
-	long      string
-	usageLine string
+// 	conf Config
+// 	args []string
 
-	conf Config
-	args []string
+// 	vdir vdir.Vdir
+// }
 
-	vdir vdir.Vdir
-}
+// type Config struct {
+// 	Path     string `required:"true"`    // Path to vdir
+// 	ListOpts string `split_words:"true"` // Default options for list command
+// 	AddOpts  string `split_words:"true"` // Default options for add command
+// }
 
-type Config struct {
-	Path     string `required:"true"`    // Path to vdir
-	ListOpts string `split_words:"true"` // Default options for list command
-	AddOpts  string `split_words:"true"` // Default options for add command
-}
+// func (c *Cmd) Init(args []string) error {
+// 	var conf Config
+// 	err := envconfig.Process("TDX", &conf)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func (c *Cmd) Run() error      { return nil }
-func (c *Cmd) Name() string    { return c.name }
-func (c *Cmd) Alias() []string { return c.alias }
+// 	c.conf = conf
+// 	c.args = args
+// 	c.fs.Usage = c.usage
 
-func (c *Cmd) Init(args []string) error {
-	var conf Config
-	err := envconfig.Process("TDX", &conf)
-	if err != nil {
-		return err
-	}
+// 	c.vdir = vdir.Vdir{}
+// 	if err := c.vdir.Init(c.conf.Path); err != nil {
+// 		return err
+// 	}
 
-	c.conf = conf
-	c.args = args
-	c.fs.Usage = c.usage
+// 	if err := c.fs.Parse(args); err != nil {
+// 		// return err
+// 		log.Fatal(err)
+// 	}
 
-	c.vdir = vdir.Vdir{}
-	if err := c.vdir.Init(c.conf.Path); err != nil {
-		return err
-	}
+// 	// h, err := c.fs.GetBool("help")
+// 	// if h {
+// 	// 	c.fs.PrintDefaults()
+// 	// 	os.Exit(2)
+// 	// }
 
-	if err := c.fs.Parse(args); err != nil {
-		// return err
-		log.Fatal(err)
-	}
-
-	// h, err := c.fs.GetBool("help")
-	// if h {
-	// 	c.fs.PrintDefaults()
-	// 	os.Exit(2)
-	// }
-
-	return nil
-}
+// 	return nil
+// }
 
 func checkList(vd vdir.Vdir, list string, required bool) error {
 	if list == "" && required {
@@ -98,37 +84,37 @@ func checkList(vd vdir.Vdir, list string, required bool) error {
 	}
 }
 
-func (c *Cmd) usage() {
-	fmt.Println()
-	fmt.Println(c.short)
-	fmt.Println()
+// func (c *Cmd) usage() {
+// 	fmt.Println()
+// 	fmt.Println(c.short)
+// 	fmt.Println()
 
-	fmt.Println("USAGE")
-	fmt.Printf("  tdx %s %s\n\n", c.name, c.usageLine)
+// 	fmt.Println("USAGE")
+// 	fmt.Printf("  tdx %s %s\n\n", c.name, c.usageLine)
 
-	if strings.Contains(c.usageLine, "[options]") {
-		fmt.Println("OPTIONS")
-		c.fs.PrintDefaults()
-	}
+// 	if strings.Contains(c.usageLine, "[options]") {
+// 		fmt.Println("OPTIONS")
+// 		c.fs.PrintDefaults()
+// 	}
 
-	if c.long != "" {
-		fmt.Println()
-		fmt.Println(c.long)
-	}
+// 	if c.long != "" {
+// 		fmt.Println()
+// 		fmt.Println(c.long)
+// 	}
 
-}
+// }
 
-func (c *Cmd) argsToIDs() (IDs []int, err error) {
-	if len(c.fs.Args()) == 0 {
-		return IDs, errors.New("Specify one or multiple IDs")
-	}
+func stringsToInts(ss []string) (ints []int, err error) {
+	// if len(ss) == 0 {
+	// 	return ints, errors.New("Specify one or multiple IDs")
+	// }
 
-	for _, s := range c.fs.Args() {
-		id, err := strconv.Atoi(s)
+	for _, s := range ss {
+		i, err := strconv.Atoi(s)
 		if err != nil {
-			return IDs, fmt.Errorf("Invalid todo ID: %q", s)
+			return ints, fmt.Errorf("Invalid arg: %q", s)
 		}
-		IDs = append(IDs, id)
+		ints = append(ints, i)
 	}
 	return
 }
@@ -198,9 +184,9 @@ func parseDate(s string) (t time.Time, text string, err error) {
 	return
 }
 
-func containsString(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
+func containsString(ss []string, s string) bool {
+	for _, a := range ss {
+		if a == s {
 			return true
 		}
 	}

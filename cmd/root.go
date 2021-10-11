@@ -46,6 +46,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&vdirPath, "path", "p", defaultPath, "path to vdir folder")
 	rootCmd.MarkFlagRequired("path")
 
+	rootCmd.AddCommand(NewListCmd())
 }
 
 // func Root(args []string, version string) error {

@@ -11,6 +11,11 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
+var (
+	list        string
+	description string
+)
+
 func NewAddCmd() *AddCmd {
 	c := &AddCmd{Cmd: Cmd{
 		fs:        flag.NewFlagSet("add", flag.ExitOnError),

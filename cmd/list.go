@@ -5,14 +5,23 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	flag "github.com/spf13/pflag"
 
 	"github.com/kkga/tdx/vdir"
 )
 
-var (
+type sortOption string
+
+const (
+	sortOptionStatus  sortOption = "STATUS"
+	sortOptionPrio    sortOption = "PRIO"
+	sortOptionDue     sortOption = "DUE"
+	sortOptionCreated sortOption = "CREATED"
+)
+
+type listOptions struct {
 	lists         []string
 	listsExcluded []string
 	allLists      bool
@@ -30,53 +39,45 @@ var (
 	// byTag = listCmd.Flags().Bool("by-tag", false, "organize by tags")
 	// TODO handle json flag
 	// json = listCmd.Flags().Bool("json", false, "output in json")
-)
-
-type sortOption string
-
-const (
-	sortOptionStatus  sortOption = "STATUS"
-	sortOptionPrio    sortOption = "PRIO"
-	sortOptionDue     sortOption = "DUE"
-	sortOptionCreated sortOption = "CREATED"
-)
-
-func init() {
-	listCmd.Flags().StringSliceVarP(&lists, "lists", "l", []string{}, "filter by `LISTS`, comma-separated (e.g. 'tasks,other')")
-	listCmd.Flags().BoolVarP(&allLists, "all", "a", false, "show todos from all lists (overrides -l)")
-	listCmd.Flags().IntVarP(&due, "due", "d", 0, "filter by due date in next `N` days")
-	listCmd.Flags().StringVarP(&status, "status", "S", "needs-action", "filter by `STATUS`: needs-action, completed, cancelled, any")
-	listCmd.Flags().StringSliceVarP(&tags, "tag", "t", []string{}, "filter todos by given `TAGS`")
-	listCmd.Flags().StringSliceVarP(&tagsExcluded, "no-tag", "T", []string{}, "exclude todos with given `TAGS`")
-
-	listCmd.Flags().StringVarP(&sorting, "sort", "s", "prio", "sort by `FIELD`: prio, due, status, created")
-	listCmd.Flags().BoolVar(&description, "description", false, "show description in output")
-	listCmd.Flags().BoolVar(&byTag, "by-tag", false, "organize by tags")
-	listCmd.Flags().BoolVar(&multiline, "two-line", false, "use 2-line output for dates and description")
-
-	listCmd.Flags().SortFlags = false
-	rootCmd.AddCommand(listCmd)
 }
 
-var listCmd = &cobra.Command{
-	Use:     "list [flags] [query]",
-	Aliases: []string{"ls", "l"},
-	Short:   "List todos",
-	Long:    "List todos, optionally filtered by query.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		vd := make(vdir.Vdir)
-		if err := vd.Init(vdirPath); err != nil {
-			return err
-		}
-		return runList(vd, cmd.Flags(), args)
-	},
-}
-
-func runList(vd vdir.Vdir, flags *flag.FlagSet, args []string) error {
-	var query string
-	if len(args) > 0 {
-		query = strings.Join(args, "")
+func NewListCmd() *cobra.Command {
+	opts := &listOptions{
+		description: false,
 	}
+
+	cmd := &cobra.Command{
+		Use:     "list [flags] [query]",
+		Aliases: []string{"ls", "l"},
+		Short:   "List todos",
+		Long:    "List todos, optionally filtered by query.",
+		Example: heredoc.Doc(`
+            $ tdx list --sort prio --due 2
+        `),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			vd := make(vdir.Vdir)
+			if err := vd.Init(vdirPath); err != nil {
+				return err
+			}
+			return runList(vd, opts, query)
+		},
+	}
+
+	cmd.Flags().StringSliceVarP(&opts.lists, "lists", "l", []string{}, "filter by `LISTS`, comma-separated (e.g. 'tasks,other')")
+	cmd.Flags().BoolVarP(&opts.allLists, "all", "a", false, "show todos from all lists (overrides -l)")
+	cmd.Flags().IntVarP(&opts.due, "due", "d", 0, "filter by due date in next `N` days")
+	cmd.Flags().StringVarP(&opts.status, "status", "S", "needs-action", "filter by `STATUS`: needs-action, completed, cancelled, any")
+	cmd.Flags().StringSliceVarP(&opts.tags, "tag", "t", []string{}, "filter todos by given `TAGS`")
+	cmd.Flags().StringSliceVarP(&opts.tagsExcluded, "no-tag", "T", []string{}, "exclude todos with given `TAGS`")
+	cmd.Flags().StringVarP(&opts.sorting, "sort", "s", "prio", "sort by `FIELD`: prio, due, status, created")
+	cmd.Flags().BoolVar(&opts.description, "description", false, "show description in output")
+	cmd.Flags().BoolVar(&opts.byTag, "by-tag", false, "organize by tags")
+	cmd.Flags().BoolVar(&opts.multiline, "two-line", false, "use 2-line output for dates and description")
+	cmd.Flags().SortFlags = false
+	return cmd
+}
+
+func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 
 	// TODO: this is a good place to set default opts from env?
 	// if len(c.conf.ListOpts) > 0 {
