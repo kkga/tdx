@@ -1,10 +1,12 @@
+//go:build skip
+
 package cmd
 
 import (
 	"bufio"
 	"errors"
-	flag "github.com/spf13/pflag"
 	"fmt"
+	flag "github.com/spf13/pflag"
 	"os"
 	"os/exec"
 	"strconv"

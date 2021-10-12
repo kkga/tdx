@@ -22,13 +22,6 @@ var rootCmd = &cobra.Command{
 	Version:          "devdddd",
 	SilenceUsage:     true,
 	TraverseChildren: true,
-	// RunE: func(cmd *cobra.Command, args []string) error {
-	// 	vd = vdir.Vdir{}
-	// 	if err := vd.Init(c.conf.Path); err != nil {
-	// 		return err
-	// 	}
-	// 	return vd.Init(vdirPath)
-	// },
 }
 
 func Execute() {
@@ -38,6 +31,7 @@ func Execute() {
 }
 
 func init() {
+	cobra.EnableCommandSorting = false
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
 
@@ -47,6 +41,7 @@ func init() {
 	rootCmd.MarkFlagRequired("path")
 
 	rootCmd.AddCommand(NewListCmd())
+	rootCmd.AddCommand(NewAddCmd())
 }
 
 // func Root(args []string, version string) error {

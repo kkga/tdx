@@ -1,8 +1,10 @@
+//go:build skip
+
 package cmd
 
 import (
-		flag "github.com/spf13/pflag"
 	"fmt"
+	flag "github.com/spf13/pflag"
 	"os"
 	"strings"
 

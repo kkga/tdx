@@ -1,8 +1,10 @@
+//go:build skip
+
 package cmd
 
 import (
-	flag "github.com/spf13/pflag"
 	"fmt"
+	flag "github.com/spf13/pflag"
 	"os"
 	"strings"
 
@@ -12,7 +14,7 @@ import (
 
 func NewPurgeCmd() *PurgeCmd {
 	c := &PurgeCmd{Cmd: Cmd{
-		fs:        flag.NewFlagSet("purge", flag.ExitOnError),
+		fs:    flag.NewFlagSet("purge", flag.ExitOnError),
 		short: "Remove completed and cancelled todos",
 	}}
 	return c
