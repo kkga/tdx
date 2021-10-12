@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -20,6 +21,9 @@ const (
 	sortOptionDue     sortOption = "DUE"
 	sortOptionCreated sortOption = "CREATED"
 )
+
+// envListOptsVar is the environment variable for setting default list options
+const envListOptsVar = "TDX_LIST_OPTS"
 
 type listOptions struct {
 	lists         []string
@@ -59,6 +63,35 @@ func NewListCmd() *cobra.Command {
 			if err := vd.Init(vdirPath); err != nil {
 				return err
 			}
+
+			defaultOpts := os.Getenv(envListOptsVar)
+			println(defaultOpts)
+			cmd.ParseFlags(strings.Split(defaultOpts, " "))
+
+			if err := checkStatusFlag(opts.status); err != nil {
+				return err
+			}
+
+			if err := checkSortFlag(opts.sorting); err != nil {
+				return err
+			}
+
+			// if lists flag set, delete other collections from vdir
+			if len(opts.lists) > 0 && opts.allLists == false {
+				for _, list := range opts.lists {
+					if err := checkList(vd, list, false); err != nil {
+						return err
+					}
+				}
+				for col := range vd {
+					if !containsString(opts.lists, col.Name) {
+						delete(vd, col)
+					}
+				}
+			}
+
+			query := strings.Join(args, "")
+
 			return runList(vd, opts, query)
 		},
 	}
@@ -79,42 +112,10 @@ func NewListCmd() *cobra.Command {
 
 func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 
-	// TODO: this is a good place to set default opts from env?
-	// if len(c.conf.ListOpts) > 0 {
-	// 	c.fs.Parse(strings.Split(c.conf.ListOpts, " "))
-	// }
-
-	// if err := c.fs.Parse(c.args); err != nil {
-	// 	return err
-	// }
-
-	// if err := checkStatusFlag(*status); err != nil {
-	// 	return err
-	// }
-
-	// if err := checkSortFlag(*sorting); err != nil {
-	// 	return err
-	// }
-
-	// if list flag set, delete other collections from vdir
-	collections := vd
-	if len(lists) > 0 && allLists == false {
-		for _, list := range lists {
-			if err := checkList(collections, list, false); err != nil {
-				return err
-			}
-		}
-		for col := range collections {
-			if !containsString(lists, col.Name) {
-				delete(collections, col)
-			}
-		}
-	}
-
 	filterItems := func(items []*vdir.Item) (filtered []*vdir.Item, err error) {
 		filtered = items
 
-		filtered, err = vdir.Filter(vdir.ByStatus(filtered), vdir.ToDoStatus(status))
+		filtered, err = vdir.Filter(vdir.ByStatus(filtered), vdir.ToDoStatus(opts.status))
 		if err != nil {
 			return
 		}
@@ -126,7 +127,7 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 		// if err != nil {
 		// 	return
 		// }
-		filtered, err = vdir.Filter(vdir.ByDue(filtered), due)
+		filtered, err = vdir.Filter(vdir.ByDue(filtered), opts.due)
 		if err != nil {
 			return
 		}
@@ -140,7 +141,7 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 	}
 
 	sortItems := func(items []*vdir.Item) {
-		switch sortOption(strings.ToUpper(sorting)) {
+		switch sortOption(strings.ToUpper(opts.sorting)) {
 		case sortOptionPrio:
 			sort.Sort(vdir.ByPriority(items))
 		case sortOptionDue:
@@ -154,11 +155,11 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 
 	var m = make(map[string][]*vdir.Item)
 
-	if byTag {
+	if opts.byTag {
 		emptyTag := vdir.Tag("[no tags]")
 
 		items := []*vdir.Item{}
-		for _, ii := range collections {
+		for _, ii := range vd {
 			items = append(items, ii...)
 		}
 
@@ -183,7 +184,7 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 			}
 		}
 	} else {
-		for col, items := range collections {
+		for col, items := range vd {
 			items, err := filterItems(items)
 			if err != nil {
 				return err
@@ -214,7 +215,7 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 	for _, key := range keys {
 		sb.WriteString(col(fmt.Sprintf("-- %s --\n", key)))
 		for _, i := range m[key] {
-			if err := writeItem(&sb, *i); err != nil {
+			if err := writeItem(&sb, *i, opts); err != nil {
 				return err
 			}
 		}
@@ -225,16 +226,16 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 	return nil
 }
 
-func writeItem(sb *strings.Builder, item vdir.Item) error {
-	opts := []vdir.FormatOption{}
-	if multiline {
-		opts = append(opts, vdir.FormatMultiline)
+func writeItem(sb *strings.Builder, item vdir.Item, opts *listOptions) error {
+	formatOpts := []vdir.FormatOption{}
+	if opts.multiline {
+		formatOpts = append(formatOpts, vdir.FormatMultiline)
 	}
-	if description {
-		opts = append(opts, vdir.FormatDescription)
+	if opts.description {
+		formatOpts = append(formatOpts, vdir.FormatDescription)
 	}
 
-	s, err := item.Format(opts...)
+	s, err := item.Format(formatOpts...)
 	if err != nil {
 		return err
 	}
