@@ -31,7 +31,6 @@ func Execute() {
 }
 
 func init() {
-	cobra.EnableCommandSorting = false
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
 
@@ -40,6 +39,7 @@ func init() {
 	rootCmd.Flags().StringVarP(&vdirPath, "path", "p", defaultPath, "path to vdir folder")
 	rootCmd.MarkFlagRequired("path")
 
+	cobra.EnableCommandSorting = false
 	rootCmd.AddCommand(NewListCmd())
 	rootCmd.AddCommand(NewAddCmd())
 }
