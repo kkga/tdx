@@ -11,6 +11,7 @@ that format the given component.
 COBRA MIGRATION:
 - [x] list command
 - [ ] add
+- [ ] command examples
 
 BUGS:
 - [x] Collections() messes up the map with non-existing items in various collections
