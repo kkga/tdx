@@ -100,7 +100,7 @@ func NewListCmd() *cobra.Command {
 
 			query := strings.Join(args, "")
 
-			return runList(vd, opts, query)
+			return runList(vd, query, opts)
 		},
 	}
 
@@ -118,7 +118,7 @@ func NewListCmd() *cobra.Command {
 	return cmd
 }
 
-func runList(vd vdir.Vdir, opts *listOptions, query string) error {
+func runList(vd vdir.Vdir, query string, opts *listOptions) error {
 
 	filterItems := func(items []*vdir.Item) (filtered []*vdir.Item, err error) {
 		filtered = items

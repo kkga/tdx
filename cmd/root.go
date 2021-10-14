@@ -13,8 +13,6 @@ var helpTxt string
 
 var vdirPath string
 
-// var vd vdir.Vdir
-
 var rootCmd = &cobra.Command{
 	Use:              "tdx",
 	Short:            "tdx -- todo manager for vdir (iCalendar) files",

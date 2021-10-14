@@ -1,9 +1,14 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
+	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
 	"github.com/spf13/cobra"
 )
@@ -12,6 +17,9 @@ type addOptions struct {
 	list        string
 	description string
 }
+
+// envAddOptsVar is the environment variable for setting default add options
+const envAddOptsVar = "TDX_ADD_OPTS"
 
 func NewAddCmd() *cobra.Command {
 	opts := &addOptions{}
@@ -31,148 +39,109 @@ func NewAddCmd() *cobra.Command {
 				return err
 			}
 
+			defaultOpts := os.Getenv(envAddOptsVar)
+			cmd.ParseFlags(strings.Split(defaultOpts, " "))
+
+			var collection *vdir.Collection
+			if len(vd) > 1 {
+				if err := checkList(vd, opts.list, true); err != nil {
+					return err
+				}
+				for col := range vd {
+					if col.Name == opts.list {
+						collection = col
+					}
+				}
+			} else {
+				// if only one collection, use it without requiring a list flag
+				for col := range vd {
+					collection = col
+				}
+			}
+
 			todo := strings.Join(args, "")
 
-			return runAdd(vd, opts, todo)
+			return runAdd(collection, opts, todo)
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.list, "l", "", "`list` for new todo")
+	cmd.Flags().StringVarP(&opts.list, "list", "l", "", "`list` for new todo")
+	cmd.MarkFlagRequired("list")
 	cmd.Flags().StringVar(&opts.description, "d", "", "`description` text")
 
 	return cmd
 }
 
-func runAdd(vd vdir.Vdir, opts *addOptions, todo string) error {
+func runAdd(collection *vdir.Collection, opts *addOptions, todo string) error {
 	return nil
 }
 
-// func NewAddCmd() *AddCmd {
-// 	c := &AddCmd{Cmd: Cmd{
-// 		fs:        flag.NewFlagSet("add", flag.ExitOnError),
-// 		alias:     []string{"a"},
-// 		short:     "Add new todo",
-// 		usageLine: "[options] <todo>",
-// 		long: `AUTOMATIC PROPERTY PARSING
-//   due date
-//         If todo text contains a date in any of the following
-//         forms, it will be converted to due date:
-//         - "today", "tomorrow", "next tuesday"
-//         - "in 3 days", "in a few days", "in 2 weeks", "in a month"
-//         - "december 1st", "15 nov", "jul"
-//   priority
-//         If todo text contains one or more "!" chars,
-//         they will be converted to priority:
-//         - "!!!" (high)
-//         - "!!"  (medium)
-//         - "!"   (low)
+func (c *AddCmd) Run() error {
 
-// ENVIRONMENT VARIABLES
-//   TDX_ADD_OPTS
-//         default options for <add> command;
-//         example: use a default list for new todos...
-//             TDX_ADD_OPTS='-l=myList'`,
-// 	}}
-// 	return c
-// }
+	args := c.fs.Args()
+	if len(args) == 0 {
+		return errors.New("Provide a todo text")
+	}
 
-// type AddCmd struct {
-// 	Cmd
-// 	description string
-// 	list        string
-// 	due         int
-// }
+	cal := ical.NewCalendar()
+	t := ical.NewComponent(ical.CompToDo)
+	uid := vdir.GenerateUID()
+	t.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
+	t.Props.SetText(ical.PropUID, uid)
+	cal.Children = append(cal.Children, t)
 
-// func (c *AddCmd) Run() error {
-// 	if len(c.conf.AddOpts) > 0 {
-// 		c.fs.Parse(strings.Split(c.conf.AddOpts, " "))
-// 	}
+	summary := strings.Join(args, " ")
 
-// 	if err := c.fs.Parse(c.args); err != nil {
-// 		return err
-// 	}
+	if strings.Contains(summary, "!!!") {
+		summary = strings.Trim(strings.Replace(summary, "!!!", "", 1), " ")
+		prioProp := ical.NewProp(ical.PropPriority)
+		prioProp.Value = fmt.Sprint(vdir.PriorityHigh)
+		t.Props.Add(prioProp)
+	} else if strings.Contains(summary, "!!") {
+		summary = strings.Trim(strings.Replace(summary, "!!", "", 1), " ")
+		prioProp := ical.NewProp(ical.PropPriority)
+		prioProp.Value = fmt.Sprint(vdir.PriorityMedium)
+		t.Props.Add(prioProp)
+	} else if strings.Contains(summary, "!") {
+		summary = strings.Trim(strings.Replace(summary, "!", "", 1), " ")
+		prioProp := ical.NewProp(ical.PropPriority)
+		prioProp.Value = fmt.Sprint(vdir.PriorityLow)
+		t.Props.Add(prioProp)
+	}
 
-// 	var collection *vdir.Collection
-// 	if len(c.vdir) > 1 {
-// 		// if err := checkList(c.list, vd, true, list); err != nil {
-// 		// 	return err
-// 		// }
-// 		for col := range c.vdir {
-// 			if col.Name == c.list {
-// 				collection = col
-// 			}
-// 		}
-// 	} else {
-// 		// if only one collection, use it without requiring a list flag
-// 		for col := range c.vdir {
-// 			collection = col
-// 		}
-// 	}
+	if c.description != "" {
+		t.Props.SetText(ical.PropDescription, c.description)
+	}
 
-// 	args := c.fs.Args()
-// 	if len(args) == 0 {
-// 		return errors.New("Provide a todo text")
-// 	}
+	if due, text, err := parseDate(summary); err == nil {
+		t.Props.SetDateTime(ical.PropDue, due)
+		summary = strings.Trim(strings.Replace(summary, text, "", 1), " ")
+	}
 
-// 	cal := ical.NewCalendar()
-// 	t := ical.NewComponent(ical.CompToDo)
-// 	uid := vdir.GenerateUID()
-// 	t.Props.SetText(ical.PropStatus, string(vdir.StatusNeedsAction))
-// 	t.Props.SetText(ical.PropUID, uid)
-// 	cal.Children = append(cal.Children, t)
+	t.Props.SetText(ical.PropSummary, summary)
 
-// 	summary := strings.Join(args, " ")
+	p := path.Join(collection.Path, fmt.Sprintf("%s.ics", uid))
 
-// 	if strings.Contains(summary, "!!!") {
-// 		summary = strings.Trim(strings.Replace(summary, "!!!", "", 1), " ")
-// 		prioProp := ical.NewProp(ical.PropPriority)
-// 		prioProp.Value = fmt.Sprint(vdir.PriorityHigh)
-// 		t.Props.Add(prioProp)
-// 	} else if strings.Contains(summary, "!!") {
-// 		summary = strings.Trim(strings.Replace(summary, "!!", "", 1), " ")
-// 		prioProp := ical.NewProp(ical.PropPriority)
-// 		prioProp.Value = fmt.Sprint(vdir.PriorityMedium)
-// 		t.Props.Add(prioProp)
-// 	} else if strings.Contains(summary, "!") {
-// 		summary = strings.Trim(strings.Replace(summary, "!", "", 1), " ")
-// 		prioProp := ical.NewProp(ical.PropPriority)
-// 		prioProp.Value = fmt.Sprint(vdir.PriorityLow)
-// 		t.Props.Add(prioProp)
-// 	}
+	item := &vdir.Item{
+		Path: p,
+		Ical: cal,
+	}
+	item.WriteFile()
 
-// 	if c.description != "" {
-// 		t.Props.SetText(ical.PropDescription, c.description)
-// 	}
+	if err := c.vdir.Init(c.conf.Path); err != nil {
+		return err
+	}
 
-// 	if due, text, err := parseDate(summary); err == nil {
-// 		t.Props.SetDateTime(ical.PropDue, due)
-// 		summary = strings.Trim(strings.Replace(summary, text, "", 1), " ")
-// 	}
+	addedItem, err := c.vdir.ItemByPath(p)
+	if err != nil {
+		return err
+	}
 
-// 	t.Props.SetText(ical.PropSummary, summary)
+	s, err := addedItem.Format()
+	if err != nil {
+		return err
+	}
+	fmt.Print(s)
 
-// 	p := path.Join(collection.Path, fmt.Sprintf("%s.ics", uid))
-
-// 	item := &vdir.Item{
-// 		Path: p,
-// 		Ical: cal,
-// 	}
-// 	item.WriteFile()
-
-// 	if err := c.vdir.Init(c.conf.Path); err != nil {
-// 		return err
-// 	}
-
-// 	addedItem, err := c.vdir.ItemByPath(p)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	s, err := addedItem.Format()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	fmt.Print(s)
-
-// 	return nil
-// }
+	return nil
+}
