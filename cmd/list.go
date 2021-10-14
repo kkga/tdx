@@ -119,14 +119,25 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 		if err != nil {
 			return
 		}
-		// filtered, err = vdir.Filter(vdir.ByTag(filtered), tags)
-		// if err != nil {
-		// 	return
-		// }
-		// filtered, err = vdir.Filter(vdir.ByTagExclude(filtered), tagsExcluded)
-		// if err != nil {
-		// 	return
-		// }
+
+		tags := []vdir.Tag{}
+		for _, tag := range opts.tags {
+			tags = append(tags, vdir.Tag(tag))
+		}
+		filtered, err = vdir.Filter(vdir.ByTags(filtered), tags)
+		if err != nil {
+			return
+		}
+
+		tagsExcluded := []vdir.Tag{}
+		for _, tag := range opts.tagsExcluded {
+			tagsExcluded = append(tagsExcluded, vdir.Tag(tag))
+		}
+		filtered, err = vdir.Filter(vdir.ByTagsExcluded(filtered), tagsExcluded)
+		if err != nil {
+			return
+		}
+
 		filtered, err = vdir.Filter(vdir.ByDue(filtered), opts.due)
 		if err != nil {
 			return

@@ -8,13 +8,13 @@ import (
 )
 
 type (
-	ByText       []*Item
-	ByPriority   []*Item
-	ByDue        []*Item
-	ByStatus     []*Item
-	ByCreated    []*Item
-	ByTag        []*Item
-	ByTagExclude []*Item
+	ByText         []*Item
+	ByPriority     []*Item
+	ByDue          []*Item
+	ByStatus       []*Item
+	ByCreated      []*Item
+	ByTags         []*Item
+	ByTagsExcluded []*Item
 )
 
 // Filter
@@ -44,27 +44,41 @@ func (s ByStatus) Keep(item Item, i interface{}) (bool, error) {
 	return status.String() == ToDoStatus(st).String(), nil
 }
 
-func (t ByTag) Items() []*Item { return t }
-func (t ByTag) Keep(item Item, i interface{}) (bool, error) {
-	tag := i.(Tag)
-	if tag.String() == "" {
+func (t ByTags) Items() []*Item { return t }
+func (t ByTags) Keep(item Item, i interface{}) (bool, error) {
+	tags := i.([]Tag)
+	if len(tags) == 0 {
 		return true, nil
 	}
-
-	hasTag, err := item.HasTag(tag)
-	return hasTag, err
+	for _, tag := range tags {
+		hasTag, err := item.HasTag(tag)
+		if err != nil {
+			return false, err
+		}
+		if hasTag {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
-func (x ByTagExclude) Items() []*Item { return x }
-func (x ByTagExclude) Keep(item Item, i interface{}) (bool, error) {
-	// TODO handle different types of args: e.g. []string, []Tag, string, Tag
-	tag := i.(Tag)
-	if tag.String() == "" {
+func (x ByTagsExcluded) Items() []*Item { return x }
+func (x ByTagsExcluded) Keep(item Item, i interface{}) (bool, error) {
+	tags := i.([]Tag)
+	if len(tags) == 0 {
 		return true, nil
 	}
 
-	hasTag, err := item.HasTag(tag)
-	return !hasTag, err
+	for _, tag := range tags {
+		hasTag, err := item.HasTag(tag)
+		if err != nil {
+			return false, err
+		}
+		if hasTag {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 func (d ByDue) Items() []*Item { return d }
