@@ -13,6 +13,26 @@ import (
 	"github.com/kkga/tdx/vdir"
 )
 
+type listOptions struct {
+	lists         []string
+	listsExcluded []string
+	allLists      bool
+	sorting       string
+	group         string
+	due           int
+	status        string
+	tags          []string
+	tagsExcluded  []string
+	description   bool
+	multiline     bool
+
+	// TODO handle json flag
+	// json = listCmd.Flags().Bool("json", false, "output in json")
+}
+
+// envListOptsVar is the environment variable for setting default list options
+const envListOptsVar = "TDX_LIST_OPTS"
+
 type sortOption string
 
 const (
@@ -22,28 +42,13 @@ const (
 	sortOptionCreated sortOption = "CREATED"
 )
 
-// envListOptsVar is the environment variable for setting default list options
-const envListOptsVar = "TDX_LIST_OPTS"
+type groupOption string
 
-type listOptions struct {
-	lists         []string
-	listsExcluded []string
-	allLists      bool
-
-	sorting      string
-	due          int
-	status       string
-	tags         []string
-	tagsExcluded []string
-	description  bool
-	multiline    bool
-	byTag        bool
-
-	// TODO think of a better way to organize output by tags/lists/...
-	// byTag = listCmd.Flags().Bool("by-tag", false, "organize by tags")
-	// TODO handle json flag
-	// json = listCmd.Flags().Bool("json", false, "output in json")
-}
+const (
+	groupOptionList groupOption = "LIST"
+	groupOptionTag  groupOption = "TAG"
+	groupOptionNone groupOption = "NONE"
+)
 
 func NewListCmd() *cobra.Command {
 	opts := &listOptions{
@@ -65,8 +70,11 @@ func NewListCmd() *cobra.Command {
 			}
 
 			defaultOpts := os.Getenv(envListOptsVar)
-			println(defaultOpts)
 			cmd.ParseFlags(strings.Split(defaultOpts, " "))
+
+			if err := checkGroupFlag(opts.group); err != nil {
+				return err
+			}
 
 			if err := checkStatusFlag(opts.status); err != nil {
 				return err
@@ -97,6 +105,7 @@ func NewListCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringSliceVarP(&opts.lists, "lists", "l", []string{}, "filter by `LISTS`, comma-separated (e.g. 'tasks,other')")
+	cmd.Flags().StringVarP(&opts.group, "group", "g", "list", "group listed todos, valid options: list, tag, none ")
 	cmd.Flags().BoolVarP(&opts.allLists, "all", "a", false, "show todos from all lists (overrides -l)")
 	cmd.Flags().IntVarP(&opts.due, "due", "d", 0, "filter by due date in next `N` days")
 	cmd.Flags().StringVarP(&opts.status, "status", "S", "needs-action", "filter by `STATUS`: needs-action, completed, cancelled, any")
@@ -104,7 +113,6 @@ func NewListCmd() *cobra.Command {
 	cmd.Flags().StringSliceVarP(&opts.tagsExcluded, "no-tag", "T", []string{}, "exclude todos with given `TAGS`")
 	cmd.Flags().StringVarP(&opts.sorting, "sort", "s", "prio", "sort by `FIELD`: prio, due, status, created")
 	cmd.Flags().BoolVar(&opts.description, "description", false, "show description in output")
-	cmd.Flags().BoolVar(&opts.byTag, "by-tag", false, "organize by tags")
 	cmd.Flags().BoolVar(&opts.multiline, "two-line", false, "use 2-line output for dates and description")
 	cmd.Flags().SortFlags = false
 	return cmd
@@ -166,9 +174,21 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 
 	var m = make(map[string][]*vdir.Item)
 
-	if opts.byTag {
-		emptyTag := vdir.Tag("[no tags]")
+	switch groupOption(strings.ToUpper(opts.group)) {
+	case groupOptionList:
+		for col, items := range vd {
+			items, err := filterItems(items)
+			if err != nil {
+				return err
+			}
 
+			sortItems(items)
+
+			for _, item := range items {
+				m[col.String()] = append(m[col.String()], item)
+			}
+		}
+	case groupOptionTag:
 		items := []*vdir.Item{}
 		for _, ii := range vd {
 			items = append(items, ii...)
@@ -180,6 +200,8 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 		}
 
 		sortItems(items)
+
+		emptyTag := vdir.Tag("[no tags]")
 
 		for _, item := range items {
 			tags, err := item.Tags()
@@ -194,19 +216,24 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 				m[emptyTag.String()] = append(m[emptyTag.String()], item)
 			}
 		}
-	} else {
-		for col, items := range vd {
-			items, err := filterItems(items)
-			if err != nil {
-				return err
-			}
-			sortItems(items)
-
-			for _, item := range items {
-				m[col.String()] = append(m[col.String()], item)
-			}
+	case groupOptionNone:
+		items := []*vdir.Item{}
+		for _, ii := range vd {
+			items = append(items, ii...)
 		}
 
+		items, err := filterItems(items)
+		if err != nil {
+			return err
+		}
+
+		sortItems(items)
+
+		noneKey := groupOptionNone
+		for _, item := range items {
+			// here comes an ugly hack
+			m[string(noneKey)] = append(m[string(noneKey)], item)
+		}
 	}
 
 	if len(m) == 0 {
@@ -220,11 +247,12 @@ func runList(vd vdir.Vdir, opts *listOptions, query string) error {
 	}
 	sort.Strings(keys)
 
-	col := color.New(color.Bold, color.FgGreen).SprintFunc()
-
+	colGroup := color.New(color.Bold, color.FgGreen).SprintFunc()
 	var sb = strings.Builder{}
 	for _, key := range keys {
-		sb.WriteString(col(fmt.Sprintf("-- %s --\n", key)))
+		if key != string(groupOptionNone) {
+			sb.WriteString(colGroup(fmt.Sprintf("-- %s --\n", key)))
+		}
 		for _, i := range m[key] {
 			if err := writeItem(&sb, *i, opts); err != nil {
 				return err
@@ -275,5 +303,16 @@ func checkSortFlag(flag string) error {
 		return nil
 	default:
 		return fmt.Errorf("Unknown sort option: %q, see %q", flag, "tdx list -h")
+	}
+}
+
+func checkGroupFlag(flag string) error {
+	switch groupOption(strings.ToUpper(flag)) {
+	case "":
+		return nil
+	case groupOptionList, groupOptionTag, groupOptionNone:
+		return nil
+	default:
+		return fmt.Errorf("Unknown group option: %q, see %q", flag, "tdx list -h")
 	}
 }
