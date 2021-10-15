@@ -69,9 +69,6 @@ func NewListCmd() *cobra.Command {
 				return err
 			}
 
-			defaultOpts := os.Getenv(envListOptsVar)
-			cmd.ParseFlags(strings.Split(defaultOpts, " "))
-
 			if err := checkGroupFlag(opts.group); err != nil {
 				return err
 			}
@@ -104,6 +101,7 @@ func NewListCmd() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().SortFlags = false
 	cmd.Flags().StringSliceVarP(&opts.lists, "lists", "l", []string{}, "filter by `LISTS`, comma-separated (e.g. 'tasks,other')")
 	cmd.Flags().StringVarP(&opts.group, "group", "g", "list", "group listed todos, valid options: list, tag, none ")
 	cmd.Flags().BoolVarP(&opts.allLists, "all", "a", false, "show todos from all lists (overrides -l)")
@@ -114,7 +112,10 @@ func NewListCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&opts.sorting, "sort", "s", "prio", "sort by `FIELD`: prio, due, status, created")
 	cmd.Flags().BoolVar(&opts.description, "description", false, "show description in output")
 	cmd.Flags().BoolVar(&opts.multiline, "two-line", false, "use 2-line output for dates and description")
-	cmd.Flags().SortFlags = false
+
+	defaultOpts := os.Getenv(envListOptsVar)
+	cmd.ParseFlags(strings.Split(defaultOpts, " "))
+
 	return cmd
 }
 

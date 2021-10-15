@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -39,50 +38,35 @@ func NewAddCmd() *cobra.Command {
 				return err
 			}
 
-			defaultOpts := os.Getenv(envAddOptsVar)
-			cmd.ParseFlags(strings.Split(defaultOpts, " "))
+			if err := checkList(vd, opts.list, true); err != nil {
+				return err
+			}
 
 			var collection *vdir.Collection
-			if len(vd) > 1 {
-				if err := checkList(vd, opts.list, true); err != nil {
-					return err
-				}
-				for col := range vd {
-					if col.Name == opts.list {
-						collection = col
-					}
-				}
-			} else {
-				// if only one collection, use it without requiring a list flag
-				for col := range vd {
+			for col := range vd {
+				if col.Name == opts.list {
 					collection = col
 				}
 			}
 
-			todo := strings.Join(args, "")
+			rawTodo := strings.Join(args, " ")
 
-			return runAdd(collection, opts, todo)
+			return runAdd(collection, opts, rawTodo)
 		},
 	}
 
+	cmd.Flags().SortFlags = false
 	cmd.Flags().StringVarP(&opts.list, "list", "l", "", "`list` for new todo")
 	cmd.MarkFlagRequired("list")
 	cmd.Flags().StringVar(&opts.description, "d", "", "`description` text")
 
+	defaultOpts := os.Getenv(envAddOptsVar)
+	cmd.ParseFlags(strings.Split(defaultOpts, " "))
+
 	return cmd
 }
 
-func runAdd(collection *vdir.Collection, opts *addOptions, todo string) error {
-	return nil
-}
-
-func (c *AddCmd) Run() error {
-
-	args := c.fs.Args()
-	if len(args) == 0 {
-		return errors.New("Provide a todo text")
-	}
-
+func runAdd(collection *vdir.Collection, opts *addOptions, rawTodo string) error {
 	cal := ical.NewCalendar()
 	t := ical.NewComponent(ical.CompToDo)
 	uid := vdir.GenerateUID()
@@ -90,7 +74,7 @@ func (c *AddCmd) Run() error {
 	t.Props.SetText(ical.PropUID, uid)
 	cal.Children = append(cal.Children, t)
 
-	summary := strings.Join(args, " ")
+	summary := rawTodo
 
 	if strings.Contains(summary, "!!!") {
 		summary = strings.Trim(strings.Replace(summary, "!!!", "", 1), " ")
@@ -109,13 +93,13 @@ func (c *AddCmd) Run() error {
 		t.Props.Add(prioProp)
 	}
 
-	if c.description != "" {
-		t.Props.SetText(ical.PropDescription, c.description)
-	}
-
 	if due, text, err := parseDate(summary); err == nil {
 		t.Props.SetDateTime(ical.PropDue, due)
 		summary = strings.Trim(strings.Replace(summary, text, "", 1), " ")
+	}
+
+	if opts.description != "" {
+		t.Props.SetText(ical.PropDescription, opts.description)
 	}
 
 	t.Props.SetText(ical.PropSummary, summary)
@@ -128,11 +112,12 @@ func (c *AddCmd) Run() error {
 	}
 	item.WriteFile()
 
-	if err := c.vdir.Init(c.conf.Path); err != nil {
+	vd := make(vdir.Vdir)
+	if err := vd.Init(vdirPath); err != nil {
 		return err
 	}
 
-	addedItem, err := c.vdir.ItemByPath(p)
+	addedItem, err := vd.ItemByPath(p)
 	if err != nil {
 		return err
 	}
