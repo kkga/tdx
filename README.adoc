@@ -1,7 +1,7 @@
 tdx
 ===
 
-link::https://hitsofcode.com/github/kkga/tdx?branch=main/view[image::https://hitsofcode.com/github/kkga/tdx?branch=main)][Hits-of-Code]]
+image:https://hitsofcode.com/github/kkga/tdx?branch=main[link=https://hitsofcode.com/]
 
 :iCalendar: https://en.wikipedia.org/wiki/ICalendar[iCalendar]
 :vdirsyncer: https://github.com/pimutils/vdirsyncer[Vdirsyncer]
