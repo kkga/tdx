@@ -1,6 +1,8 @@
 tdx
 ===
 
+link::https://hitsofcode.com/github/kkga/tdx?branch=main/view[image::https://hitsofcode.com/github/kkga/tdx?branch=main)][Hits-of-Code]]
+
 :iCalendar: https://en.wikipedia.org/wiki/ICalendar[iCalendar]
 :vdirsyncer: https://github.com/pimutils/vdirsyncer[Vdirsyncer]
 :vdirstorage: https://vdirsyncer.pimutils.org/en/latest/vdir.html[storage format]
@@ -47,8 +49,8 @@ Gadzhi Kharkharov <x@kkga.me>
 USAGE
   tdx <command> [options] [<args>...]
 
-COMMANDS
   list, ls       list todos
+COMMANDS
   add, a         add todo
   done, do       complete todos
   edit, e        edit todo
