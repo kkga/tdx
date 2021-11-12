@@ -40,6 +40,7 @@ func init() {
 	cobra.EnableCommandSorting = false
 	rootCmd.AddCommand(NewListCmd())
 	rootCmd.AddCommand(NewAddCmd())
+	rootCmd.AddCommand(NewDeleteCmd())
 }
 
 // func Root(args []string, version string) error {
