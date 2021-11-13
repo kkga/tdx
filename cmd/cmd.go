@@ -84,26 +84,6 @@ func checkList(vd vdir.Vdir, list string, required bool) error {
 	}
 }
 
-// func (c *Cmd) usage() {
-// 	fmt.Println()
-// 	fmt.Println(c.short)
-// 	fmt.Println()
-
-// 	fmt.Println("USAGE")
-// 	fmt.Printf("  tdx %s %s\n\n", c.name, c.usageLine)
-
-// 	if strings.Contains(c.usageLine, "[options]") {
-// 		fmt.Println("OPTIONS")
-// 		c.fs.PrintDefaults()
-// 	}
-
-// 	if c.long != "" {
-// 		fmt.Println()
-// 		fmt.Println(c.long)
-// 	}
-
-// }
-
 func stringsToInts(ss []string) (ints []int, err error) {
 	// if len(ss) == 0 {
 	// 	return ints, errors.New("Specify one or multiple IDs")
