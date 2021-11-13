@@ -43,8 +43,9 @@ func init() {
 	rootCmd.MarkFlagRequired("path")
 
 	cobra.EnableCommandSorting = false
-	rootCmd.AddCommand(NewListCmd())
 	rootCmd.AddCommand(NewAddCmd())
+	rootCmd.AddCommand(NewListCmd())
+	rootCmd.AddCommand(NewDoneCmd())
 	rootCmd.AddCommand(NewDeleteCmd())
 }
 
