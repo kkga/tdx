@@ -47,6 +47,7 @@ func init() {
 	rootCmd.AddCommand(NewListCmd())
 	rootCmd.AddCommand(NewDoneCmd())
 	rootCmd.AddCommand(NewDeleteCmd())
+	rootCmd.AddCommand(NewEditCmd())
 }
 
 // TODO: run default command if no subcommands
