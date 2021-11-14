@@ -47,6 +47,7 @@ func init() {
 	rootCmd.AddCommand(NewListCmd())
 	rootCmd.AddCommand(NewDoneCmd())
 	rootCmd.AddCommand(NewEditCmd())
+	rootCmd.AddCommand(NewShowCmd())
 	rootCmd.AddCommand(NewDeleteCmd())
 	rootCmd.AddCommand(NewPurgeCmd())
 }
