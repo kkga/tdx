@@ -24,13 +24,14 @@ func NewAddCmd() *cobra.Command {
 	opts := &addOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "add [options] <todo>",
-		Aliases: []string{"a"},
-		Short:   "Add todo",
-		Long:    "Add new todo.",
-		Args:    cobra.MinimumNArgs(1),
+		Use:        "add <todo summary>",
+		Aliases:    []string{"a"},
+		Short:      "Add todo",
+		Long:       "Add new todo.",
+		SuggestFor: []string{"new"},
+		Args:       cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
-		$ tdx add -l personal buy milk`),
+		$ tdx add buy milk -l shopping`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {

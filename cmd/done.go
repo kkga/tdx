@@ -18,10 +18,10 @@ func NewDoneCmd() *cobra.Command {
 	opts := &doneOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "done [options] <todo>...",
+		Use:     "done <id>...",
 		Aliases: []string{"do"},
 		Short:   "Complete todos",
-		Long:    "Complete todos",
+		Long:    "Mark todos as completed.",
 		Args:    cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
 			$ tdx done 1

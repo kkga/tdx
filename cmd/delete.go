@@ -18,10 +18,10 @@ func NewDeleteCmd() *cobra.Command {
 	opts := &deleteOptions{}
 
 	cmd := &cobra.Command{
-		Use:     "delete [options] <todo>...",
+		Use:     "delete <id>...",
 		Aliases: []string{"del"},
 		Short:   "Delete todos",
-		Long:    "Delete todos",
+		Long:    "Permanently delete todos.",
 		Args:    cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
 			$ tdx delete 1

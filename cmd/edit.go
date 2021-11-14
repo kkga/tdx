@@ -31,10 +31,10 @@ func NewEditCmd() *cobra.Command {
 		Use:     "edit <id>",
 		Aliases: []string{"e"},
 		Short:   "Edit todo",
-		Long:    "Edit todo",
+		Long:    "Edit todo content in external program.",
 		Args:    cobra.ExactArgs(1),
 		Example: heredoc.Doc(`
-			tdx edit 1`),
+			$ tdx edit 1`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {

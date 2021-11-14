@@ -15,12 +15,12 @@ var (
 	vdirPath string
 
 	rootCmd = &cobra.Command{
-		Use:              "tdx",
-		Short:            "tdx -- todo manager for vdir (iCalendar) files",
-		Long:             "tdx -- todo manager for vdir (iCalendar) files",
-		Version:          "dev",
-		SilenceUsage:     true,
-		TraverseChildren: true,
+		Use:          "tdx",
+		Short:        "tdx -- todo manager for vdir (iCalendar) files",
+		Long:         "tdx -- todo manager for vdir (iCalendar) files",
+		Version:      "dev",
+		SilenceUsage: true,
+		// TraverseChildren: true,
 	}
 )
 

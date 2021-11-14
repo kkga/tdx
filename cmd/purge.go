@@ -14,8 +14,8 @@ import (
 func NewPurgeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "purge",
-		Short: "Remove completed and cancelled todos",
-		Long:  "Remove completed and cancelled todos",
+		Short: "Delete done todos",
+		Long:  "Permanently delete completed and cancelled todos.",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)

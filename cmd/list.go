@@ -56,7 +56,7 @@ func NewListCmd() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:     "list [flags] [query]",
+		Use:     "list [query]",
 		Aliases: []string{"ls", "l"},
 		Short:   "List todos",
 		Long:    "List todos, optionally filtered by query.",
