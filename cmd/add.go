@@ -30,8 +30,7 @@ func NewAddCmd() *cobra.Command {
 		Long:    "Add new todo.",
 		Args:    cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
-			tdx add --sort prio --due 2
-		`),
+			tdx add --sort prio --due 2`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {

@@ -61,8 +61,7 @@ func NewListCmd() *cobra.Command {
 		Short:   "List todos",
 		Long:    "List todos, optionally filtered by query.",
 		Example: heredoc.Doc(`
-            $ tdx list --sort prio --due 2
-        `),
+            $ tdx list --sort prio --due 2`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {

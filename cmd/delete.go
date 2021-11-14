@@ -24,8 +24,7 @@ func NewDeleteCmd() *cobra.Command {
 		Long:    "Delete todos",
 		Example: heredoc.Doc(`
 			$ tdx delete 1
-			$ tdx delete 1 2 3
-		`),
+			$ tdx delete 1 2 3`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {
