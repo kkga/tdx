@@ -22,6 +22,7 @@ func NewDoneCmd() *cobra.Command {
 		Aliases: []string{"do"},
 		Short:   "Complete todos",
 		Long:    "Complete todos",
+		Args:    cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
 			$ tdx done 1
 			$ tdx done 1 2 3`),
@@ -30,8 +31,6 @@ func NewDoneCmd() *cobra.Command {
 			if err := vd.Init(vdirPath); err != nil {
 				return err
 			}
-
-			// TODO check for empty args
 
 			IDs, err := stringsToInts(args)
 			if err != nil {

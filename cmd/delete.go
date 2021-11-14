@@ -22,6 +22,7 @@ func NewDeleteCmd() *cobra.Command {
 		Aliases: []string{"del"},
 		Short:   "Delete todos",
 		Long:    "Delete todos",
+		Args:    cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
 			$ tdx delete 1
 			$ tdx delete 1 2 3`),
@@ -30,8 +31,6 @@ func NewDeleteCmd() *cobra.Command {
 			if err := vd.Init(vdirPath); err != nil {
 				return err
 			}
-
-			// TODO check for empty args
 
 			IDs, err := stringsToInts(args)
 			if err != nil {
