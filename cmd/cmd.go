@@ -17,56 +17,6 @@ import (
 	"github.com/olebedev/when/rules/ru"
 )
 
-// type Cmd struct {
-// 	fs        *flag.FlagSet
-// 	name      string
-// 	alias     []string
-// 	short     string
-// 	long      string
-// 	usageLine string
-
-// 	conf Config
-// 	args []string
-
-// 	vdir vdir.Vdir
-// }
-
-// type Config struct {
-// 	Path     string `required:"true"`    // Path to vdir
-// 	ListOpts string `split_words:"true"` // Default options for list command
-// 	AddOpts  string `split_words:"true"` // Default options for add command
-// }
-
-// func (c *Cmd) Init(args []string) error {
-// 	var conf Config
-// 	err := envconfig.Process("TDX", &conf)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	c.conf = conf
-// 	c.args = args
-// 	c.fs.Usage = c.usage
-
-// 	c.vdir = vdir.Vdir{}
-// 	if err := c.vdir.Init(c.conf.Path); err != nil {
-// 		return err
-// 	}
-
-// 	if err := c.fs.Parse(args); err != nil {
-// 		// return err
-// 		log.Fatal(err)
-// 	}
-
-// 	// h, err := c.fs.GetBool("help")
-// 	// if h {
-// 	// 	c.fs.PrintDefaults()
-// 	// 	os.Exit(2)
-// 	// }
-
-// 	return nil
-// }
-
 func checkList(vd vdir.Vdir, list string, required bool) error {
 	if list == "" && required {
 		return errors.New("List flag required. See 'tdx %s -h'")
