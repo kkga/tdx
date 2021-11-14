@@ -17,8 +17,8 @@ var (
 	rootCmd = &cobra.Command{
 		Use:              "tdx",
 		Short:            "tdx -- todo manager for vdir (iCalendar) files",
-		Long:             `long output`,
-		Version:          "devdddd",
+		Long:             "tdx -- todo manager for vdir (iCalendar) files",
+		Version:          "dev",
 		SilenceUsage:     true,
 		TraverseChildren: true,
 	}
