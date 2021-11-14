@@ -10,7 +10,6 @@ require (
 	github.com/hako/durafmt v0.0.0-20210608085754-5c1018a4e16b
 	github.com/olebedev/when v0.0.0-20190311101825-c3b538a97254
 	github.com/spf13/cobra v1.2.1
-	github.com/spf13/pflag v1.0.5
 )
 
 require (
@@ -19,5 +18,6 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
 )
