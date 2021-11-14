@@ -30,7 +30,7 @@ func NewAddCmd() *cobra.Command {
 		Long:    "Add new todo.",
 		Args:    cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
-			tdx add --sort prio --due 2`),
+		$ tdx add -l personal buy milk`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {
@@ -55,9 +55,9 @@ func NewAddCmd() *cobra.Command {
 	}
 
 	cmd.Flags().SortFlags = false
-	cmd.Flags().StringVarP(&opts.list, "list", "l", "", "`list` for new todo")
+	cmd.Flags().StringVarP(&opts.list, "list", "l", "", "`LIST` for new todo")
 	cmd.MarkFlagRequired("list")
-	cmd.Flags().StringVar(&opts.description, "d", "", "`description` text")
+	cmd.Flags().StringVarP(&opts.description, "description", "d", "", "description text")
 
 	defaultOpts := os.Getenv(envAddOptsVar)
 	cmd.ParseFlags(strings.Split(defaultOpts, " "))
