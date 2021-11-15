@@ -17,10 +17,8 @@ var (
 	rootCmd = &cobra.Command{
 		Use:          "tdx",
 		Short:        "tdx -- todo manager for vdir (iCalendar) files.",
-		Long:         "tdx -- todo manager for vdir (iCalendar) files.",
 		Version:      "dev",
 		SilenceUsage: true,
-		// TraverseChildren: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				listCmd := NewListCmd()
@@ -58,12 +56,3 @@ func init() {
 		NewPurgeCmd(),
 	)
 }
-
-// TODO: run default command if no subcommands
-// if len(args) == 0 {
-// 	defaultCmd := NewListCmd()
-// 	if err := defaultCmd.Init([]string{}); err != nil {
-// 		return err
-// 	}
-// 	return defaultCmd.Run()
-// }
