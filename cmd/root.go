@@ -57,5 +57,6 @@ func init() {
 		NewShowCmd(),
 		NewDeleteCmd(),
 		NewPurgeCmd(),
+		NewDocsCmd(),
 	)
 }
