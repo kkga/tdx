@@ -24,8 +24,8 @@ type filter interface {
 	Keep(item Item, i interface{}) (bool, error)
 }
 
-func (s ByStatus) Items() []*Item { return s }
-func (s ByStatus) Keep(item Item, i interface{}) (bool, error) {
+func (f ByStatus) Items() []*Item { return f }
+func (f ByStatus) Keep(item Item, i interface{}) (bool, error) {
 	status := i.(ToDoStatus)
 	if status.String() == StatusAny.String() {
 		return true, nil
@@ -44,8 +44,8 @@ func (s ByStatus) Keep(item Item, i interface{}) (bool, error) {
 	return status.String() == ToDoStatus(st).String(), nil
 }
 
-func (t ByTags) Items() []*Item { return t }
-func (t ByTags) Keep(item Item, i interface{}) (bool, error) {
+func (f ByTags) Items() []*Item { return f }
+func (f ByTags) Keep(item Item, i interface{}) (bool, error) {
 	tags := i.([]Tag)
 	if len(tags) == 0 {
 		return true, nil
@@ -62,8 +62,8 @@ func (t ByTags) Keep(item Item, i interface{}) (bool, error) {
 	return false, nil
 }
 
-func (x ByTagsExcluded) Items() []*Item { return x }
-func (x ByTagsExcluded) Keep(item Item, i interface{}) (bool, error) {
+func (f ByTagsExcluded) Items() []*Item { return f }
+func (f ByTagsExcluded) Keep(item Item, i interface{}) (bool, error) {
 	tags := i.([]Tag)
 	if len(tags) == 0 {
 		return true, nil
@@ -81,8 +81,8 @@ func (x ByTagsExcluded) Keep(item Item, i interface{}) (bool, error) {
 	return true, nil
 }
 
-func (d ByDue) Items() []*Item { return d }
-func (d ByDue) Keep(item Item, i interface{}) (bool, error) {
+func (f ByDue) Items() []*Item { return f }
+func (f ByDue) Keep(item Item, i interface{}) (bool, error) {
 	dueDays := i.(int)
 	if dueDays == 0 {
 		return true, nil
@@ -107,8 +107,8 @@ func (d ByDue) Keep(item Item, i interface{}) (bool, error) {
 	return false, nil
 }
 
-func (d ByText) Items() []*Item { return d }
-func (d ByText) Keep(item Item, i interface{}) (bool, error) {
+func (f ByText) Items() []*Item { return f }
+func (f ByText) Keep(item Item, i interface{}) (bool, error) {
 	text := i.(string)
 	if text == "" {
 		return true, nil
@@ -145,12 +145,12 @@ func Filter(f filter, i interface{}) (filtered []*Item, err error) {
 
 // Sort
 
-func (p ByPriority) Len() int      { return len(p) }
-func (p ByPriority) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
+func (s ByPriority) Len() int      { return len(s) }
+func (s ByPriority) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-func (p ByPriority) Less(i, j int) bool {
-	vt1, _ := p[i].Vtodo()
-	vt2, _ := p[j].Vtodo()
+func (s ByPriority) Less(i, j int) bool {
+	vt1, _ := s[i].Vtodo()
+	vt2, _ := s[j].Vtodo()
 	prio1 := vt1.Props.Get(ical.PropPriority)
 	prio2 := vt2.Props.Get(ical.PropPriority)
 
@@ -173,12 +173,12 @@ func (p ByPriority) Less(i, j int) bool {
 	}
 }
 
-func (d ByDue) Len() int      { return len(d) }
-func (d ByDue) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
+func (s ByDue) Len() int      { return len(s) }
+func (s ByDue) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-func (d ByDue) Less(i, j int) bool {
-	vt1, _ := d[i].Vtodo()
-	vt2, _ := d[j].Vtodo()
+func (s ByDue) Less(i, j int) bool {
+	vt1, _ := s[i].Vtodo()
+	vt2, _ := s[j].Vtodo()
 	p1 := vt1.Props.Get(ical.PropDue)
 	p2 := vt2.Props.Get(ical.PropDue)
 
@@ -229,12 +229,12 @@ func (s ByStatus) Less(i, j int) bool {
 	}
 }
 
-func (c ByCreated) Len() int      { return len(c) }
-func (c ByCreated) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+func (s ByCreated) Len() int      { return len(s) }
+func (s ByCreated) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-func (c ByCreated) Less(i, j int) bool {
-	vt1, _ := c[i].Vtodo()
-	vt2, _ := c[j].Vtodo()
+func (s ByCreated) Less(i, j int) bool {
+	vt1, _ := s[i].Vtodo()
+	vt2, _ := s[j].Vtodo()
 	p1 := vt1.Props.Get(ical.PropCreated)
 	p2 := vt2.Props.Get(ical.PropCreated)
 
