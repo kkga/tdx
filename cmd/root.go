@@ -16,18 +16,23 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:          "tdx",
-		Short:        "tdx -- todo manager for vdir (iCalendar) files",
-		Long:         "tdx -- todo manager for vdir (iCalendar) files",
+		Short:        "tdx -- todo manager for vdir (iCalendar) files.",
+		Long:         "tdx -- todo manager for vdir (iCalendar) files.",
 		Version:      "dev",
 		SilenceUsage: true,
 		// TraverseChildren: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				listCmd := NewListCmd()
+				return listCmd.Execute()
+			}
+			return nil
+		},
 	}
 )
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		os.Exit(-1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 func init() {
@@ -43,13 +48,15 @@ func init() {
 	rootCmd.MarkFlagRequired("path")
 
 	cobra.EnableCommandSorting = false
-	rootCmd.AddCommand(NewAddCmd())
-	rootCmd.AddCommand(NewListCmd())
-	rootCmd.AddCommand(NewDoneCmd())
-	rootCmd.AddCommand(NewEditCmd())
-	rootCmd.AddCommand(NewShowCmd())
-	rootCmd.AddCommand(NewDeleteCmd())
-	rootCmd.AddCommand(NewPurgeCmd())
+	rootCmd.AddCommand(
+		NewAddCmd(),
+		NewListCmd(),
+		NewDoneCmd(),
+		NewEditCmd(),
+		NewShowCmd(),
+		NewDeleteCmd(),
+		NewPurgeCmd(),
+	)
 }
 
 // TODO: run default command if no subcommands
