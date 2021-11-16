@@ -95,18 +95,18 @@ Global Flags:
 
 `tdx` is configured through environment variables.
 
-| variable   | function                    |
-| ---------- | --------------------------- |
-| `TDX_PATH` | Path to [vdir directory]^1^ |
-|            |                             |
-|            |                             |
-|            |                             |
-|            |                             |
+| variable   | function                        |
+| ---------- | ------------------------------- |
+| `TDX_PATH` | Path to [vdir] directory[^fn1]. |
+|            |                                 |
+|            |                                 |
+|            |                                 |
+|            |                                 |
 
-^1^Either root path containing multiple collections or path to specific
+[^fn1]: Either root path containing multiple collections or path to specific
 collection containing `*.ics` files.
 
-[vdir directory]: http://vdirsyncer.pimutils.org/en/stable/vdir.html
+[vdir]: http://vdirsyncer.pimutils.org/en/stable/vdir.html
 
 #### `TDX_PATH`
 
