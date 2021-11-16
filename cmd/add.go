@@ -31,7 +31,7 @@ func NewAddCmd() *cobra.Command {
 		SuggestFor: []string{"new"},
 		Args:       cobra.MinimumNArgs(1),
 		Example: heredoc.Doc(`
-		$ tdx add buy milk -l shopping`),
+			$ tdx add buy milk -l shopping`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			vd := make(vdir.Vdir)
 			if err := vd.Init(vdirPath); err != nil {

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-// Collection represents a Vdir collection
+// Collection is a Vdir collection
 type Collection struct {
 	Name  string
 	Color string
