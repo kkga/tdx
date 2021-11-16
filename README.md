@@ -3,11 +3,11 @@
 `tdx` is a todo manager for [iCalendar] files.
 
 It is designed to work with [vdirsyncer] and expects to operate in its
-[vdirstorage].
+[storage format][vdirstorage].
 
 iCalendar-compatibility means it can be used as a CLI companion to any
 CalDAV-enabled todo program, such as iOS Reminders. See more on how to set up
-calendars and synchronization in [vdirdocs].
+calendars and synchronization in [vdirsyncer documentation][vdirdocs].
 
 [iCalendar]: https://en.wikipedia.org/wiki/ICalendar
 [vdirsyncer]: https://github.com/pimutils/vdirsyncer
