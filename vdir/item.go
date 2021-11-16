@@ -34,8 +34,6 @@ const (
 	PriorityLow    ToDoPriority = 6
 )
 
-const HashtagRe = "\\B#\\w+"
-
 type FormatOption int
 
 const (
@@ -49,17 +47,19 @@ const (
 	FormatFullRaw FormatFullOption = iota
 )
 
-// Item represents an iCalendar item with a unique id
+const hashtagRe = "\\B#\\w+"
+
+// Item is an iCalendar item with a unique id
 type Item struct {
 	Id   int
 	Path string
 	Ical *ical.Calendar
 }
 
-// Tag represents a hashtag label in todo summary
+// Tag is a hashtag label in todo summary
 type Tag string
 
-// DecodeError represents and error occured during ical decoding
+// DecodeError is an error occured during ical decoding
 type DecodeError struct {
 	Path string
 	Err  error
@@ -69,9 +69,14 @@ func (d *DecodeError) Error() string {
 	return fmt.Sprintf("%s (%s)", d.Err, d.Path)
 }
 
-// String returns a lowercased tag string
+// String returns a lowercased tag string without hash prefix
 func (t Tag) String() string {
-	return strings.ToLower(string(t))
+	return strings.ToLower(strings.TrimPrefix(string(t), "#"))
+}
+
+// String returns a lowercased todo status string
+func (s ToDoStatus) String() string {
+	return strings.ToLower(string(s))
 }
 
 // Init initializes an Item with a decoded ical data from path
@@ -155,7 +160,7 @@ func (i *Item) FormatFull(options ...FormatFullOption) (string, error) {
 	return sb.String(), nil
 }
 
-// Format returns a readable representation of an item ready for output
+// Format returns a readable representation of an item
 func (i *Item) Format(options ...FormatOption) (string, error) {
 
 	vtodo, err := i.Vtodo()
@@ -202,7 +207,8 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 			if len(tags) > 0 {
 				c := color.New(color.FgBlue).SprintFunc()
 				for _, t := range tags {
-					summary = strings.ReplaceAll(summary, string(t), c(t))
+					tag := c(fmt.Sprintf("#%s", t))
+					summary = strings.ReplaceAll(summary, string(t), tag)
 				}
 			}
 
@@ -445,23 +451,23 @@ func (i *Item) WriteFile() error {
 
 // Tags returns a slice of hashtag strings parsed from summary and description
 func (i *Item) Tags() (tags []Tag, err error) {
-	re := regexp.MustCompile(HashtagRe)
+	re := regexp.MustCompile(hashtagRe)
 
 	vt, err := i.Vtodo()
 	if err != nil {
 		return
 	}
-	summary, err := vt.Props.Text(ical.PropSummary)
+	s, err := vt.Props.Text(ical.PropSummary)
 	if err != nil {
 		return
 	}
-	description, err := vt.Props.Text(ical.PropDescription)
+	d, err := vt.Props.Text(ical.PropDescription)
 	if err != nil {
 		return
 	}
 
-	st := re.FindAllString(summary, -1)
-	dt := re.FindAllString(description, -1)
+	st := re.FindAllString(s, -1)
+	dt := re.FindAllString(d, -1)
 
 	tagExists := func(tags []Tag, t Tag) bool {
 		for _, tag := range tags {
@@ -474,15 +480,33 @@ func (i *Item) Tags() (tags []Tag, err error) {
 
 	for _, t := range st {
 		if !tagExists(tags, Tag(t)) {
-			tags = append(tags, Tag(t))
+			tags = append(tags, Tag(strings.ToLower(t)))
 		}
 	}
 	for _, t := range dt {
 		if !tagExists(tags, Tag(t)) {
-			tags = append(tags, Tag(t))
+			tags = append(tags, Tag(strings.ToLower(t)))
 		}
 	}
 	return
+}
+
+// HasTag reports whether an item has a given tag
+func (i *Item) HasTag(t Tag) (bool, error) {
+	tags, err := i.Tags()
+	if err != nil {
+		return false, err
+	}
+	if !strings.HasPrefix(string(t), "#") {
+		t = Tag(fmt.Sprintf("#%s", string(t)))
+	}
+
+	for _, tag := range tags {
+		if tag == t {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // GenerateUID returns a random string containing timestamp and hostname

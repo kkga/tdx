@@ -8,7 +8,17 @@ that format the given component.
 
 ---
 
-BUGS
+COBRA MIGRATION:
+- [x] refactor all commands
+- [ ] update command examples
+- [ ] add shell completion files
+	- https://github.com/goreleaser/goreleaser/blob/main/scripts/completions.sh
+- [ ] update readme
+
+COBRA CLI EXAMPLES:
+- https://github.com/goreleaser/goreleaser/tree/main/cmd
+
+BUGS:
 - [x] Collections() messes up the map with non-existing items in various collections
 	- [x] this is the result of incorrect path (higher up tree), should prob check if
 				the path actually contains calendars
@@ -16,17 +26,19 @@ BUGS
 - [x] show problematic file when ical returns an error
 - [x] don't add item to tagged map twice (e.g. tag in summary+description)
 
-MISC
+MISC:
 - [ ] don't colorize due dates if todo is completed
 - [x] store collection names in a sorted slice before printing
 - [x] don't require list name if only one list
 - [ ] add more tests for vdir package
 	- [ ] test for a vdir with many files
 
-COMMANDS
+COMMANDS:
 - [ ] tag
 	- [ ] e.g. `tdx tag 4 -someTag +otherTag` -- similar to notmuch
 - [ ] list
+	- [ ] add custom usage output for list command
+		- current one is hard to scan
 	- [x] sorting
 	- [x] add a flag to organize by tags instead of list
 	- [x] parse tags in summary
@@ -44,7 +56,7 @@ COMMANDS
 - [ ] stats: total lists, total todos, etc
 - [ ] move between lists
 
-FEAT
+FEAT:
 - [x] edit command
 	- [x] open $EDITOR with predefined template
 - [ ] json output for list
@@ -56,18 +68,18 @@ FEAT
 		- https://github.com/tj/go-naturaldate
 		- https://github.com/bcampbell/fuzzytime
 
-ENCODING
+ENCODING:
 - [x] use a NewToDo func similar to NewEvent in go-ical
 - [x] generate UID of specific format?
 - [x] read about priority ical spec
 - [x] update modified date on write
 - [x] what is sequence?
 
-DECODING
+DECODING:
 - [x] ? parse #tags in description
 - [x] (not needed for nor) make a map of [UID]ToDo instead of slice
 
-CONFIG OPTIONS
+CONFIG OPTIONS:
 - [x] list of dirs to parse todos
 - [x] default list
 - [ ] components displayed on list cmd (date, description etc)

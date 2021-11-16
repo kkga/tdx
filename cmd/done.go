@@ -1,55 +1,70 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
+	"github.com/spf13/cobra"
 )
 
-func NewDoneCmd() *DoneCmd {
-	c := &DoneCmd{Cmd: Cmd{
-		fs:        flag.NewFlagSet("done", flag.ExitOnError),
-		alias:     []string{"do"},
-		short: "Complete todos",
-		usageLine: "[options] <id>...",
-	}}
-	c.fs.BoolVar(&c.toggle, "t", false, "toggle completed state")
-	return c
-}
-
-type DoneCmd struct {
-	Cmd
+type doneOptions struct {
 	toggle bool
 }
 
-func (c *DoneCmd) Run() error {
-	IDs, err := c.argsToIDs()
-	if err != nil {
-		return err
+func NewDoneCmd() *cobra.Command {
+	opts := &doneOptions{}
+
+	cmd := &cobra.Command{
+		Use:     "done <id>...",
+		Aliases: []string{"do"},
+		Short:   "Complete todos",
+		Long:    "Mark todos as completed.",
+		Args:    cobra.MinimumNArgs(1),
+		Example: heredoc.Doc(`
+			$ tdx done 1
+			$ tdx done 1 2 3`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			vd := make(vdir.Vdir)
+			if err := vd.Init(vdirPath); err != nil {
+				return err
+			}
+
+			IDs, err := stringsToInts(args)
+			if err != nil {
+				return err
+			}
+
+			var items []*vdir.Item
+			for _, id := range IDs {
+				item, err := vd.ItemById(id)
+				if err != nil {
+					return err
+				}
+				items = append(items, item)
+			}
+
+			return runDone(items, opts)
+		},
 	}
 
-	var toComplete []*vdir.Item
+	cmd.Flags().BoolVarP(&opts.toggle, "toggle", "t", false, "toggle completed state")
 
-	for _, id := range IDs {
-		item, err := c.vdir.ItemById(id)
-		if err != nil {
-			return err
-		}
-		toComplete = append(toComplete, item)
-	}
+	return cmd
+}
 
+func runDone(items []*vdir.Item, opts *doneOptions) error {
 	sb := strings.Builder{}
 
-	for _, item := range toComplete {
+	for _, item := range items {
 		vtodo, err := item.Vtodo()
 		if err != nil {
 			return err
 		}
 
-		if c.toggle {
+		if opts.toggle {
 			s, err := vtodo.Props.Text(ical.PropStatus)
 			if err != nil {
 				return err
@@ -78,6 +93,5 @@ func (c *DoneCmd) Run() error {
 	}
 
 	fmt.Print(sb.String())
-
 	return nil
 }

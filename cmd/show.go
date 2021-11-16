@@ -1,49 +1,64 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/kkga/tdx/vdir"
+	"github.com/spf13/cobra"
 )
 
-func NewShowCmd() *ShowCmd {
-	c := &ShowCmd{Cmd: Cmd{
-		fs:        flag.NewFlagSet("show", flag.ExitOnError),
-		short:     "Show detailed info for todo",
-		usageLine: "[options] <id>...",
-	}}
-	c.fs.BoolVar(&c.raw, "r", false, "raw output")
-	return c
-}
-
-type ShowCmd struct {
-	Cmd
+type showOptions struct {
 	raw bool
 }
 
-func (c *ShowCmd) Run() error {
-	IDs, err := c.argsToIDs()
-	if err != nil {
-		return err
+func NewShowCmd() *cobra.Command {
+	opts := &showOptions{}
+
+	cmd := &cobra.Command{
+		Use:   "show [options] <todo>...",
+		Short: "Show todos",
+		Long:  "Show detailed info about todos",
+		Args:  cobra.MinimumNArgs(1),
+		Example: heredoc.Doc(`
+			$ tdx show 1
+			$ tdx show 1 2 3`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			vd := make(vdir.Vdir)
+			if err := vd.Init(vdirPath); err != nil {
+				return err
+			}
+
+			IDs, err := stringsToInts(args)
+			if err != nil {
+				return err
+			}
+
+			var items []*vdir.Item
+			for _, id := range IDs {
+				item, err := vd.ItemById(id)
+				if err != nil {
+					return err
+				}
+				items = append(items, item)
+			}
+
+			return runShow(items, opts)
+		},
 	}
 
-	var toShow []*vdir.Item
+	cmd.Flags().BoolVarP(&opts.raw, "raw", "r", false, "raw output")
 
-	for _, id := range IDs {
-		item, err := c.vdir.ItemById(id)
-		if err != nil {
-			return err
-		}
-		toShow = append(toShow, item)
-	}
+	return cmd
+}
 
+func runShow(items []*vdir.Item, opts *showOptions) error {
 	sb := strings.Builder{}
 
-	for i, item := range toShow {
+	for i, item := range items {
 		var s string
-		if c.raw {
+		if opts.raw {
 			ff, err := item.FormatFull(vdir.FormatFullRaw)
 			if err != nil {
 				return err
@@ -56,8 +71,10 @@ func (c *ShowCmd) Run() error {
 			}
 			s = ff
 		}
+
 		sb.WriteString(s)
-		if i < len(toShow)-1 {
+
+		if i < len(items)-1 {
 			sb.WriteString("\n")
 		}
 	}

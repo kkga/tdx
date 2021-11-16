@@ -4,14 +4,12 @@ package cmd
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kelseyhightower/envconfig"
 	"github.com/kkga/tdx/vdir"
 	"github.com/olebedev/when"
 	"github.com/olebedev/when/rules/common"
@@ -19,65 +17,12 @@ import (
 	"github.com/olebedev/when/rules/ru"
 )
 
-type Runner interface {
-	Init([]string) error
-	Run() error
-	Name() string
-	Alias() []string
-}
-
-type Cmd struct {
-	fs        *flag.FlagSet
-	alias     []string
-	short     string
-	long      string
-	usageLine string
-
-	conf Config
-	args []string
-
-	vdir vdir.Vdir
-}
-
-type Config struct {
-	Path     string `required:"true"`    // Path to vdir
-	ListOpts string `split_words:"true"` // Default options for list command
-	AddOpts  string `split_words:"true"` // Default options for add command
-}
-
-func (c *Cmd) Run() error      { return nil }
-func (c *Cmd) Name() string    { return c.fs.Name() }
-func (c *Cmd) Alias() []string { return c.alias }
-
-func (c *Cmd) Init(args []string) error {
-	var conf Config
-	err := envconfig.Process("TDX", &conf)
-	if err != nil {
-		return err
-	}
-
-	c.conf = conf
-	c.args = args
-	c.fs.Usage = c.usage
-
-	c.vdir = vdir.Vdir{}
-	if err := c.vdir.Init(c.conf.Path); err != nil {
-		return err
-	}
-
-	if err := c.fs.Parse(args); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Cmd) checkListFlag(list string, required bool, cmd Runner) error {
+func checkList(vd vdir.Vdir, list string, required bool) error {
 	if list == "" && required {
-		return fmt.Errorf("List flag required. See 'tdx %s -h'", cmd.Name())
+		return errors.New("List flag required. See 'tdx %s -h'")
 	} else if list != "" {
 		names := []string{}
-		for col := range c.vdir {
+		for col := range vd {
 			names = append(names, col.Name)
 			if col.Name == list {
 				return nil
@@ -89,36 +34,17 @@ func (c *Cmd) checkListFlag(list string, required bool, cmd Runner) error {
 	}
 }
 
-func (c *Cmd) usage() {
-	fmt.Println(c.short)
-	fmt.Println()
+func stringsToInts(ss []string) (ints []int, err error) {
+	// if len(ss) == 0 {
+	// 	return ints, errors.New("Specify one or multiple IDs")
+	// }
 
-	fmt.Println("USAGE")
-	fmt.Printf("  tdx %s %s\n\n", c.fs.Name(), c.usageLine)
-
-	if strings.Contains(c.usageLine, "[options]") {
-		fmt.Println("OPTIONS")
-		c.fs.PrintDefaults()
-	}
-
-	if c.long != "" {
-		fmt.Println()
-		fmt.Println(c.long)
-	}
-
-}
-
-func (c *Cmd) argsToIDs() (IDs []int, err error) {
-	if len(c.fs.Args()) == 0 {
-		return IDs, errors.New("Specify one or multiple IDs")
-	}
-
-	for _, s := range c.fs.Args() {
-		id, err := strconv.Atoi(s)
+	for _, s := range ss {
+		i, err := strconv.Atoi(s)
 		if err != nil {
-			return IDs, fmt.Errorf("Invalid todo ID: %q", s)
+			return ints, fmt.Errorf("Invalid arg: %q", s)
 		}
-		IDs = append(IDs, id)
+		ints = append(ints, i)
 	}
 	return
 }
@@ -186,4 +112,13 @@ func parseDate(s string) (t time.Time, text string, err error) {
 	)
 
 	return
+}
+
+func containsString(ss []string, s string) bool {
+	for _, a := range ss {
+		if a == s {
+			return true
+		}
+	}
+	return false
 }

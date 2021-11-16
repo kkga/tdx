@@ -3,7 +3,6 @@ package cmd
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,44 +11,58 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/emersion/go-ical"
 	"github.com/kkga/tdx/vdir"
+	"github.com/spf13/cobra"
 )
 
-func NewEditCmd() *EditCmd {
-	c := &EditCmd{Cmd: Cmd{
-		fs:        flag.NewFlagSet("edit", flag.ExitOnError),
-		alias:     []string{"e"},
-		short:     "Edit todo",
-		usageLine: "[options] <id>",
-	}}
-	return c
-}
-
-type EditCmd struct {
-	Cmd
-}
+type editOptions struct{}
 
 const (
 	layoutDateTime = "2 Jan 2006 15:04"
 	layoutDate     = "2 Jan 2006"
 )
 
-func (c *EditCmd) Run() error {
-	if len(c.fs.Args()) == 0 {
-		return errors.New("Specify todo ID")
+func NewEditCmd() *cobra.Command {
+	_ = &editOptions{}
+
+	cmd := &cobra.Command{
+		Use:     "edit <id>",
+		Aliases: []string{"e"},
+		Short:   "Edit todo",
+		Long:    "Edit todo content in external program.",
+		Args:    cobra.ExactArgs(1),
+		Example: heredoc.Doc(`
+			$ tdx edit 1`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			vd := make(vdir.Vdir)
+			if err := vd.Init(vdirPath); err != nil {
+				return err
+			}
+
+			IDs, err := stringsToInts(args)
+			if err != nil {
+				return err
+			}
+
+			var item *vdir.Item
+			for _, id := range IDs {
+				i, err := vd.ItemById(id)
+				if err != nil {
+					return err
+				}
+				item = i
+			}
+
+			return runEdit(item)
+		},
 	}
 
-	id, err := strconv.Atoi(c.fs.Arg(0))
-	if err != nil {
-		return fmt.Errorf("Invalid todo ID: %q", c.fs.Arg(0))
-	}
+	return cmd
+}
 
-	item, err := c.vdir.ItemById(id)
-	if err != nil {
-		return err
-	}
-
+func runEdit(item *vdir.Item) error {
 	tmp, err := os.CreateTemp("", "tdx")
 	if err != nil {
 		return err

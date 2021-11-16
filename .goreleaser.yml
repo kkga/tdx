@@ -8,6 +8,8 @@ builds:
     goos:
       - linux
       - darwin
+    ldflags:
+      - -s -w -X github.com/kkga/tdx/cmd.AppVersion={{.Version}}
 
 archives:
   - format: binary
@@ -16,16 +18,20 @@ checksum:
   disable: true
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: '{{ incpatch .Version }}-next'
 
 changelog:
+  use: github
   sort: asc
   filters:
     exclude:
-      - "^docs"
-      - "^test"
-      - "^todo"
-      - "^wip"
-      - "minor"
-      - "WIP"
-      - "typo"
+      - '^docs'
+      - '^test'
+      - '^todo'
+      - '^wip'
+      - 'minor'
+      - 'WIP'
+      - 'typo'
+      - Merge pull request
+      - Merge branch
+      - go mod tidy

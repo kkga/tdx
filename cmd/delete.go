@@ -1,49 +1,64 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/kkga/tdx/vdir"
+	"github.com/spf13/cobra"
 )
 
-func NewDeleteCmd() *DeleteCmd {
-	c := &DeleteCmd{Cmd: Cmd{
-		fs:        flag.NewFlagSet("delete", flag.ExitOnError),
-		alias:     []string{"del"},
-		short:     "Delete todos",
-		usageLine: "[options] <id>...",
-	}}
-	c.fs.BoolVar(&c.yes, "y", false, "do not ask for confimation")
-	return c
-}
-
-type DeleteCmd struct {
-	Cmd
+type deleteOptions struct {
 	yes bool
 }
 
-func (c *DeleteCmd) Run() error {
-	IDs, err := c.argsToIDs()
-	if err != nil {
-		return err
+func NewDeleteCmd() *cobra.Command {
+	opts := &deleteOptions{}
+
+	cmd := &cobra.Command{
+		Use:     "delete <id>...",
+		Aliases: []string{"del"},
+		Short:   "Delete todos",
+		Long:    "Permanently delete todos.",
+		Args:    cobra.MinimumNArgs(1),
+		Example: heredoc.Doc(`
+			$ tdx delete 1
+			$ tdx delete 1 2 3`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			vd := make(vdir.Vdir)
+			if err := vd.Init(vdirPath); err != nil {
+				return err
+			}
+
+			IDs, err := stringsToInts(args)
+			if err != nil {
+				return err
+			}
+
+			var items []*vdir.Item
+			for _, id := range IDs {
+				item, err := vd.ItemById(id)
+				if err != nil {
+					return err
+				}
+				items = append(items, item)
+			}
+
+			return runDelete(items, opts)
+		},
 	}
 
-	var toDelete []*vdir.Item
+	cmd.Flags().BoolVarP(&opts.yes, "yes", "y", false, "do not ask for confirmation")
 
-	for _, id := range IDs {
-		item, err := c.vdir.ItemById(id)
-		if err != nil {
-			return err
-		}
-		toDelete = append(toDelete, item)
-	}
+	return cmd
+}
 
+func runDelete(items []*vdir.Item, opts *deleteOptions) error {
 	sb := strings.Builder{}
 
-	for _, item := range toDelete {
+	for _, item := range items {
 		s, err := item.Format()
 		if err != nil {
 			return err
@@ -53,23 +68,23 @@ func (c *DeleteCmd) Run() error {
 
 	fmt.Print(sb.String())
 
-	if !c.yes {
+	if !opts.yes {
 		ok := promptConfirm("Delete listed todos?", false)
 		if ok {
-			for _, i := range toDelete {
+			for _, i := range items {
 				if err := os.Remove(i.Path); err != nil {
 					return err
 				}
 			}
-			fmt.Printf("Deleted: %d todos\n", len(toDelete))
+			fmt.Printf("Deleted: %d todos\n", len(items))
 		}
 	} else {
-		for _, i := range toDelete {
+		for _, i := range items {
 			if err := os.Remove(i.Path); err != nil {
 				return err
 			}
 		}
-		fmt.Printf("Deleted: %d todos\n", len(toDelete))
+		fmt.Printf("Deleted: %d todos\n", len(items))
 	}
 
 	return nil
