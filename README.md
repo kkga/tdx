@@ -117,12 +117,12 @@ go install github.com/kkga/tdx@latest
 
 `tdx` is configured through environment variables.
 
-| variable        | function                                                       |
-| --------------- | -------------------------------------------------------------- |
-| `TDX_PATH`      | Path to [vdir] directory[^fn1].                                |
-| `TDX_LIST_OPTS` | Default options for `<list>` command, see `tdx list -h`[^fn2]. |
-| `TDX_ADD_OPTS`  | Default options for `<add>` command, see `tdx add -h`[^fn3].   |
-| `NO_COLOR`      | Disable color in output.                                       |
+| variable        | function                                                      |
+| --------------- | ------------------------------------------------------------- |
+| `TDX_PATH`      | Path to [vdir] directory[^fn1]                                |
+| `TDX_LIST_OPTS` | Default options for `<list>` command, see `tdx list -h`[^fn2] |
+| `TDX_ADD_OPTS`  | Default options for `<add>` command, see `tdx add -h`[^fn3]   |
+| `NO_COLOR`      | Disable color in output                                       |
 
 [^fn1]: Either root path containing multiple collections or path to specific
 collection containing `*.ics` files.
@@ -130,7 +130,7 @@ collection containing `*.ics` files.
 [^fn2]: For example, to show todos due in the next 2 days, from 'myList',
 grouped by tag: `TDX_LIST_OPTS='-d 2 -l myList -g tag'`
 
-[^fn3]: For example, to use a default list for new todos: `TDX_ADD_OPTS='-l
-myList'``
+[^fn3]: For example, to use a default list for new todos:
+`TDX_ADD_OPTS='-l myList'`
 
 [vdir]: http://vdirsyncer.pimutils.org/en/stable/vdir.html
