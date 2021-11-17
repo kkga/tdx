@@ -7,25 +7,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// envPathVar is the environment variable for setting default vdir path
-const envPathVar = "TDX_PATH"
-
-// AppVersion is the build version set dynamically
-var AppVersion = "dev"
-
 var (
-	// vdirPath is the path to user's vdir folder
-	vdirPath string
+	vdirPath   string
+	version    = "dev"
+	defaultCmd = NewListCmd()
 
 	rootCmd = &cobra.Command{
 		Use:          "tdx",
 		Short:        "tdx -- todo manager for vdir (iCalendar) files.",
-		Version:      AppVersion,
+		Version:      version,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				listCmd := NewListCmd()
-				return listCmd.Execute()
+				return defaultCmd.Execute()
 			}
 			return nil
 		},
@@ -37,6 +31,7 @@ func Execute() error {
 }
 
 func init() {
+	const envPathVar = "TDX_PATH"
 	var defaultPath string
 
 	if defaultPath = os.Getenv(envPathVar); defaultPath == "" {

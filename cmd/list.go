@@ -30,9 +30,6 @@ type listOptions struct {
 	// json = listCmd.Flags().Bool("json", false, "output in json")
 }
 
-// envListOptsVar is the environment variable for setting default list options
-const envListOptsVar = "TDX_LIST_OPTS"
-
 type sortOption string
 
 const (
@@ -51,9 +48,9 @@ const (
 )
 
 func NewListCmd() *cobra.Command {
-	opts := &listOptions{
-		description: false,
-	}
+	const envListOptsVar = "TDX_LIST_OPTS"
+
+	opts := &listOptions{}
 
 	cmd := &cobra.Command{
 		Use:     "list [query]",

@@ -17,10 +17,9 @@ type addOptions struct {
 	description string
 }
 
-// envAddOptsVar is the environment variable for setting default add options
-const envAddOptsVar = "TDX_ADD_OPTS"
-
 func NewAddCmd() *cobra.Command {
+	const envAddOptsVar = "TDX_ADD_OPTS"
+
 	opts := &addOptions{}
 
 	cmd := &cobra.Command{

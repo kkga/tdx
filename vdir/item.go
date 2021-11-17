@@ -208,6 +208,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 				c := color.New(color.FgBlue).SprintFunc()
 				for _, t := range tags {
 					tag := c(fmt.Sprintf("#%s", t))
+					// TODO: split into lowercase strings before replacing
 					summary = strings.ReplaceAll(summary, string(t), tag)
 				}
 			}
