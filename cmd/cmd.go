@@ -35,10 +35,6 @@ func checkList(vd vdir.Vdir, list string, required bool) error {
 }
 
 func stringsToInts(ss []string) (ints []int, err error) {
-	// if len(ss) == 0 {
-	// 	return ints, errors.New("Specify one or multiple IDs")
-	// }
-
 	for _, s := range ss {
 		i, err := strconv.Atoi(s)
 		if err != nil {
