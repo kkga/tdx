@@ -10,11 +10,30 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/boltdb/bolt"
 	"github.com/emersion/go-ical"
 )
 
 // Vdir is a map of all collections and items
 type Vdir map[*Collection][]*Item
+
+func initDB(opts *bolt.Options) (*bolt.DB, error) {
+	userCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return nil, fmt.Errorf("get cache dir: %w", err)
+	}
+	cacheDir := filepath.Join(userCacheDir, "tdx")
+	if err := os.MkdirAll(cacheDir, 0700); err != nil {
+		return nil, fmt.Errorf("create cache dir: %w", err)
+	}
+	dbPath := filepath.Join(cacheDir, "db")
+	db, err := bolt.Open(dbPath, 0644, nil)
+	if err != nil {
+		return nil, fmt.Errorf("open db: %w", err)
+	}
+
+	return db, nil
+}
 
 // Init initializes the map with collections and items in path, items have unique IDs
 func (v *Vdir) Init(path string) error {

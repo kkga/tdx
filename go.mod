@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
+	github.com/boltdb/bolt v1.3.1
 	github.com/emersion/go-ical v0.0.0-20210319224440-20039d462364
 	github.com/fatih/color v1.12.0
 	github.com/google/go-cmp v0.5.6
