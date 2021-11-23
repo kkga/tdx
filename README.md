@@ -26,10 +26,6 @@ calendars and synchronization in [vdirsyncer documentation][vdirdocs].
 - deleting todos
 - purging completed/cancelled todos
 
-## Demo
-
-TODO: add demo
-
 ## Usage
 
 ### General usage
