@@ -32,3 +32,21 @@ func TestInit(t *testing.T) {
 		})
 	}
 }
+
+func TestUpdateDB(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		err := updateDB()
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
+func TestViewDB(t *testing.T) {
+	t.Run("", func(t *testing.T) {
+		_, err := viewDB()
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
