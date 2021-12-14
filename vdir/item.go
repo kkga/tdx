@@ -232,7 +232,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 			var prefix string
 			var humanDate string
-			var col = color.New(color.Reset).SprintFunc()
+			var col func(a ...interface{}) string
 
 			if math.Abs(diff.Hours()) < 24 {
 				if now.Day() == d.Day() {
