@@ -89,7 +89,7 @@ func runDone(items []*vdir.Item, opts *doneOptions) error {
 		if err != nil {
 			return err
 		}
-		sb.WriteString(fmt.Sprintf("%s", s))
+		sb.WriteString(s)
 	}
 
 	fmt.Print(sb.String())
