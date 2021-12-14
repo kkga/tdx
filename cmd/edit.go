@@ -92,7 +92,10 @@ func runEdit(item *vdir.Item) error {
 	cmd := exec.Command(editorBin, tmp.Name())
 	cmd.SysProcAttr = &syscall.SysProcAttr{Foreground: true}
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
-	cmd.Run()
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
 
 	newProps, err := parseTemplate(tmp)
 	if err != nil {
@@ -173,7 +176,10 @@ func runEdit(item *vdir.Item) error {
 func parseTemplate(f *os.File) (map[string]string, error) {
 	props := make(map[string]string)
 
-	f.Seek(0, 0)
+	_, err := f.Seek(0, 0)
+	if err != nil {
+		return nil, err
+	}
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {

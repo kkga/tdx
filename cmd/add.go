@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -56,11 +57,14 @@ func NewAddCmd() *cobra.Command {
 
 	cmd.Flags().SortFlags = false
 	cmd.Flags().StringVarP(&opts.list, "list", "l", "", "`LIST` for new todo")
-	cmd.MarkFlagRequired("list")
+	cmd.MarkFlagRequired("list") // nolint: errcheck
 	cmd.Flags().StringVarP(&opts.description, "description", "d", "", "description text")
 
 	defaultOpts := os.Getenv(envAddOptsVar)
-	cmd.ParseFlags(strings.Split(defaultOpts, " "))
+	err := cmd.ParseFlags(strings.Split(defaultOpts, " "))
+	if err != nil {
+		log.Panicln("Error parsing environment variable flags: ", err)
+	}
 
 	return cmd
 }
@@ -109,7 +113,10 @@ func runAdd(collection *vdir.Collection, opts *addOptions, rawTodo string) error
 		Path: p,
 		Ical: cal,
 	}
-	item.WriteFile()
+	err := item.WriteFile()
+	if err != nil {
+		return fmt.Errorf("error writing file: %v", err)
+	}
 
 	vd := make(vdir.Vdir)
 	if err := vd.Init(vdirPath); err != nil {

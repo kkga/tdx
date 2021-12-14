@@ -41,7 +41,7 @@ func init() {
 	}
 
 	rootCmd.PersistentFlags().StringVarP(&vdirPath, "path", "p", defaultPath, "path to vdir folder")
-	rootCmd.MarkFlagRequired("path")
+	rootCmd.MarkFlagRequired("path") // nolint: errcheck
 
 	cobra.EnableCommandSorting = false
 	rootCmd.AddCommand(

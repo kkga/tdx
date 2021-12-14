@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -110,7 +111,10 @@ func NewListCmd() *cobra.Command {
 	cmd.Flags().BoolVar(&opts.multiline, "two-line", false, "use 2-line output for dates and description")
 
 	defaultOpts := os.Getenv(envListOptsVar)
-	cmd.ParseFlags(strings.Split(defaultOpts, " "))
+	err := cmd.ParseFlags(strings.Split(defaultOpts, " "))
+	if err != nil {
+		log.Panicln("Error parsing environment variable flags: ", err)
+	}
 
 	return cmd
 }
