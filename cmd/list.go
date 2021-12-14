@@ -16,7 +16,6 @@ import (
 
 type listOptions struct {
 	lists         []string
-	listsExcluded []string
 	allLists      bool
 	sorting       string
 	group         string
