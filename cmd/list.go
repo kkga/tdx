@@ -78,7 +78,7 @@ func NewListCmd() *cobra.Command {
 			}
 
 			// if lists flag set, delete other collections from vdir
-			if len(opts.lists) > 0 && opts.allLists == false {
+			if len(opts.lists) > 0 && !opts.allLists {
 				for _, list := range opts.lists {
 					if err := checkList(vd, list, false); err != nil {
 						return err
