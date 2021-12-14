@@ -181,9 +181,7 @@ func runList(vd vdir.Vdir, query string, opts *listOptions) error {
 
 			sortItems(items)
 
-			for _, item := range items {
-				m[col.String()] = append(m[col.String()], item)
-			}
+			m[col.String()] = append(m[col.String()], items...)
 		}
 	case groupOptionTag:
 		items := []*vdir.Item{}
@@ -227,10 +225,8 @@ func runList(vd vdir.Vdir, query string, opts *listOptions) error {
 		sortItems(items)
 
 		noneKey := groupOptionNone
-		for _, item := range items {
-			// here comes an ugly hack
-			m[string(noneKey)] = append(m[string(noneKey)], item)
-		}
+		// here comes an ugly hack
+		m[string(noneKey)] = append(m[string(noneKey)], items...)
 	}
 
 	if len(m) == 0 {
