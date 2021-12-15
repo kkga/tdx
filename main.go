@@ -1,9 +1,14 @@
 package main
 
 import (
+	"log"
+
 	"github.com/kkga/tdx/cmd"
 )
 
 func main() {
-	cmd.Execute()
+	err := cmd.Execute()
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

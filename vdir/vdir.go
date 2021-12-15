@@ -29,6 +29,9 @@ func (v *Vdir) Init(path string) error {
 	var itemId int
 
 	walkFunc := func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 		if d.IsDir() && hasIcalFiles(path) {
 			c := &Collection{}
 			if err := c.Init(path); err != nil {

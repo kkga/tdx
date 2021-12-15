@@ -63,7 +63,7 @@ func runDelete(items []*vdir.Item, opts *deleteOptions) error {
 		if err != nil {
 			return err
 		}
-		sb.WriteString(fmt.Sprintf("%s", s))
+		sb.WriteString(s)
 	}
 
 	fmt.Print(sb.String())

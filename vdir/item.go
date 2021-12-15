@@ -215,7 +215,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 		case ical.PropDescription:
 			col := color.New(color.Faint, color.Italic).SprintFunc()
-			description = col(fmt.Sprintf("%s", p.Value))
+			description = col(p.Value)
 
 		case ical.PropRecurrenceRule:
 			c := color.New(color.FgYellow).SprintFunc()
@@ -232,7 +232,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 
 			var prefix string
 			var humanDate string
-			var col = color.New(color.Reset).SprintFunc()
+			var col func(a ...interface{}) string
 
 			if math.Abs(diff.Hours()) < 24 {
 				if now.Day() == d.Day() {
@@ -320,7 +320,7 @@ func (i *Item) Format(options ...FormatOption) (string, error) {
 		if due != "" {
 			metaSb.WriteString(fmt.Sprintf(" %s %s", colFaint("|"), description))
 		} else {
-			metaSb.WriteString(fmt.Sprintf("%s", description))
+			metaSb.WriteString(description)
 		}
 	}
 

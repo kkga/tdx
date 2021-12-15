@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -15,7 +16,6 @@ import (
 
 type listOptions struct {
 	lists         []string
-	listsExcluded []string
 	allLists      bool
 	sorting       string
 	group         string
@@ -78,7 +78,7 @@ func NewListCmd() *cobra.Command {
 			}
 
 			// if lists flag set, delete other collections from vdir
-			if len(opts.lists) > 0 && opts.allLists == false {
+			if len(opts.lists) > 0 && !opts.allLists {
 				for _, list := range opts.lists {
 					if err := checkList(vd, list, false); err != nil {
 						return err
@@ -110,7 +110,10 @@ func NewListCmd() *cobra.Command {
 	cmd.Flags().BoolVar(&opts.multiline, "two-line", false, "use 2-line output for dates and description")
 
 	defaultOpts := os.Getenv(envListOptsVar)
-	cmd.ParseFlags(strings.Split(defaultOpts, " "))
+	err := cmd.ParseFlags(strings.Split(defaultOpts, " "))
+	if err != nil {
+		log.Panicln("Error parsing environment variable flags: ", err)
+	}
 
 	return cmd
 }
@@ -181,9 +184,7 @@ func runList(vd vdir.Vdir, query string, opts *listOptions) error {
 
 			sortItems(items)
 
-			for _, item := range items {
-				m[col.String()] = append(m[col.String()], item)
-			}
+			m[col.String()] = append(m[col.String()], items...)
 		}
 	case groupOptionTag:
 		items := []*vdir.Item{}
@@ -227,10 +228,8 @@ func runList(vd vdir.Vdir, query string, opts *listOptions) error {
 		sortItems(items)
 
 		noneKey := groupOptionNone
-		for _, item := range items {
-			// here comes an ugly hack
-			m[string(noneKey)] = append(m[string(noneKey)], item)
-		}
+		// here comes an ugly hack
+		m[string(noneKey)] = append(m[string(noneKey)], items...)
 	}
 
 	if len(m) == 0 {
