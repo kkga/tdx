@@ -6,7 +6,7 @@ It is designed to work with [vdirsyncer] and expects to operate in its
 [storage format][vdirstorage].
 
 iCalendar-compatibility means it can be used as a CLI companion to any
-CalDAV-enabled todo program, such as iOS Reminders. See more on how to set up
+CalDAV-enabled todo program, such as iOS Reminders or [Tasks.org](https://tasks.org/). See more on how to set up
 calendars and synchronization in [vdirsyncer documentation][vdirdocs].
 
 [iCalendar]: https://en.wikipedia.org/wiki/ICalendar
